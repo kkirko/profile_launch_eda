@@ -563,14 +563,15 @@ def save_countplot(
     path: Path,
     top_n: int | None = None,
     horizontal: bool = True,
+    pre_counted: bool = False,
 ) -> None:
-    data = series.value_counts(dropna=False)
+    data = series.copy() if pre_counted else series.value_counts(dropna=False)
     if top_n is not None:
         data = data.head(top_n)
 
     total = data.sum()
 
-    fig, ax = plt.subplots(figsize=(12, max(5, 0.45 * len(data) + 2)))
+    fig, ax = plt.subplots(figsize=(13, max(5, 0.45 * len(data) + 2)))
     colors = sns.color_palette("viridis", n_colors=len(data))
 
     if horizontal:
@@ -591,7 +592,10 @@ def save_countplot(
     ax.set_ylabel(ylabel)
     ax.grid(axis="x" if horizontal else "y", alpha=0.25)
     sns.despine(ax=ax, left=False, bottom=False)
-    fig.tight_layout()
+    if horizontal:
+        fig.tight_layout(rect=(0.25, 0, 1, 1))
+    else:
+        fig.tight_layout()
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -761,6 +765,7 @@ def main() -> None:
             "Skill",
             FIG_DIR / "10_top_skills.png",
             top_n=25,
+            pre_counted=True,
         )
 
     enriched_path = OUT_DIR / "profiles_2026_02_26_enriched.csv"

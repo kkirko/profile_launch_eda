@@ -11,7 +11,8 @@ tools                    94.7
 years_experience         29.4
 id                        0.0
 updated_at_dt             0.0
-employer_mentions         0.0
+employer_source_field     0.0
+employer_name             0.0
 employer_type             0.0
 region                    0.0
 seniority                 0.0
@@ -33,14 +34,15 @@ has_explicit_employer     0.0
 - `role_family`: keyword-based mapping from `summary` first sentence + full text; fallback to `specialist_category`.
 - `seniority`: title keyword rules (Executive/Lead/Senior/Middle/Junior) + years-of-experience fallback.
 - `region`: geo keyword matching; if no explicit region and summary is Cyrillic, marked as `Russia & CIS (inferred)`.
-- `employer_type`: keyword mapping by industry context in summary.
-- `employer_mentions`: only explicit recognizable organization mentions from summary text.
+- `employer_name`: extracted strictly from dedicated employer columns only.
+- Dedicated employer column(s) found in source: **(none)**
+- `employer_type`: keyword mapping by industry context in summary (separate from employer_name).
 
 ## Key Metrics
 - Profiles with parsed years-of-experience: **70.6%**
 - Mean years-of-experience: **12.8**
 - Median years-of-experience: **12.0**
-- Profiles with explicit employer mentions: **7.1%**
+- Profiles with non-empty dedicated employer field: **0.0%**
 
 ### Role Family
 ```
@@ -106,18 +108,9 @@ Healthcare / Pharma                   3      1.8
 Media / Gaming                        1      0.6
 ```
 
-### Top Explicit Employer Mentions
+### Top Employers (Dedicated Employer Field)
 ```
-employer_mentions
-IBM                                3
-Rostelecom                         2
-Ministry of Digital Development    2
-Minpromtorg                        2
-VTB                                2
-EMIAS                              1
-Forward                            1
-RZD                                1
-EPAM                               1
+(none)
 ```
 
 ### Top Skills (Keyword-level)
@@ -161,7 +154,7 @@ JavaScript                    7
 4. `figures/04_seniority.png`
 5. `figures/05_region.png`
 6. `figures/06_employer_type.png`
-7. `figures/07_employer_mentions.png` (if explicit mentions exist)
+7. `figures/07_employer_mentions.png`
 8. `figures/08_experience_distribution.png`
 9. `figures/09_role_seniority_heatmap.png`
 10. `figures/10_top_skills.png`

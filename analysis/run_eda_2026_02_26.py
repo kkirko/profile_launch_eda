@@ -342,63 +342,22 @@ EMPLOYER_TYPE_RULES: Dict[str, List[str]] = {
     ],
 }
 
-ORG_NAME_PATTERNS = {
-    "Rostelecom": r"\brostelecom\b|ростелеком",
-    "EPAM": r"\bepam\b",
-    "IBM": r"\bibm\b",
-    "VTB": r"\bвтб\b|\bvtb\b",
-    "RZD": r"\bржд\b|\brzd\b",
-    "EMIAS": r"\bемиас\b",
-    "Ministry of Digital Development": r"минцифр",
-    "Minpromtorg": r"минпромторг",
-    "Forward": r"\bforward\b",
-}
-
-ORG_ALIAS_MAP = {
-    "VTB": "VTB",
-    "ВТБ": "VTB",
-    "RZD": "RZD",
-    "РЖД": "RZD",
-    "EMIAS": "EMIAS",
-    "ЕМИАС": "EMIAS",
-    "IBM": "IBM",
-    "EPAM": "EPAM",
-}
-
-EXCLUDED_ACRONYMS = {
-    "IT",
-    "HR",
-    "PR",
-    "QA",
-    "BI",
-    "UI",
-    "UX",
-    "SQL",
-    "CRM",
-    "ERP",
-    "B2B",
-    "B2C",
-    "SLA",
-    "KPI",
-    "AI",
-    "ML",
-    "API",
-    "SDLC",
-    "PMO",
-    "ISO",
-    "AWS",
-    "NLP",
-    "DWH",
-    "ETL",
-    "ELT",
-    "MVP",
-    "OKR",
-    "PMP",
-    "ITIL",
-    "BPMN",
-    "UML",
-    "CI",
-    "CD",
+EMPLOYER_FIELD_ALIASES = {
+    "employer",
+    "employer_name",
+    "company",
+    "company_name",
+    "current_company",
+    "current_employer",
+    "last_company",
+    "last_employer",
+    "latest_company",
+    "latest_employer",
+    "organization",
+    "organisation",
+    "org_name",
+    "workplace",
+    "current_workplace",
 }
 
 YEARS_RE = re.compile(r"(?<!\d)(\d{1,2})\s*\+?\s*(?:years?|year|лет|года|год)", re.IGNORECASE)
@@ -519,27 +478,41 @@ def infer_employer_type(summary: str) -> str:
     return best
 
 
-def extract_employer_mentions(summary: str) -> str:
-    text = str(summary or "")
-    text_lc = text.lower()
-    mentions = set()
+def normalize_col_name(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(name).strip().lower()).strip("_")
 
-    for org_name, pattern in ORG_NAME_PATTERNS.items():
-        if re.search(pattern, text_lc):
-            mentions.add(org_name)
 
-    for token in re.findall(r"\b[A-ZА-Я][A-ZА-Я0-9]{2,8}\b", text):
-        token_clean = token.strip()
-        if token_clean in EXCLUDED_ACRONYMS:
-            continue
-        canonical = ORG_ALIAS_MAP.get(token_clean.upper(), ORG_ALIAS_MAP.get(token_clean))
-        if canonical:
-            mentions.add(canonical)
-
-    if not mentions:
+def clean_text_value(value: object) -> str:
+    if pd.isna(value):
         return ""
+    text = str(value).strip()
+    if text.lower() in {"", "nan", "none", "null", "n/a", "na", "-"}:
+        return ""
+    return text
 
-    return ", ".join(sorted(mentions))
+
+def find_employer_fields(columns: Iterable[str]) -> List[str]:
+    fields = []
+    for col in columns:
+        if normalize_col_name(col) in EMPLOYER_FIELD_ALIASES:
+            fields.append(col)
+    return fields
+
+
+def extract_employer_from_row(row: pd.Series, employer_fields: List[str]) -> str:
+    for field in employer_fields:
+        value = clean_text_value(row.get(field))
+        if value:
+            return value
+    return ""
+
+
+def detect_employer_source_field(row: pd.Series, employer_fields: List[str]) -> str:
+    for field in employer_fields:
+        value = clean_text_value(row.get(field))
+        if value:
+            return field
+    return ""
 
 
 def parse_skills(raw: str) -> List[str]:
@@ -596,6 +569,16 @@ def save_countplot(
         fig.tight_layout(rect=(0.25, 0, 1, 1))
     else:
         fig.tight_layout()
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_no_data(path: Path, title: str, message: str) -> None:
+    fig, ax = plt.subplots(figsize=(10, 4.5))
+    ax.axis("off")
+    ax.text(0.5, 0.58, title, ha="center", va="center", fontsize=16, fontweight="bold")
+    ax.text(0.5, 0.40, message, ha="center", va="center", fontsize=12)
+    fig.tight_layout()
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -675,6 +658,7 @@ def main() -> None:
     df = pd.read_csv(DATA_PATH)
     df["created_at_dt"] = pd.to_datetime(df["created_at"], utc=True, errors="coerce")
     df["updated_at_dt"] = pd.to_datetime(df["updated_at"], utc=True, errors="coerce")
+    employer_fields = find_employer_fields(df.columns)
 
     cohort = df[df["created_at_dt"].dt.date == TARGET_DATE].copy()
 
@@ -690,8 +674,16 @@ def main() -> None:
     )
     cohort["region"] = cohort["summary"].map(infer_region)
     cohort["employer_type"] = cohort["summary"].map(infer_employer_type)
-    cohort["employer_mentions"] = cohort["summary"].map(extract_employer_mentions)
-    cohort["has_explicit_employer"] = cohort["employer_mentions"].str.len().gt(0)
+    if employer_fields:
+        cohort["employer_name"] = cohort.apply(lambda row: extract_employer_from_row(row, employer_fields), axis=1)
+        cohort["employer_source_field"] = cohort.apply(
+            lambda row: detect_employer_source_field(row, employer_fields),
+            axis=1,
+        )
+    else:
+        cohort["employer_name"] = ""
+        cohort["employer_source_field"] = ""
+    cohort["has_explicit_employer"] = cohort["employer_name"].str.len().gt(0)
 
     all_skills = []
     for raw in cohort["skills"]:
@@ -738,21 +730,30 @@ def main() -> None:
         FIG_DIR / "06_employer_type.png",
     )
 
-    top_employers = (
-        cohort.loc[cohort["has_explicit_employer"], "employer_mentions"]
-        .str.split(", ")
-        .explode()
-        .value_counts()
-    )
+    top_employers = cohort.loc[cohort["has_explicit_employer"], "employer_name"].value_counts()
     if not top_employers.empty:
         save_countplot(
             top_employers.rename_axis("employer").reset_index(name="count").set_index("employer")["count"],
-            "Explicit Employer Mentions (From Summary)",
+            "Top Employers (Dedicated Employer Field)",
             "Mentions",
             "Employer",
             FIG_DIR / "07_employer_mentions.png",
             top_n=15,
+            pre_counted=True,
         )
+    else:
+        if employer_fields:
+            plot_no_data(
+                FIG_DIR / "07_employer_mentions.png",
+                "Top Employers (Dedicated Employer Field)",
+                "Employer fields exist, but no non-empty values in this cohort.",
+            )
+        else:
+            plot_no_data(
+                FIG_DIR / "07_employer_mentions.png",
+                "Top Employers (Dedicated Employer Field)",
+                "No dedicated employer column found in source CSV.",
+            )
 
     plot_experience_distribution(cohort["years_experience"], FIG_DIR / "08_experience_distribution.png")
     plot_role_seniority_heatmap(cohort, FIG_DIR / "09_role_seniority_heatmap.png")
@@ -787,6 +788,7 @@ def main() -> None:
 
     experience_non_null = cohort["years_experience"].dropna()
     experience_coverage = len(experience_non_null) / len(cohort) * 100 if len(cohort) else 0.0
+    employer_field_info = ", ".join(employer_fields) if employer_fields else "(none)"
 
     report_path = OUT_DIR / "EDA_report_2026_02_26.md"
     report = f"""# EDA: Profiles Created on 2026-02-26 (UTC)
@@ -805,14 +807,15 @@ def main() -> None:
 - `role_family`: keyword-based mapping from `summary` first sentence + full text; fallback to `specialist_category`.
 - `seniority`: title keyword rules (Executive/Lead/Senior/Middle/Junior) + years-of-experience fallback.
 - `region`: geo keyword matching; if no explicit region and summary is Cyrillic, marked as `Russia & CIS (inferred)`.
-- `employer_type`: keyword mapping by industry context in summary.
-- `employer_mentions`: only explicit recognizable organization mentions from summary text.
+- `employer_name`: extracted strictly from dedicated employer columns only.
+- Dedicated employer column(s) found in source: **{employer_field_info}**
+- `employer_type`: keyword mapping by industry context in summary (separate from employer_name).
 
 ## Key Metrics
 - Profiles with parsed years-of-experience: **{experience_coverage:.1f}%**
 - Mean years-of-experience: **{experience_non_null.mean():.1f}**
 - Median years-of-experience: **{experience_non_null.median():.1f}**
-- Profiles with explicit employer mentions: **{cohort['has_explicit_employer'].mean()*100:.1f}%**
+- Profiles with non-empty dedicated employer field: **{cohort['has_explicit_employer'].mean()*100:.1f}%**
 
 ### Role Family
 ```
@@ -834,7 +837,7 @@ def main() -> None:
 {employer_type_table.to_string()}
 ```
 
-### Top Explicit Employer Mentions
+### Top Employers (Dedicated Employer Field)
 ```
 {top_employers.to_string() if not top_employers.empty else '(none)'}
 ```
@@ -851,7 +854,7 @@ def main() -> None:
 4. `figures/04_seniority.png`
 5. `figures/05_region.png`
 6. `figures/06_employer_type.png`
-7. `figures/07_employer_mentions.png` (if explicit mentions exist)
+7. `figures/07_employer_mentions.png`
 8. `figures/08_experience_distribution.png`
 9. `figures/09_role_seniority_heatmap.png`
 10. `figures/10_top_skills.png`

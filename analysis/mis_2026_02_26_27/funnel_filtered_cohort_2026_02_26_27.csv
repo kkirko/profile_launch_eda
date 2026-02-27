@@ -1,0 +1,6 @@
+stage,count,conversion_from_entry_%,conversion_from_prev_%
+1. Вход в чат-бот (createdAt),521,100.0,100.0
+2. CV загружено (cvPath),521,100.0,100.0
+3. CV анализ завершён (cvAnalysisResult),521,100.0,100.0
+4. CV enhanced готов (cvEnhancedResult),521,100.0,100.0
+5. Onboarding completed,521,100.0,100.0

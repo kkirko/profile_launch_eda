@@ -1,0 +1,28 @@
+industry_raw,industry_norm,count
+,Not specified,614
+IT,IT/Software,24
+Other,Other,24
+FinTech,Banking/FinTech,18
+Banking,Banking/FinTech,7
+Healthcare,Healthcare,6
+E-commerce,E-commerce/Retail,5
+Retail,E-commerce/Retail,4
+Telecom,Telecom,4
+EdTech,EdTech,3
+Real Estate,Real Estate,3
+Consulting,Consulting,2
+Manufacturing,Manufacturing,2
+AdTech/MarTech,AdTech/MarTech,1
+B2B SaaS,IT/Software,1
+Chemical Industry,Chemical Industry,1
+Distribution,Distribution,1
+Finance,Finance,1
+Foodtech,Foodtech,1
+Gaming,Gaming,1
+GovTech,Public Sector,1
+HRTech,HRTech,1
+Marketing/Sales,Marketing/Sales,1
+PropTech,PropTech,1
+SaaS,IT/Software,1
+iGaming,iGaming,1
+финтех,Banking/FinTech,1

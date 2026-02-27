@@ -425,30 +425,6 @@ def plot_entries_by_day(period_df: pd.DataFrame, path: Path) -> None:
     plt.close(fig)
 
 
-def plot_funnel(funnel_df: pd.DataFrame, path: Path) -> None:
-    fig, ax = plt.subplots(figsize=(11, 6))
-    colors = sns.color_palette("mako", n_colors=len(funnel_df))
-    ax.barh(funnel_df["stage"], funnel_df["count"], color=colors)
-    ax.invert_yaxis()
-
-    for i, row in funnel_df.iterrows():
-        ax.text(
-            row["count"] + 2,
-            i,
-            f"{row['count']} ({row['conversion_from_entry_%']:.1f}%)",
-            va="center",
-            fontsize=10,
-        )
-
-    ax.set_title("Воронка: вход в чат-бот → onboardingCompleted")
-    ax.set_xlabel("Количество кандидатов")
-    ax.set_ylabel("Этап")
-    ax.grid(axis="x", alpha=0.25)
-    fig.tight_layout(rect=(0.22, 0, 1, 1))
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
-
-
 def plot_current_vs_ended(series: pd.Series, path: Path) -> None:
     counts = series.value_counts().reindex(["Current job", "Ended job", "Unknown"], fill_value=0)
     fig, ax = plt.subplots(figsize=(8, 4.8))
@@ -507,7 +483,8 @@ def main() -> None:
     period_df = df[period_mask].copy()
 
     enhanced_mask = non_empty_series(period_df["cvEnhancedResult"])
-    cohort = period_df[enhanced_mask].copy()
+    onboarding_mask = bool_series(period_df["onboardingCompleted"])
+    cohort = period_df[enhanced_mask & onboarding_mask].copy()
 
     # Derived fields for last/current job (jobs[0])
     cohort["last_company"] = cohort["talentCard.jobs[0].company"].map(clean_text).replace("", "Not specified")
@@ -542,88 +519,8 @@ def main() -> None:
         np.where(cohort["is_current_job"], "Current job", "Ended job"),
     )
 
-    # Funnel on full period cohort (entry -> onboarding)
-    stage_1 = pd.Series(True, index=period_df.index)
-    stage_2 = stage_1 & non_empty_series(period_df["cvPath"])
-    stage_3 = stage_2 & non_empty_series(period_df["cvAnalysisResult"])
-    stage_4 = stage_3 & non_empty_series(period_df["cvEnhancedResult"])
-    stage_5 = stage_4 & bool_series(period_df["onboardingCompleted"])
-
-    funnel = pd.DataFrame(
-        {
-            "stage": [
-                "1. Вход в чат-бот (createdAt)",
-                "2. CV загружено (cvPath)",
-                "3. CV анализ завершён (cvAnalysisResult)",
-                "4. CV enhanced готов (cvEnhancedResult)",
-                "5. Onboarding completed",
-            ],
-            "count": [
-                int(stage_1.sum()),
-                int(stage_2.sum()),
-                int(stage_3.sum()),
-                int(stage_4.sum()),
-                int(stage_5.sum()),
-            ],
-        }
-    )
-    funnel["conversion_from_entry_%"] = (funnel["count"] / funnel.loc[0, "count"] * 100).round(1)
-    funnel["conversion_from_prev_%"] = [
-        100.0,
-        round(funnel.loc[1, "count"] / funnel.loc[0, "count"] * 100, 1) if funnel.loc[0, "count"] else 0.0,
-        round(funnel.loc[2, "count"] / funnel.loc[1, "count"] * 100, 1) if funnel.loc[1, "count"] else 0.0,
-        round(funnel.loc[3, "count"] / funnel.loc[2, "count"] * 100, 1) if funnel.loc[2, "count"] else 0.0,
-        round(funnel.loc[4, "count"] / funnel.loc[3, "count"] * 100, 1) if funnel.loc[3, "count"] else 0.0,
-    ]
-
-    # Funnel strictly for filtered cohort (as requested: "по этим пользователям")
-    cohort_stage_1 = pd.Series(True, index=cohort.index)
-    cohort_stage_2 = cohort_stage_1 & non_empty_series(cohort["cvPath"])
-    cohort_stage_3 = cohort_stage_2 & non_empty_series(cohort["cvAnalysisResult"])
-    cohort_stage_4 = cohort_stage_3 & non_empty_series(cohort["cvEnhancedResult"])
-    cohort_stage_5 = cohort_stage_4 & bool_series(cohort["onboardingCompleted"])
-
-    funnel_filtered = pd.DataFrame(
-        {
-            "stage": [
-                "1. Вход в чат-бот (createdAt)",
-                "2. CV загружено (cvPath)",
-                "3. CV анализ завершён (cvAnalysisResult)",
-                "4. CV enhanced готов (cvEnhancedResult)",
-                "5. Onboarding completed",
-            ],
-            "count": [
-                int(cohort_stage_1.sum()),
-                int(cohort_stage_2.sum()),
-                int(cohort_stage_3.sum()),
-                int(cohort_stage_4.sum()),
-                int(cohort_stage_5.sum()),
-            ],
-        }
-    )
-    funnel_filtered["conversion_from_entry_%"] = (
-        funnel_filtered["count"] / funnel_filtered.loc[0, "count"] * 100
-    ).round(1)
-    funnel_filtered["conversion_from_prev_%"] = [
-        100.0,
-        round(funnel_filtered.loc[1, "count"] / funnel_filtered.loc[0, "count"] * 100, 1)
-        if funnel_filtered.loc[0, "count"]
-        else 0.0,
-        round(funnel_filtered.loc[2, "count"] / funnel_filtered.loc[1, "count"] * 100, 1)
-        if funnel_filtered.loc[1, "count"]
-        else 0.0,
-        round(funnel_filtered.loc[3, "count"] / funnel_filtered.loc[2, "count"] * 100, 1)
-        if funnel_filtered.loc[2, "count"]
-        else 0.0,
-        round(funnel_filtered.loc[4, "count"] / funnel_filtered.loc[3, "count"] * 100, 1)
-        if funnel_filtered.loc[3, "count"]
-        else 0.0,
-    ]
-
     # Visualizations
-    plot_entries_by_day(period_df, FIG_DIR / "01_new_candidates_by_day.png")
-    plot_funnel(funnel, FIG_DIR / "02_chatbot_onboarding_funnel.png")
-    plot_funnel(funnel_filtered, FIG_DIR / "11_chatbot_onboarding_funnel_filtered_cohort.png")
+    plot_entries_by_day(cohort, FIG_DIR / "01_new_candidates_by_day.png")
     plot_top_bar(cohort["last_region_group"], "Топ регионов (jobs[0].region)", FIG_DIR / "03_top_regions.png", top_n=15, ylabel="Регион")
     plot_top_bar(cohort["domain_inferred"], "Топ доменов (inferred)", FIG_DIR / "04_top_domains.png", top_n=12, ylabel="Домен")
     plot_top_bar(cohort["last_industry_group"], "Топ отраслей (jobs[0].industry)", FIG_DIR / "05_top_industries.png", top_n=12, ylabel="Отрасль")
@@ -666,12 +563,8 @@ def main() -> None:
     quality = cohort[quality_cols].isna().mean().mul(100).round(1).sort_values(ascending=False)
 
     # Save datasets
-    cohort_out = OUT_DIR / "candidates_2026_02_26_27_cvEnhancedResult_enriched.csv"
-    funnel_out = OUT_DIR / "funnel_2026_02_26_27.csv"
-    funnel_filtered_out = OUT_DIR / "funnel_filtered_cohort_2026_02_26_27.csv"
+    cohort_out = OUT_DIR / "candidates_2026_02_26_27_cvEnhancedResult_onboardingCompleted_enriched.csv"
     cohort.to_csv(cohort_out, index=False)
-    funnel.to_csv(funnel_out, index=False)
-    funnel_filtered.to_csv(funnel_filtered_out, index=False)
 
     report_out = OUT_DIR / "MIS_report_2026_02_26_27.md"
     report_text = f"""# MIS Report: Candidate Base Analytics
@@ -679,22 +572,21 @@ def main() -> None:
 ## Scope
 - Source: `{SOURCE_CSV}`
 - Date filter: `createdAt` in **{REPORT_PERIOD_LABEL}**
-- Cohort condition: non-empty **`cvEnhancedResult`**
+- Cohort condition: non-empty **`cvEnhancedResult`** and **`onboardingCompleted=True`**
 
 ## Important Note on Filtering
 - В датасете нет отдельного timestamp-поля для момента генерации `cvEnhancedResult`.
-- Поэтому срез построен по `createdAt` (попадание в базу) + наличию непустого `cvEnhancedResult`.
+- Поэтому срез построен по `createdAt` (попадание в базу) + наличию непустого `cvEnhancedResult` + `onboardingCompleted=True`.
 
 ## Executive Summary
-- В периоде зафиксировано **{len(period_df)}** входов в чат-бот; до `cvEnhancedResult` дошли **{len(cohort)}** кандидатов (**{len(cohort)/len(period_df)*100:.1f}%**).
-- По воронке периода основной отток происходит на этапе после входа в чат-бот: `createdAt -> cvPath` (**78.4%** конверсия).
-- Внутри целевого среза (`cvEnhancedResult`) все **521** кандидата имеют `onboardingCompleted=True` (100%).
+- В периоде зафиксировано **{len(period_df)}** входов в чат-бот.
+- В целевой MIS-срез попало **{len(cohort)}** fully-onboarded кандидатов (условие: `cvEnhancedResult` + `onboardingCompleted=True`), это **{len(cohort)/len(period_df)*100:.1f}%** от входов периода.
 - География последних мест работы концентрируется в **{top_region_name}** (**{top_region_share:.1f}%**), затем идут другие локации РФ/СНГ.
 - По inferred-доменам лидирует **{top_domain_name}** (**{top_domain_share:.1f}%**), а по отрасли наблюдается высокий уровень пропусков (`jobs[0].industry`: **{top_industry_missing_share:.1f}%** `Not specified`).
 
 ## KPI Snapshot
 - Users in period (`createdAt`): **{len(period_df)}**
-- Users with non-empty `cvEnhancedResult`: **{len(cohort)}** ({len(cohort)/len(period_df)*100:.1f}% от периода)
+- Users in final cohort (`cvEnhancedResult` + `onboardingCompleted=True`): **{len(cohort)}** ({len(cohort)/len(period_df)*100:.1f}% от периода)
 - `onboardingCompleted=True` внутри среза: **{int(bool_series(cohort['onboardingCompleted']).sum())}** ({bool_series(cohort['onboardingCompleted']).mean()*100:.1f}%)
 - Unique users (`userId`) в срезе: **{cohort['userId'].nunique()}**
 - Parse coverage for `jobs[0].employment_period`: **{parse_coverage}%**
@@ -703,21 +595,6 @@ def main() -> None:
 ```
 {quality.to_string()}
 ```
-
-## Funnel: Chat-bot Entry -> Onboarding
-### 1) Full period funnel (all chatbot entrants in period)
-```
-{funnel.to_string(index=False)}
-```
-
-### 2) Filtered cohort funnel (users included in this MIS slice)
-```
-{funnel_filtered.to_string(index=False)}
-```
-
-### Visual
-![Period Funnel](figures/02_chatbot_onboarding_funnel.png)
-![Filtered Cohort Funnel](figures/11_chatbot_onboarding_funnel_filtered_cohort.png)
 
 ## Last Job Insights (`talentCard.jobs[0]`)
 ### Top Regions
@@ -767,23 +644,19 @@ def main() -> None:
 
 ## Visualizations
 1. `figures/01_new_candidates_by_day.png`
-2. `figures/02_chatbot_onboarding_funnel.png`
-3. `figures/03_top_regions.png`
-4. `figures/04_top_domains.png`
-5. `figures/05_top_industries.png`
-6. `figures/06_seniority_distribution.png`
-7. `figures/07_top_employers.png`
-8. `figures/08_current_vs_ended_job.png`
-9. `figures/09_last_job_tenure_months.png`
-10. `figures/10_top_job_titles.png`
-11. `figures/11_chatbot_onboarding_funnel_filtered_cohort.png`
+2. `figures/03_top_regions.png`
+3. `figures/04_top_domains.png`
+4. `figures/05_top_industries.png`
+5. `figures/06_seniority_distribution.png`
+6. `figures/07_top_employers.png`
+7. `figures/08_current_vs_ended_job.png`
+8. `figures/09_last_job_tenure_months.png`
+9. `figures/10_top_job_titles.png`
 """
     report_out.write_text(report_text, encoding="utf-8")
 
     print(f"Saved report: {report_out}")
     print(f"Saved cohort dataset: {cohort_out}")
-    print(f"Saved funnel dataset: {funnel_out}")
-    print(f"Saved filtered-cohort funnel dataset: {funnel_filtered_out}")
     print(f"Saved figures dir: {FIG_DIR}")
 
 

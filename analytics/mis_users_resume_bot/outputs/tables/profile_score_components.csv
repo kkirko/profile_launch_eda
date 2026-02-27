@@ -1,0 +1,9 @@
+component,avg_value
+summary_present,0.722
+skills_present,0.722
+jobs_present,0.722
+resp_cov,0.71
+ach_cov,0.581
+ach_num_cov,0.385
+period_parse_success,0.989
+analysis_present,0.784

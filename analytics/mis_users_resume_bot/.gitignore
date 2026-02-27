@@ -1,0 +1,10 @@
+# Never commit raw user exports
+*.users.csv
+raw/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/

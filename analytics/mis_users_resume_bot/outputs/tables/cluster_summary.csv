@@ -1,0 +1,11 @@
+cluster_id,users,median_experience_years,top_role_family,top_industry,top_country,share_%,top_terms
+0,279,19.7,Other,,Unknown,38.2,"директор, управление, руководитель, продаж, бюджетирование, управления, развитие, b2b"
+6,87,13.5,Data/ML/Analytics,,Unknown,11.9,"design, support, operations, product, business, analyst, designer, analysis"
+3,74,14.5,Marketing/Sales,,Unknown,10.1,"management, marketing, development, strategy, sales, leadership, across, business"
+7,74,12.9,Product/Project,,Unknown,10.1,"управление, проектов, руководитель, project, manager, delivery, project manager, scrum"
+4,72,13.0,Product/Project,,Unknown,9.9,"project, manager, delivery, management, project manager, stakeholder, program, product"
+2,56,12.3,Data/ML/Analytics,,Unknown,7.7,"product, данных, аналитик, sql, требований, анализ, менеджер, продукта"
+9,36,8.3,Engineering/Software,,Unknown,4.9,"testing, test, react, engineer, api, typescript, automation, developer"
+8,32,11.8,Engineering/Software,,Unknown,4.4,"backend, engineer, kubernetes, java, docker, python, spring, postgresql"
+5,17,14.5,Design,,Unknown,2.3,"подбора, интервью, руководитель, обучение, recruiter, практики, senior recruiter, найма"
+1,3,7.9,Finance/Legal/HR,,Unknown,0.4,"legal, aml cft, cft, compliance, aml, counsel, regulatory, fintech"

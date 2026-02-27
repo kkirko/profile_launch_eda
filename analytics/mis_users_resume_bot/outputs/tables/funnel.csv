@@ -1,0 +1,6 @@
+stage,count,conversion_from_signup_%
+1) Signup,730,100.0
+2) Onboarding completed,527,72.2
+3) CV uploaded (cvPath),527,72.2
+4) CV analyzed (cvAnalysisResult),527,72.2
+5) CV enhanced (cvEnhancedResult),527,72.2

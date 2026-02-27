@@ -1,0 +1,101 @@
+token_a,token_b,count
+confluence,jira,115
+jira,miro,55
+confluence,miro,50
+jira,kanban,46
+agile (scrum,kanban,45
+agile,scrum,44
+figma,jira,39
+confluence,kanban,39
+agile,jira,36
+figma,miro,33
+jira,sql,33
+agile,confluence,33
+confluence,figma,33
+jira,scrum,32
+jira,stakeholder management,31
+confluence,sql,30
+agile (scrum,jira,30
+cd,ci,29
+confluence,scrum,29
+ci,docker,26
+docker,postgresql,25
+confluence,stakeholder management,25
+bpmn,jira,24
+kanban,miro,23
+agile (scrum,confluence,23
+jira,notion,23
+jira,waterfall,22
+docker,git,22
+bpmn,confluence,22
+git,jira,21
+kanban,waterfall,21
+cd,docker,21
+jira,ms project,20
+confluence,ms project,20
+ci,git,19
+ci,postgresql,19
+agile,miro,19
+confluence,waterfall,19
+kanban,stakeholder management,18
+confluence,git,18
+confluence,notion,18
+jira,postman,18
+kanban,scrum,18
+miro,scrum,18
+jira,trello,18
+miro,notion,18
+python,sql,18
+docker,python,17
+jira,power bi,17
+cd,postgresql,17
+confluence,postman,17
+figma,kanban,16
+docker,kubernetes,16
+confluence,power bi,15
+scrum,sql,15
+jenkins,jira,15
+confluence,uml,15
+power bi,sql,15
+cd,git,15
+excel,jira,15
+confluence,trello,15
+agile,sql,15
+bpmn,uml,14
+agile,stakeholder management,14
+ci,kanban,14
+agile (scrum,waterfall,14
+agile,figma,14
+bpmn,sql,14
+jira,uml,14
+agile,kanban,13
+ci,kubernetes,13
+agile (scrum,miro,13
+postgresql,python,13
+ci,grafana,13
+jira,slack,13
+confluence,excel,13
+agile (scrum,stakeholder management,13
+git,postgresql,13
+miro,sql,12
+figma,sql,12
+kanban,ms project,12
+miro,ms project,12
+docker,jira,12
+figma,notion,12
+asana,jira,11
+linux,python,11
+excel,miro,11
+kpi,okr,11
+miro,trello,11
+confluence,grafana,11
+confluence,jenkins,11
+miro,waterfall,11
+figma,scrum,11
+docker,fastapi,11
+scrum,waterfall,11
+docker,grafana,11
+agile,ms project,11
+sql,uml,11
+confluence,slack,11
+git,linux,11

@@ -12,36 +12,52 @@ import pandas as pd
 from latex_parser import clean_text, is_tool_token, parse_period
 
 
-REGION_MAP = {
-    "москва": "Moscow",
-    "moscow": "Moscow",
-    "санкт петербург": "Saint Petersburg",
-    "санкт-петербург": "Saint Petersburg",
-    "saint petersburg": "Saint Petersburg",
-    "st petersburg": "Saint Petersburg",
-    "минск": "Minsk",
-    "minsk": "Minsk",
-    "алматы": "Almaty",
-    "almaty": "Almaty",
-    "киев": "Kyiv",
-    "kyiv": "Kyiv",
-    "tashkent": "Tashkent",
-    "ташкент": "Tashkent",
-    "yerevan": "Yerevan",
-    "ереван": "Yerevan",
+COUNTRY_SYNONYMS: Dict[str, set[str]] = {
+    "Russia": {"russia", "россия", "рф", "russian federation", "российская федерация"},
+    "Belarus": {"belarus", "беларусь", "белоруссия", "republic of belarus", "республика беларусь"},
+    "Kazakhstan": {"kazakhstan", "казахстан", "republic of kazakhstan", "республика казахстан"},
+    "UAE": {"uae", "u.a.e", "united arab emirates", "оаэ", "объединенные арабские эмираты"},
+    "Ukraine": {"ukraine", "украина"},
+    "Poland": {"poland", "польша"},
+    "Qatar": {"qatar", "катар"},
+    "Georgia": {"georgia", "грузия", "sakartvelo"},
+    "Turkey": {"turkey", "турция"},
+    "Uzbekistan": {"uzbekistan", "узбекистан"},
+    "Armenia": {"armenia", "армения"},
+    "Lithuania": {"lithuania", "литва"},
 }
 
-COUNTRY_PATTERNS = [
-    ("Russia", [r"\bmoscow\b", r"\bsaint petersburg\b", r"росси", r"russia", r"\bрф\b"]),
-    ("Belarus", [r"\bminsk\b", r"беларус", r"belarus"]),
-    ("Kazakhstan", [r"\balmaty\b", r"казахстан", r"kazakhstan"]),
-    ("Uzbekistan", [r"\btashkent\b", r"узбекистан", r"uzbekistan"]),
-    ("Armenia", [r"\byerevan\b", r"армен", r"armenia"]),
-    ("Ukraine", [r"\bkyiv\b", r"\bkiev\b", r"украин", r"ukraine"]),
-    ("Lithuania", [r"vilnius", r"литв", r"lithuania"]),
-    ("Poland", [r"warsaw", r"польш", r"poland"]),
-    ("UAE", [r"dubai", r"abu dhabi", r"uae", r"оаэ"]),
-]
+CITY_SYNONYMS: Dict[str, set[str]] = {
+    "Moscow": {"moscow", "москва", "moskva"},
+    "Saint Petersburg": {"saint petersburg", "st petersburg", "st. petersburg", "санкт петербург", "спб"},
+    "Minsk": {"minsk", "минск"},
+    "Almaty": {"almaty", "алматы", "alma-ata", "алма-ата"},
+    "Kyiv": {"kyiv", "kiev", "киев"},
+    "Tashkent": {"tashkent", "ташкент"},
+    "Yerevan": {"yerevan", "ереван"},
+    "Warsaw": {"warsaw", "варшава"},
+    "Vilnius": {"vilnius", "вильнюс"},
+    "Tbilisi": {"tbilisi", "тбилиси"},
+    "Doha": {"doha", "доха"},
+    "Dubai": {"dubai", "дубай"},
+    "Abu Dhabi": {"abu dhabi", "абу даби"},
+}
+
+CITY_TO_COUNTRY: Dict[str, str] = {
+    "Moscow": "Russia",
+    "Saint Petersburg": "Russia",
+    "Minsk": "Belarus",
+    "Almaty": "Kazakhstan",
+    "Kyiv": "Ukraine",
+    "Tashkent": "Uzbekistan",
+    "Yerevan": "Armenia",
+    "Warsaw": "Poland",
+    "Vilnius": "Lithuania",
+    "Tbilisi": "Georgia",
+    "Doha": "Qatar",
+    "Dubai": "UAE",
+    "Abu Dhabi": "UAE",
+}
 
 ROLE_FAMILY_RULES = [
     ("Data/ML/Analytics", [r"\bdata\b", r"analyst", r"analytics", r"bi", r"machine learning", r"ai", r"аналит"]),
@@ -101,6 +117,33 @@ def canonical_text(value: object) -> str:
     text = text.replace("ё", "е").lower().strip()
     text = re.sub(r"\s+", " ", text)
     return text
+
+
+def _normalize_geo_separators(text: str) -> str:
+    out = text
+    out = re.sub(r"[|•;]+", ",", out)
+    out = re.sub(r"\s+/\s+", ",", out)
+    out = re.sub(r"\s*-\s*", ",", out)
+    out = re.sub(r"\s*,\s*", ",", out)
+    out = re.sub(r",{2,}", ",", out)
+    return out.strip(" ,")
+
+
+def _match_synonym(token: str, mapping: Dict[str, set[str]]) -> str:
+    t = canonical_text(token)
+    if not t:
+        return ""
+    padded = f" {t} "
+    for canonical, variants in mapping.items():
+        for variant in variants:
+            v = canonical_text(variant)
+            if not v:
+                continue
+            if t == v:
+                return canonical
+            if f" {v} " in padded:
+                return canonical
+    return ""
 
 
 def hash_user_id(value: object) -> str:
@@ -222,11 +265,46 @@ def normalize_region(region: object) -> str:
     raw = clean_text(region)
     if not raw:
         return "Not specified"
-    c = canonical_text(raw)
-    for key, value in REGION_MAP.items():
-        if key in c:
-            return value
-    return raw
+    c = _normalize_geo_separators(canonical_text(raw))
+    if not c:
+        return "Not specified"
+
+    if c in {"not specified", "other"}:
+        return "Not specified" if c == "not specified" else "Other"
+    if c in {"remote", "remotely", "удаленно", "удаленно, россия", "удаленно, remote"}:
+        return "Remote"
+
+    tokens = [t for t in c.split(",") if t]
+    if not tokens:
+        tokens = [c]
+
+    country = ""
+    city = ""
+
+    # Prefer token-level mapping first, then whole-string fallback.
+    for token in tokens:
+        if not country:
+            country = _match_synonym(token, COUNTRY_SYNONYMS)
+        if not city:
+            city = _match_synonym(token, CITY_SYNONYMS)
+
+    if not country:
+        country = _match_synonym(c, COUNTRY_SYNONYMS)
+    if not city:
+        city = _match_synonym(c, CITY_SYNONYMS)
+
+    # Country-only values should collapse into one canonical country label.
+    if len(tokens) == 1 and country and not city:
+        return country
+
+    # For city+country combinations, keep a single city-level canonical region.
+    if city:
+        return city
+    if country:
+        return country
+
+    cleaned = ", ".join([token.strip().title() for token in tokens if token.strip()])
+    return cleaned if cleaned else "Not specified"
 
 
 def normalize_company(company: object) -> str:
@@ -234,6 +312,8 @@ def normalize_company(company: object) -> str:
     if not raw:
         return "Not specified"
     c = canonical_text(raw)
+    if c in {"not specified", "other"}:
+        return "Not specified" if c == "not specified" else "Other"
     c = c.replace('"', " ")
     c = re.sub(r"\b(ooo|ооо|ao|ао|oao|оао|zao|зао|llc|inc|ltd|corp)\b", "", c)
     c = re.sub(r"\s+", " ", c).strip(" -")
@@ -257,9 +337,22 @@ def guess_country(region_norm: object) -> str:
     text = canonical_text(region_norm)
     if not text:
         return "Unknown"
-    for country, patterns in COUNTRY_PATTERNS:
-        if any(re.search(p, text) for p in patterns):
+
+    for country in COUNTRY_SYNONYMS:
+        if canonical_text(country) == text:
             return country
+
+    for city, country in CITY_TO_COUNTRY.items():
+        if canonical_text(city) == text:
+            return country
+
+    m_country = _match_synonym(text, COUNTRY_SYNONYMS)
+    if m_country:
+        return m_country
+
+    m_city = _match_synonym(text, CITY_SYNONYMS)
+    if m_city:
+        return CITY_TO_COUNTRY.get(m_city, "Unknown")
     return "Unknown"
 
 

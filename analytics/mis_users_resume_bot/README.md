@@ -10,23 +10,23 @@
 Top-3 domains:
 | domain_filled              |   count |
 |:---------------------------|--------:|
-| Other                      |     209 |
 | Product/Project Management |     193 |
 | Engineering/IT             |     124 |
+| Finance/Legal/HR           |      66 |
 
 Top-3 regions:
 | region_display   |   count |
 |:-----------------|--------:|
-| Not specified    |     241 |
-| Москва           |     125 |
-| Minsk, Belarus   |      26 |
+| Москва           |     122 |
+| Russia           |      31 |
+| Minsk, Belarus   |      25 |
 
 Top-3 companies:
-| company_display   |   count |
-|:------------------|--------:|
-| Not specified     |     203 |
-| Сбер              |       4 |
-| BostonGene        |       3 |
+| company_display        |   count |
+|:-----------------------|--------:|
+| Сбер                   |       4 |
+| BostonGene             |       3 |
+| Delta Distribution LLC |       3 |
 
 ### Key observations
 - База содержит 730 профилей.
@@ -36,7 +36,10 @@ Top-3 companies:
 - Покрытие `talentCard.specialist_category`: 71.4%.
 - LaTeX-парсинг нашел `ExpHeader` у 71.6% пользователей.
 - LaTeX skills section найдена у 72.2% пользователей.
+- Гео-мэппинг схлопнул варианты Russia/Россия/РФ: 31 записей перешли в канон `Russia`.
 - Industry анализируется только на subset с заполненным industry: 15.9% пользователей.
+- `region=Not specified` остается у 33.0% базы; `company=Not specified` — у 27.8%.
+- В fallback цепочку региона добавлено альтернативных geo-колонок: 0.
 - Топ tools: Jira, Confluence, Sql, Miro, Figma.
 
 ## 2) Coverage / Parsing validation
@@ -84,8 +87,11 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 ![Domain x Tools heatmap (row share)](outputs/figures/12_heatmap_domain_tools_share.png)
 
 ## 6) Стратификация выборки
-![Seniority donut](outputs/figures/13_donut_seniority_filled.png)
-![CV generation language donut](outputs/figures/14_donut_cv_generation_language.png)
+<p>
+  <img src="outputs/figures/13_donut_seniority_filled.png" width="48%" />
+  <img src="outputs/figures/14_donut_cv_generation_language.png" width="48%" />
+</p>
+
 ![Top-20 strata](outputs/figures/15_strata_top20.png)
 
 Ключевые таблицы стратификации:
@@ -98,24 +104,51 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 - `outputs/tables/cv_generation_language_distribution.csv`
 
 ## 7) Not specified diagnostics
-| field     |   share_missing |   share_filled_by_fallback | source_breakdown                                                                            |
-|:----------|----------------:|---------------------------:|:--------------------------------------------------------------------------------------------|
-| domain    |             0   |                       28.6 | talentCard:71.4%; inferred:28.6%                                                            |
-| region    |            33   |                       20.7 | latex_expheader:46.3%; not_specified:33.0%; latex_header:14.0%; talentCard:6.7%             |
-| company   |            27.8 |                        0.5 | latex_expheader:71.6%; not_specified:27.8%; talentCard:0.5%                                 |
-| seniority |            40.1 |                       30.7 | not_specified:40.1%; talentCard:29.2%; inferred_job_title:16.6%; inferred_header_role:14.1% |
-| industry  |            84.1 |                        0   | not_specified:84.1%; talentCard:15.9%                                                       |
+| field     |   total_missing_count |   share_missing_% |   share_filled_by_fallback | source_breakdown                                                                            |
+|:----------|----------------------:|------------------:|---------------------------:|:--------------------------------------------------------------------------------------------|
+| domain    |                     0 |               0   |                       28.6 | talentCard:71.4%; inferred:28.6%                                                            |
+| region    |                   241 |              33   |                       20.7 | latex_expheader:46.3%; not_specified:33.0%; latex_header:14.0%; talentCard:6.7%             |
+| company   |                   203 |              27.8 |                        0.5 | latex_expheader:71.6%; not_specified:27.8%; talentCard:0.5%                                 |
+| seniority |                   293 |              40.1 |                       30.7 | not_specified:40.1%; talentCard:29.2%; inferred_job_title:16.6%; inferred_header_role:14.1% |
+| industry  |                   614 |              84.1 |                        0   | not_specified:84.1%; talentCard:15.9%                                                       |
 
 Пустоты уменьшались по fallback-цепочкам:
-- `region_filled`: `latex_expheader -> talentCard -> latex_header`
+- `region_filled`: `latex_expheader -> talentCard -> latex_header -> alt_geo_columns`
 - `seniority_filled`: `talentCard -> inferred_job_title -> inferred_header_role`
 - `domain_filled`: `talentCard.specialist_category -> inferred role family`
 
-## 8) Appendix
+## 8) Other/Not specified deep dive
+| field     |   total_missing_count |   share_missing_% |   share_filled_by_fallback | source_breakdown                                                                            |
+|:----------|----------------------:|------------------:|---------------------------:|:--------------------------------------------------------------------------------------------|
+| domain    |                     0 |               0   |                       28.6 | talentCard:71.4%; inferred:28.6%                                                            |
+| region    |                   241 |              33   |                       20.7 | latex_expheader:46.3%; not_specified:33.0%; latex_header:14.0%; talentCard:6.7%             |
+| company   |                   203 |              27.8 |                        0.5 | latex_expheader:71.6%; not_specified:27.8%; talentCard:0.5%                                 |
+| seniority |                   293 |              40.1 |                       30.7 | not_specified:40.1%; talentCard:29.2%; inferred_job_title:16.6%; inferred_header_role:14.1% |
+
+Таблицы deep dive:
+- `outputs/tables/not_specified_deep_dive_domain_titles.csv`
+- `outputs/tables/not_specified_deep_dive_domain_selected_position.csv`
+- `outputs/tables/not_specified_deep_dive_domain_tools.csv`
+- `outputs/tables/not_specified_deep_dive_domain_skills.csv`
+- `outputs/tables/not_specified_deep_dive_region_not_specified_breakdown.csv`
+- `outputs/tables/not_specified_deep_dive_region_not_specified_domain.csv`
+- `outputs/tables/not_specified_deep_dive_region_not_specified_seniority.csv`
+- `outputs/tables/not_specified_deep_dive_region_alt_columns.csv`
+- `outputs/tables/not_specified_deep_dive_company_not_specified_breakdown.csv`
+- `outputs/tables/not_specified_deep_dive_company_not_specified_job_titles.csv`
+- `outputs/tables/not_specified_deep_dive_company_not_specified_region.csv`
+
+Графики deep dive:
+![Domain Other/Not specified titles](outputs/figures/16_deep_dive_domain_titles.png)
+![Region Not specified by domain](outputs/figures/17_deep_dive_region_not_specified_domain.png)
+![Company Not specified top titles](outputs/figures/18_deep_dive_company_not_specified_titles.png)
+
+## 9) Appendix
 Артефакты:
 - Figures: `outputs/figures/*.png`
 - Tables: `outputs/tables/*.csv`
 - Notebook: `notebooks/mis_users_resume_bot.ipynb`
+- Geo mapping audit: `outputs/tables/geo_mapping_audit.csv`
 
 How to reproduce:
 ```bash

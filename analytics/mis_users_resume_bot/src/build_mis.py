@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -238,21 +239,24 @@ def plot_donut(series: pd.Series, out_path: Path, title: str) -> pd.DataFrame:
     if len(data) < 3:
         return pd.DataFrame(columns=["category", "count", "share_%"])
 
-    fig, ax = plt.subplots(figsize=(7, 7))
+    fig, ax = plt.subplots(figsize=(4.2, 4.2))
     colors = sns.color_palette("Set2", n_colors=len(data))
     wedges, texts, autotexts = ax.pie(
         data.values,
-        labels=[shorten(i, 24) for i in data.index],
+        labels=[shorten(i, 18) for i in data.index],
         autopct=lambda p: f"{p:.1f}%",
         startangle=90,
         counterclock=False,
         wedgeprops={"width": 0.42, "edgecolor": "white"},
         colors=colors,
-        pctdistance=0.8,
+        pctdistance=0.74,
+        labeldistance=1.02,
     )
+    for t in texts:
+        t.set_fontsize(8)
     for t in autotexts:
-        t.set_fontsize(10)
-    ax.set_title(title)
+        t.set_fontsize(7)
+    ax.set_title(title, fontsize=10)
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
@@ -329,20 +333,24 @@ def choose_with_source(candidates: List[Tuple[object, str]], default: str = "Not
 
 def build_not_specified_diagnostics(df: pd.DataFrame) -> pd.DataFrame:
     specs = [
-        ("domain", "domain_filled", "domain_source", "talentCard", {"inferred"}),
-        ("region", "region_filled", "region_source", "latex_expheader", {"talentCard", "latex_header"}),
-        ("company", "company_filled", "company_source", "latex_expheader", {"talentCard"}),
-        ("seniority", "seniority_filled", "seniority_source", "talentCard", {"inferred_job_title", "inferred_header_role"}),
-        ("industry", "industry_filled", "industry_source", "talentCard", set()),
+        ("domain", "domain_filled", "domain_source", {"inferred"}),
+        ("region", "region_filled", "region_source", {"talentCard", "latex_header"}),
+        ("company", "company_filled", "company_source", {"talentCard"}),
+        ("seniority", "seniority_filled", "seniority_source", {"inferred_job_title", "inferred_header_role"}),
+        ("industry", "industry_filled", "industry_source", set()),
     ]
 
     rows: List[Dict[str, object]] = []
-    for field, value_col, source_col, _, fallback_sources in specs:
+    for field, value_col, source_col, fallback_sources in specs:
         source = df[source_col].fillna("not_specified").astype(str)
         value = df[value_col].fillna("Not specified").astype(str)
 
+        missing_count = int(value.eq("Not specified").sum())
         missing_share = round((value.eq("Not specified").mean()) * 100, 1)
-        fallback_share = round((source.isin(fallback_sources).mean()) * 100, 1)
+        fallback_mask = source.isin(fallback_sources)
+        if field == "region":
+            fallback_mask = fallback_mask | source.str.startswith("alt_col:")
+        fallback_share = round((fallback_mask.mean()) * 100, 1)
 
         breakdown = (source.value_counts(normalize=True) * 100).round(1)
         breakdown_text = "; ".join([f"{k}:{v:.1f}%" for k, v in breakdown.items()])
@@ -350,13 +358,70 @@ def build_not_specified_diagnostics(df: pd.DataFrame) -> pd.DataFrame:
         rows.append(
             {
                 "field": field,
-                "share_missing": missing_share,
+                "total_missing_count": missing_count,
+                "share_missing_%": missing_share,
                 "share_filled_by_fallback": fallback_share,
                 "source_breakdown": breakdown_text,
             }
         )
 
     return pd.DataFrame(rows)
+
+
+def top_counts(series: pd.Series, n: int, col_name: str) -> pd.DataFrame:
+    s = series.fillna("").astype(str).str.strip()
+    s = s[s.ne("")]
+    if s.empty:
+        return pd.DataFrame(columns=[col_name, "count", "share_%"])
+    out = s.value_counts().head(n).rename_axis(col_name).reset_index(name="count")
+    out["share_%"] = (out["count"] / out["count"].sum() * 100).round(1)
+    return out
+
+
+def top_tokens_from_list(df: pd.DataFrame, list_col: str, n: int, token_name: str) -> pd.DataFrame:
+    rows: List[str] = []
+    for tokens in df[list_col]:
+        for token in (tokens or []):
+            t = clean_text(token)
+            if t:
+                rows.append(t)
+    if not rows:
+        return pd.DataFrame(columns=[token_name, "count", "share_%"])
+    series = pd.Series(rows)
+    out = series.value_counts().head(n).rename_axis(token_name).reset_index(name="count")
+    out["share_%"] = (out["count"] / out["count"].sum() * 100).round(1)
+    return out
+
+
+def discover_alt_geo_columns(df: pd.DataFrame) -> pd.DataFrame:
+    pattern = re.compile(r"(location|city|country|region|geo)", flags=re.IGNORECASE)
+    rows: List[Dict[str, object]] = []
+    for col in df.columns:
+        if not pattern.search(col):
+            continue
+        if col.startswith("talentCard.jobs["):
+            continue
+        if col in {"region_filled", "region_norm", "current_region_talentCard", "current_region_latex", "header_location_latex"}:
+            continue
+        if col == "talentCard":
+            continue
+        if str(df[col].dtype) not in {"object", "string"}:
+            continue
+        series = df[col].fillna("").astype(str).str.strip()
+        non_empty = int(series.ne("").sum())
+        if non_empty == 0:
+            continue
+        rows.append(
+            {
+                "column": col,
+                "non_empty_count": non_empty,
+                "non_empty_rate_%": round(non_empty / len(df) * 100, 1),
+                "median_len": int(series[series.ne("")].str.len().median()),
+            }
+        )
+    if not rows:
+        return pd.DataFrame(columns=["column", "non_empty_count", "non_empty_rate_%", "median_len"])
+    return pd.DataFrame(rows).sort_values("non_empty_count", ascending=False)
 
 
 def build_notebook(path: Path) -> None:
@@ -408,16 +473,35 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     profile = tables["dataset_profile"]
     validation = tables["validation_summary"]
     diagnostics = tables["not_specified_diagnostics"]
+    geo_audit = tables["geo_mapping_audit"]
+    region_ns_breakdown = tables["not_specified_deep_dive_region_not_specified_breakdown"]
+    company_ns_breakdown = tables["not_specified_deep_dive_company_not_specified_breakdown"]
+    region_alt_cols = tables["not_specified_deep_dive_region_alt_columns"]
 
     p = dict(zip(profile["metric"], profile["value"]))
     v = dict(zip(validation["metric"], validation["value"]))
 
-    top_domains = tables["domain_distribution"].head(3)
-    top_regions = tables["region_distribution"].head(3)
-    top_companies = tables["company_distribution"].head(3)
+    top_domains = tables["domain_distribution_plot"].head(3)
+    top_regions = tables["region_distribution_plot"].head(3)
+    top_companies = tables["company_distribution_plot"].head(3)
     top_tools = tables["tools_top"].head(5)
 
     industry_cov = float(v.get("coverage_industry_talentCard_%", 0))
+    russia_collapsed = geo_audit[
+        geo_audit["raw_region"].astype(str).str.contains(r"russia|россия|рф|russian federation", case=False, regex=True)
+        & geo_audit["region_norm"].astype(str).eq("Russia")
+    ]["count"].sum()
+    region_ns_share = float(
+        region_ns_breakdown.loc[region_ns_breakdown["metric"] == "share_of_dataset_%", "value"].iloc[0]
+    ) if not region_ns_breakdown.empty else 0.0
+    company_ns_share = float(
+        company_ns_breakdown.loc[company_ns_breakdown["metric"] == "share_of_dataset_%", "value"].iloc[0]
+    ) if not company_ns_breakdown.empty else 0.0
+    alt_geo_used = (
+        int(region_alt_cols["selected_in_fallback"].fillna(False).sum())
+        if "selected_in_fallback" in region_alt_cols.columns
+        else 0
+    )
 
     observations = [
         f"База содержит {int(float(p['users_total']))} профилей.",
@@ -427,9 +511,19 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         f"Покрытие `talentCard.specialist_category`: {float(v['coverage_specialist_category_%']):.1f}%.",
         f"LaTeX-парсинг нашел `ExpHeader` у {float(v['share_users_with_expheader_%']):.1f}% пользователей.",
         f"LaTeX skills section найдена у {float(v['share_users_with_skills_section_%']):.1f}% пользователей.",
+        f"Гео-мэппинг схлопнул варианты Russia/Россия/РФ: {int(russia_collapsed)} записей перешли в канон `Russia`.",
         f"Industry анализируется только на subset с заполненным industry: {industry_cov:.1f}% пользователей.",
+        f"`region=Not specified` остается у {region_ns_share:.1f}% базы; `company=Not specified` — у {company_ns_share:.1f}%.",
+        f"В fallback цепочку региона добавлено альтернативных geo-колонок: {alt_geo_used}.",
         f"Топ tools: {', '.join(top_tools['token_display'].tolist())}.",
     ]
+
+    diagnostics_md = diagnostics.to_markdown(index=False)
+    validation_md = validation.to_markdown(index=False)
+    top_domains_md = top_domains[["domain_filled", "count"]].to_markdown(index=False) if not top_domains.empty else "(empty)"
+    top_regions_md = top_regions[["region_display", "count"]].to_markdown(index=False) if not top_regions.empty else "(empty)"
+    top_companies_md = top_companies[["company_display", "count"]].to_markdown(index=False) if not top_companies.empty else "(empty)"
+    deep_dive_summary_md = tables["not_specified_deep_dive_summary"].to_markdown(index=False)
 
     readme = f"""# MIS: Users Resume Bot (Candidate Analytics)
 
@@ -441,19 +535,19 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
 - Coverage `talentCard.specialist_category`: **{float(v['coverage_specialist_category_%']):.1f}%**
 
 Top-3 domains:
-{top_domains[['domain_filled', 'count']].to_markdown(index=False)}
+{top_domains_md}
 
 Top-3 regions:
-{top_regions[['region_display', 'count']].to_markdown(index=False)}
+{top_regions_md}
 
 Top-3 companies:
-{top_companies[['company_display', 'count']].to_markdown(index=False)}
+{top_companies_md}
 
 ### Key observations
 {"\n".join([f"- {x}" for x in observations])}
 
 ## 2) Coverage / Parsing validation
-{validation.to_markdown(index=False)}
+{validation_md}
 
 Columns inventory (real CSV structure + non-null profile + length stats):
 - `outputs/tables/columns_inventory.csv`
@@ -477,8 +571,11 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 ![Domain x Tools heatmap (row share)](outputs/figures/12_heatmap_domain_tools_share.png)
 
 ## 6) Стратификация выборки
-![Seniority donut](outputs/figures/13_donut_seniority_filled.png)
-![CV generation language donut](outputs/figures/14_donut_cv_generation_language.png)
+<p>
+  <img src="outputs/figures/13_donut_seniority_filled.png" width="48%" />
+  <img src="outputs/figures/14_donut_cv_generation_language.png" width="48%" />
+</p>
+
 ![Top-20 strata](outputs/figures/15_strata_top20.png)
 
 Ключевые таблицы стратификации:
@@ -491,18 +588,40 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 - `outputs/tables/cv_generation_language_distribution.csv`
 
 ## 7) Not specified diagnostics
-{diagnostics.to_markdown(index=False)}
+{diagnostics_md}
 
 Пустоты уменьшались по fallback-цепочкам:
-- `region_filled`: `latex_expheader -> talentCard -> latex_header`
+- `region_filled`: `latex_expheader -> talentCard -> latex_header -> alt_geo_columns`
 - `seniority_filled`: `talentCard -> inferred_job_title -> inferred_header_role`
 - `domain_filled`: `talentCard.specialist_category -> inferred role family`
 
-## 8) Appendix
+## 8) Other/Not specified deep dive
+{deep_dive_summary_md}
+
+Таблицы deep dive:
+- `outputs/tables/not_specified_deep_dive_domain_titles.csv`
+- `outputs/tables/not_specified_deep_dive_domain_selected_position.csv`
+- `outputs/tables/not_specified_deep_dive_domain_tools.csv`
+- `outputs/tables/not_specified_deep_dive_domain_skills.csv`
+- `outputs/tables/not_specified_deep_dive_region_not_specified_breakdown.csv`
+- `outputs/tables/not_specified_deep_dive_region_not_specified_domain.csv`
+- `outputs/tables/not_specified_deep_dive_region_not_specified_seniority.csv`
+- `outputs/tables/not_specified_deep_dive_region_alt_columns.csv`
+- `outputs/tables/not_specified_deep_dive_company_not_specified_breakdown.csv`
+- `outputs/tables/not_specified_deep_dive_company_not_specified_job_titles.csv`
+- `outputs/tables/not_specified_deep_dive_company_not_specified_region.csv`
+
+Графики deep dive:
+![Domain Other/Not specified titles](outputs/figures/16_deep_dive_domain_titles.png)
+![Region Not specified by domain](outputs/figures/17_deep_dive_region_not_specified_domain.png)
+![Company Not specified top titles](outputs/figures/18_deep_dive_company_not_specified_titles.png)
+
+## 9) Appendix
 Артефакты:
 - Figures: `outputs/figures/*.png`
 - Tables: `outputs/tables/*.csv`
 - Notebook: `notebooks/mis_users_resume_bot.ipynb`
+- Geo mapping audit: `outputs/tables/geo_mapping_audit.csv`
 
 How to reproduce:
 ```bash
@@ -558,6 +677,13 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     users_enriched["jobs_count_talentCard"] = users_enriched["jobs_count_talentCard"].fillna(0).astype(int)
     users_enriched["jobs_count_latex"] = users_enriched["jobs_count_latex"].fillna(0).astype(int)
 
+    alt_geo_inventory = discover_alt_geo_columns(users)
+    selected_alt_geo_cols: List[str] = []
+    if not alt_geo_inventory.empty:
+        selected_alt_geo_cols = (
+            alt_geo_inventory.loc[alt_geo_inventory["non_empty_rate_%"] >= 1.0, "column"].head(2).astype(str).tolist()
+        )
+
     # Filled fields with explicit source fallback chains.
     company_rows = users_enriched.apply(
         lambda r: choose_with_source(
@@ -577,6 +703,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
                 (r.get("current_region_expheader", ""), "latex_expheader"),
                 (r.get("current_region_talentCard", ""), "talentCard"),
                 (r.get("header_location_latex", ""), "latex_header"),
+                *[(r.get(col, ""), f"alt_col:{col}") for col in selected_alt_geo_cols],
             ]
         ),
         axis=1,
@@ -772,6 +899,23 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     company_distribution = distribution_with_display(users_enriched, "company_filled", "company_norm", "company")
     industry_distribution = distribution_with_display(users_enriched, "industry_filled", "industry_norm", "industry")
 
+    domain_distribution_plot = domain_distribution[
+        ~domain_distribution["domain_filled"].astype(str).str.lower().isin({"other", "not specified"})
+    ].copy()
+    region_distribution_plot = region_distribution[
+        ~region_distribution["region_norm"].astype(str).str.lower().isin({"other", "not specified"})
+    ].copy()
+    company_distribution_plot = company_distribution[
+        ~company_distribution["company_norm"].astype(str).str.lower().isin({"other", "not specified"})
+    ].copy()
+
+    if domain_distribution_plot.empty:
+        domain_distribution_plot = domain_distribution.copy()
+    if region_distribution_plot.empty:
+        region_distribution_plot = region_distribution.copy()
+    if company_distribution_plot.empty:
+        company_distribution_plot = company_distribution.copy()
+
     industry_subset = industry_distribution[industry_distribution["industry_norm"] != "Not specified"].copy()
 
     country_distribution = users_enriched["country_guess"].fillna("Unknown").astype(str).value_counts().rename_axis("country").reset_index(name="count")
@@ -783,19 +927,37 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     tools_top = aggregate_tokens(users_enriched, "tools_list")
 
     # Domain x Region (heatmap row-share) and stacked by regions.
-    domain_small = limit_categories(users_enriched["domain_filled"], max_n=10, other_label="Other")
-    region_small = limit_categories(users_enriched["region_norm"], max_n=15, other_label="Other")
+    domain_analysis = users_enriched[
+        ~users_enriched["domain_filled"].fillna("Not specified").astype(str).str.lower().isin({"other", "not specified"})
+    ].copy()
+    if domain_analysis.empty:
+        domain_analysis = users_enriched.copy()
+
+    domain_small = limit_categories(domain_analysis["domain_filled"], max_n=10, other_label="Other")
+    region_small = limit_categories(domain_analysis["region_norm"], max_n=15, other_label="Other")
 
     domain_region_counts = pd.crosstab(domain_small, region_small)
     domain_region_share = row_normalize_percent(domain_region_counts)
 
-    region_top10 = limit_categories(users_enriched["region_norm"], max_n=10, other_label="Other")
-    domain_for_regions = limit_categories(users_enriched["domain_filled"], max_n=10, other_label="Other")
+    region_domain_base = users_enriched[
+        ~users_enriched["region_norm"].fillna("Not specified").astype(str).str.lower().isin({"not specified", "other"})
+    ].copy()
+    if region_domain_base.empty:
+        region_domain_base = users_enriched.copy()
+
+    region_top10 = limit_categories(region_domain_base["region_norm"], max_n=10, other_label="Other")
+    domain_for_regions = limit_categories(region_domain_base["domain_filled"], max_n=10, other_label="Other")
     region_domain_counts = pd.crosstab(region_top10, domain_for_regions)
 
     # Seniority x Company and Domain x Company as 100% stacked bars.
-    company_small = limit_categories(users_enriched["company_norm"], max_n=15, other_label="Other")
-    seniority_small = users_enriched["seniority_filled"].fillna("Not specified")
+    company_analysis = users_enriched[
+        ~users_enriched["company_norm"].fillna("Not specified").astype(str).str.lower().isin({"not specified", "other"})
+    ].copy()
+    if company_analysis.empty:
+        company_analysis = users_enriched.copy()
+
+    company_small = limit_categories(company_analysis["company_norm"], max_n=15, other_label="Other")
+    seniority_small = company_analysis["seniority_filled"].fillna("Not specified")
     seniority_company_counts = pd.crosstab(company_small, seniority_small)
     for cat in seniority_order:
         if cat not in seniority_company_counts.columns:
@@ -803,10 +965,10 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     seniority_company_counts = seniority_company_counts[seniority_order]
     seniority_company_counts = seniority_company_counts.sort_values(by=seniority_order, ascending=False)
 
-    domain_company_counts = pd.crosstab(company_small, domain_small)
+    domain_company_counts = pd.crosstab(company_small, company_analysis["domain_filled"])
 
     # Domain x Tools heatmap (top-8 domains x top-20 tools, row share).
-    domain_top8 = domain_distribution.head(8)["domain_filled"].astype(str).tolist()
+    domain_top8 = domain_distribution_plot.head(8)["domain_filled"].astype(str).tolist()
     tools_top20 = tools_top.head(20)["token_norm"].tolist()
     token_display_map = dict(zip(tools_top["token_norm"], tools_top["token_display"]))
 
@@ -870,6 +1032,105 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
 
     not_specified_diagnostics = build_not_specified_diagnostics(users_enriched)
 
+    deep_fields = ["domain", "region", "company", "seniority"]
+    not_specified_deep_dive_summary = not_specified_diagnostics[
+        not_specified_diagnostics["field"].isin(deep_fields)
+    ].copy()
+
+    # Domain = Other/Not specified deep dive.
+    domain_deep = users_enriched[
+        users_enriched["domain_filled"].fillna("Not specified").astype(str).isin(["Other", "Not specified"])
+    ].copy()
+    domain_titles = (
+        domain_deep.groupby(["domain_filled", "current_job_title_filled"])
+        .size()
+        .reset_index(name="count")
+        .sort_values("count", ascending=False)
+        .head(20)
+    )
+    domain_selected_position = (
+        domain_deep.groupby(["domain_filled", "selectedPosition"])
+        .size()
+        .reset_index(name="count")
+        .sort_values("count", ascending=False)
+        .head(20)
+    )
+
+    domain_tools_rows: List[Dict[str, object]] = []
+    domain_skills_rows: List[Dict[str, object]] = []
+    for dom in ["Other", "Not specified"]:
+        subset = domain_deep[domain_deep["domain_filled"] == dom]
+        local_tools = top_tokens_from_list(subset, "tools_list", 20, "tool")
+        local_skills = top_tokens_from_list(subset, "skills_list", 20, "skill")
+        if not local_tools.empty:
+            local_tools["domain_filled"] = dom
+            domain_tools_rows.append(local_tools)
+        if not local_skills.empty:
+            local_skills["domain_filled"] = dom
+            domain_skills_rows.append(local_skills)
+    domain_tools_deep = pd.concat(domain_tools_rows, ignore_index=True) if domain_tools_rows else pd.DataFrame(columns=["tool", "count", "share_%", "domain_filled"])
+    domain_skills_deep = pd.concat(domain_skills_rows, ignore_index=True) if domain_skills_rows else pd.DataFrame(columns=["skill", "count", "share_%", "domain_filled"])
+
+    # Region = Not specified deep dive.
+    region_ns = users_enriched[users_enriched["region_norm"].fillna("Not specified").astype(str).str.lower().eq("not specified")].copy()
+    region_ns_total = len(region_ns)
+    region_ns_breakdown = pd.DataFrame(
+        {
+            "metric": [
+                "users_region_not_specified",
+                "share_of_dataset_%",
+                "cvEnhancedResult_present_%",
+                "latex_found_%",
+                "expheader_gt0_%",
+                "jobs_count_talentCard_gt0_%",
+            ],
+            "value": [
+                region_ns_total,
+                round(region_ns_total / len(users_enriched) * 100, 1) if len(users_enriched) else 0.0,
+                round(region_ns["cvEnhancedResult_present"].mean() * 100, 1) if region_ns_total else 0.0,
+                round(region_ns["latex_found"].fillna(False).mean() * 100, 1) if region_ns_total else 0.0,
+                round((region_ns["expheader_count"].fillna(0) > 0).mean() * 100, 1) if region_ns_total else 0.0,
+                round((region_ns["jobs_count_talentCard"] > 0).mean() * 100, 1) if region_ns_total else 0.0,
+            ],
+        }
+    )
+    region_ns_domain = top_counts(region_ns["domain_filled"], 20, "domain_filled")
+    region_ns_seniority = top_counts(region_ns["seniority_filled"], 20, "seniority_filled")
+
+    if not alt_geo_inventory.empty:
+        region_alt_columns = alt_geo_inventory.copy()
+        region_alt_columns["selected_in_fallback"] = region_alt_columns["column"].isin(selected_alt_geo_cols)
+    else:
+        region_alt_columns = pd.DataFrame(
+            [{"column": "none", "non_empty_count": 0, "non_empty_rate_%": 0.0, "median_len": 0, "selected_in_fallback": False}]
+        )
+
+    # Company = Not specified deep dive.
+    company_ns = users_enriched[users_enriched["company_norm"].fillna("Not specified").astype(str).str.lower().eq("not specified")].copy()
+    company_ns_total = len(company_ns)
+    company_ns_breakdown = pd.DataFrame(
+        {
+            "metric": [
+                "users_company_not_specified",
+                "share_of_dataset_%",
+                "expheader_gt0_%",
+                "jobs_count_talentCard_gt0_%",
+            ],
+            "value": [
+                company_ns_total,
+                round(company_ns_total / len(users_enriched) * 100, 1) if len(users_enriched) else 0.0,
+                round((company_ns["expheader_count"].fillna(0) > 0).mean() * 100, 1) if company_ns_total else 0.0,
+                round((company_ns["jobs_count_talentCard"] > 0).mean() * 100, 1) if company_ns_total else 0.0,
+            ],
+        }
+    )
+    company_ns_job_titles = top_counts(company_ns["current_job_title_filled"], 20, "current_job_title_filled")
+    company_ns_regions = top_counts(company_ns["region_norm"], 20, "region_norm")
+
+    geo_mapping_audit = (
+        users_enriched.groupby(["region_filled", "region_norm"]).size().reset_index(name="count").rename(columns={"region_filled": "raw_region"}).sort_values("count", ascending=False)
+    )
+
     region_mappings = build_mapping_table(users_enriched["region_filled"], users_enriched["region_norm"], "region")
     company_mappings = build_mapping_table(users_enriched["company_filled"], users_enriched["company_norm"], "company")
     industry_mappings = build_mapping_table(users_enriched["industry_filled"], users_enriched["industry_norm"], "industry")
@@ -909,14 +1170,17 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "not_specified_diagnostics": not_specified_diagnostics,
         "weekly_signups": weekly_signups,
         "domain_distribution": domain_distribution,
+        "domain_distribution_plot": domain_distribution_plot,
         "role_family_distribution": role_family_distribution,
         "seniority_distribution": seniority_distribution,
         "experience_bin_distribution": experience_distribution,
         "leadership_distribution": leadership_distribution,
         "cv_generation_language_distribution": cv_generation_language_distribution,
         "region_distribution": region_distribution,
+        "region_distribution_plot": region_distribution_plot,
         "country_distribution": country_distribution,
         "company_distribution": company_distribution,
+        "company_distribution_plot": company_distribution_plot,
         "industry_distribution": industry_distribution,
         "industry_distribution_subset": industry_subset,
         "english_level_distribution": english_level_distribution,
@@ -933,7 +1197,20 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "region_mappings": region_mappings,
         "company_mappings": company_mappings,
         "industry_mappings": industry_mappings,
+        "geo_mapping_audit": geo_mapping_audit,
         "strata_top20": strata_top20,
+        "not_specified_deep_dive_summary": not_specified_deep_dive_summary,
+        "not_specified_deep_dive_domain_titles": domain_titles,
+        "not_specified_deep_dive_domain_selected_position": domain_selected_position,
+        "not_specified_deep_dive_domain_tools": domain_tools_deep,
+        "not_specified_deep_dive_domain_skills": domain_skills_deep,
+        "not_specified_deep_dive_region_not_specified_breakdown": region_ns_breakdown,
+        "not_specified_deep_dive_region_not_specified_domain": region_ns_domain,
+        "not_specified_deep_dive_region_not_specified_seniority": region_ns_seniority,
+        "not_specified_deep_dive_region_alt_columns": region_alt_columns,
+        "not_specified_deep_dive_company_not_specified_breakdown": company_ns_breakdown,
+        "not_specified_deep_dive_company_not_specified_job_titles": company_ns_job_titles,
+        "not_specified_deep_dive_company_not_specified_region": company_ns_regions,
     }
 
     for name, table in tables.items():
@@ -949,9 +1226,30 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         xlabel="Week",
         ylabel="Users",
     )
-    plot_barh(domain_distribution, "domain_filled", "count", figures_dir / "02_top_domains.png", "Top domains (domain_filled)", top_n=10)
-    plot_barh(region_distribution.rename(columns={"region_display": "region"}), "region", "count", figures_dir / "03_top_regions.png", "Top regions (region_filled)", top_n=15)
-    plot_barh(company_distribution.rename(columns={"company_display": "company"}), "company", "count", figures_dir / "04_top_companies.png", "Top companies (company_filled)", top_n=15)
+    plot_barh(
+        domain_distribution_plot,
+        "domain_filled",
+        "count",
+        figures_dir / "02_top_domains.png",
+        "Top domains (excluding Other/Not specified)",
+        top_n=10,
+    )
+    plot_barh(
+        region_distribution_plot.rename(columns={"region_display": "region"}),
+        "region",
+        "count",
+        figures_dir / "03_top_regions.png",
+        "Top regions (excluding Other/Not specified)",
+        top_n=15,
+    )
+    plot_barh(
+        company_distribution_plot.rename(columns={"company_display": "company"}),
+        "company",
+        "count",
+        figures_dir / "04_top_companies.png",
+        "Top companies (excluding Other/Not specified)",
+        top_n=15,
+    )
     if not industry_subset.empty:
         plot_barh(industry_subset.rename(columns={"industry_display": "industry"}), "industry", "count", figures_dir / "05_top_industries_subset.png", "Top industries (subset with non-empty industry)", top_n=15)
 
@@ -1013,8 +1311,55 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             top_n=20,
         )
 
+    if not domain_titles.empty:
+        deep_titles_plot = domain_titles.copy()
+        deep_titles_plot["domain_title"] = deep_titles_plot.apply(
+            lambda r: f"{r['domain_filled']} | {r['current_job_title_filled']}", axis=1
+        )
+        plot_barh(
+            deep_titles_plot.rename(columns={"domain_title": "label"}),
+            "label",
+            "count",
+            figures_dir / "16_deep_dive_domain_titles.png",
+            "Domain Other/Not specified: top current job titles",
+            top_n=20,
+        )
+
+    if not region_ns_domain.empty:
+        plot_barh(
+            region_ns_domain,
+            "domain_filled",
+            "count",
+            figures_dir / "17_deep_dive_region_not_specified_domain.png",
+            "Region Not specified: top domains",
+            top_n=20,
+        )
+
+    if not company_ns_job_titles.empty:
+        plot_barh(
+            company_ns_job_titles,
+            "current_job_title_filled",
+            "count",
+            figures_dir / "18_deep_dive_company_not_specified_titles.png",
+            "Company Not specified: top current job titles",
+            top_n=20,
+        )
+
     build_notebook(base / "notebooks" / "mis_users_resume_bot.ipynb")
     build_readme(base, tables)
+
+    readme_text = (base / "README.md").read_text(encoding="utf-8")
+    md_links = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", readme_text)
+    html_links = re.findall(r'<img[^>]*src="([^"]+)"', readme_text)
+    links = md_links + html_links
+    readme_links_check = pd.DataFrame(
+        {
+            "link": links,
+            "exists": [((base / link).exists()) for link in links],
+        }
+    )
+    save_table(readme_links_check, tables_dir / "readme_links_check.csv")
+    tables["readme_links_check"] = readme_links_check
 
     return tables
 

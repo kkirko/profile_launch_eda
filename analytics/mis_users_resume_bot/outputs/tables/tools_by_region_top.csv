@@ -5,47 +5,47 @@ Not specified,Git,7
 Not specified,Miro,7
 Not specified,Figma,6
 Moscow,Jira,38
-Moscow,Confluence,37
-Moscow,Miro,20
+Moscow,Confluence,36
+Moscow,Miro,19
 Moscow,Sql,19
-Moscow,Figma,13
-Minsk,Jira,11
+Moscow,Figma,12
+Russia,Confluence,7
+Russia,Git,7
+Russia,Sql,5
+Russia,Python,5
+Russia,Jira,5
+Minsk,Jira,10
 Minsk,Confluence,8
-Minsk,Figma,4
 Minsk,Miro,4
+Minsk,Figma,4
 Minsk,Sql,4
-Saint Petersburg,Ci/Cd,5
-Saint Petersburg,Postgresql,5
-Saint Petersburg,Git,5
-Saint Petersburg,Linux,4
-Saint Petersburg,Jira,4
-"Dubai, UAE",Power Bi,4
-"Dubai, UAE",Figma,3
-"Dubai, UAE",Google,3
-"Dubai, UAE",Jira,2
-"Dubai, UAE",1C,2
+Dubai,Power Bi,6
+Dubai,Jira,4
+Dubai,Sql,3
+Dubai,Figma,3
+Dubai,Google,3
+"Санкт, Петербург",Ci/Cd,4
+"Санкт, Петербург",Confluence,4
+"Санкт, Петербург",Django,4
+"Санкт, Петербург",Postgresql,4
+"Санкт, Петербург",Linux,3
 Almaty,Docker,3
 Almaty,Postgresql,3
 Almaty,Jira,2
 Almaty,Kafka,2
 Almaty,Confluence,2
-"Warsaw, Poland",Jira,4
-"Warsaw, Poland",Figma,3
-"Warsaw, Poland",Miro,3
-"Warsaw, Poland",Confluence,3
-"Warsaw, Poland",Design Systems (Figma Components,1
+Warsaw,Jira,5
+Warsaw,Confluence,4
+Warsaw,Figma,3
+Warsaw,Miro,3
+Warsaw,Notion,2
 Remote,Jira,4
-Remote,Sql,3
 Remote,Notion,3
 Remote,Miro,3
-Remote,Git,2
+Remote,Sql,3
+Remote,Python,2
 Tashkent,Jira,3
 Tashkent,Figma,3
 Tashkent,Sql,2
 Tashkent,Python,2
 Tashkent,Confluence,2
-Russia,Git,2
-Russia,Digital Transformation,1
-Russia,Sap,1
-Russia,1C:Enterprise / 1C:Erp,1
-Russia,Cloud/Devops (Ci/Cd,1

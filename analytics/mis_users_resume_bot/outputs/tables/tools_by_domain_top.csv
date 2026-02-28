@@ -1,9 +1,4 @@
 domain,tool,count
-Other,Miro,2
-Other,Figma,2
-Other,Kpi Dashboards (Ms Excel,1
-Other,Sql,1
-Other,управление эффективностью,1
 Product/Project Management,Jira,94
 Product/Project Management,Confluence,79
 Product/Project Management,Miro,47
@@ -29,3 +24,8 @@ Marketing/Sales,Power Bi,5
 Marketing/Sales,Bitrix24,4
 Marketing/Sales,Confluence,4
 Marketing/Sales,Notion,3
+Design/Creative,Figma,8
+Design/Creative,Miro,6
+Design/Creative,Jira,5
+Design/Creative,Notion,4
+Design/Creative,Git,3

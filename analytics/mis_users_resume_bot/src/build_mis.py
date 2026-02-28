@@ -18,7 +18,6 @@ from feature_builders import (
     build_jobs_long_talent,
     build_mapping_table,
     canonical_text,
-    cooccurrence_pairs,
     experience_bin,
     guess_country,
     hash_user_id,
@@ -31,10 +30,9 @@ from feature_builders import (
     normalize_region,
     normalize_seniority,
     parse_bool_series,
-    profile_quality_score,
     summarize_user_jobs,
 )
-from latex_parser import parse_cv_latex
+from latex_parser import clean_text, parse_cv_latex
 
 
 sns.set_theme(style="whitegrid", context="talk")
@@ -60,124 +58,208 @@ def save_table(df: pd.DataFrame, path: Path) -> None:
     df.to_csv(path, index=False)
 
 
-def shorten(text: str, max_len: int = 56) -> str:
-    t = str(text)
-    return t if len(t) <= max_len else t[: max_len - 3] + "..."
+def shorten(value: object, max_len: int = 44) -> str:
+    text = str(value)
+    return text if len(text) <= max_len else text[: max_len - 3] + "..."
 
 
-def barh_counts(
-    df: pd.DataFrame,
-    label_col: str,
-    value_col: str,
-    out_path: Path,
-    title: str,
-    xlabel: str,
-    top_n: int = 20,
-) -> None:
+def non_empty(value: object) -> bool:
+    return clean_text(value) != ""
+
+
+def limit_categories(series: pd.Series, max_n: int, other_label: str = "Other") -> pd.Series:
+    values = series.fillna("Not specified").astype(str)
+    top = values.value_counts().head(max_n - 1 if values.nunique() > max_n else max_n).index
+    if values.nunique() <= max_n:
+        return values
+    return values.map(lambda x: x if x in top else other_label)
+
+
+def row_normalize_percent(df: pd.DataFrame) -> pd.DataFrame:
+    share = df.div(df.sum(axis=1).replace(0, np.nan), axis=0) * 100
+    return share.fillna(0)
+
+
+def build_columns_inventory(df: pd.DataFrame) -> pd.DataFrame:
+    rows: List[Dict[str, object]] = []
+    for col in df.columns:
+        series = df[col]
+        non_null = series.notna()
+        rate = round(float(non_null.mean()), 4)
+
+        if non_null.any():
+            lengths = series[non_null].astype(str).str.len()
+            stats = f"p50={int(lengths.quantile(0.5))};p95={int(lengths.quantile(0.95))};max={int(lengths.max())}"
+        else:
+            stats = ""
+
+        rows.append(
+            {
+                "col": col,
+                "dtype": str(series.dtype),
+                "non_null_rate": rate,
+                "example_len_stats": stats,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def distribution_with_display(df: pd.DataFrame, raw_col: str, norm_col: str, field_name: str) -> pd.DataFrame:
+    work = df[[raw_col, norm_col]].copy()
+    work[raw_col] = work[raw_col].fillna("Not specified").astype(str)
+    work[norm_col] = work[norm_col].fillna("Not specified").astype(str)
+
+    counts = work.groupby(norm_col).size().rename("count").reset_index()
+    counts = counts.sort_values("count", ascending=False)
+
+    display_map = (
+        work.groupby([norm_col, raw_col]).size().rename("cnt").reset_index().sort_values([norm_col, "cnt"], ascending=[True, False])
+    )
+    display_top = display_map.drop_duplicates(subset=[norm_col])[[norm_col, raw_col]]
+
+    out = counts.merge(display_top, on=norm_col, how="left")
+    out = out.rename(columns={raw_col: f"{field_name}_display", norm_col: f"{field_name}_norm"})
+    return out
+
+
+def plot_line(df: pd.DataFrame, x_col: str, y_col: str, out_path: Path, title: str, xlabel: str, ylabel: str) -> None:
+    if df.empty:
+        return
+    fig, ax = plt.subplots(figsize=(12.5, 5.8))
+    ax.plot(df[x_col], df[y_col], marker="o", linewidth=2.1, color="#355C7D")
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.grid(alpha=0.25)
+    ax.tick_params(axis="x", rotation=45)
+    for label in ax.get_xticklabels():
+        label.set_ha("right")
+    fig.tight_layout()
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_barh(df: pd.DataFrame, label_col: str, value_col: str, out_path: Path, title: str, top_n: int) -> None:
     if df.empty:
         return
     top = df.head(top_n).copy()
-    labels = [shorten(v, 62) for v in top[label_col].astype(str)]
+    labels = [shorten(x, 55) for x in top[label_col].astype(str)]
     values = top[value_col].astype(float).values
 
-    fig, ax = plt.subplots(figsize=(12, max(5, 0.45 * len(top) + 1.5)))
+    fig, ax = plt.subplots(figsize=(12.5, max(5.5, 0.5 * len(top) + 2)))
     colors = sns.color_palette("viridis", n_colors=len(top))
     ax.barh(labels, values, color=colors)
     ax.invert_yaxis()
 
-    total = float(df[value_col].sum()) if df[value_col].sum() else 0.0
-    for i, v in enumerate(values):
-        share = pct(int(v), int(total)) if total else 0.0
-        ax.text(v + max(values) * 0.01, i, f"{int(v)} ({share:.1f}%)", va="center", fontsize=10)
+    total = float(top[value_col].sum())
+    for i, value in enumerate(values):
+        ax.text(value + max(values) * 0.01, i, f"{int(value)} ({pct(int(value), int(total)):.1f}%)", va="center", fontsize=10)
 
     ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(label_col.replace("_", " ").title())
+    ax.set_xlabel("Candidates")
+    ax.set_ylabel("")
     ax.grid(axis="x", alpha=0.25)
-    fig.subplots_adjust(left=0.34, right=0.98, top=0.90, bottom=0.10)
-    fig.savefig(out_path, bbox_inches="tight")
-    plt.close(fig)
-
-
-def line_series(df: pd.DataFrame, x_col: str, y_col: str, out_path: Path, title: str, xlabel: str, ylabel: str) -> None:
-    if df.empty:
-        return
-    fig, ax = plt.subplots(figsize=(11.5, 5.5))
-    ax.plot(df[x_col], df[y_col], marker="o", linewidth=2.2, color="#355C7D")
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.grid(alpha=0.3)
-    fig.autofmt_xdate()
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
 
 
-def plot_funnel(funnel: pd.DataFrame, out_path: Path) -> None:
-    if funnel.empty:
-        return
-    fig, ax = plt.subplots(figsize=(12.5, 5.8))
-    colors = sns.color_palette("mako", n_colors=len(funnel))
-    ax.barh(funnel["stage"], funnel["count"], color=colors)
-    ax.invert_yaxis()
-
-    base = int(funnel.iloc[0]["count"]) if len(funnel) else 0
-    for i, row in funnel.iterrows():
-        ax.text(row["count"] + max(funnel["count"]) * 0.01, i, f"{int(row['count'])} ({pct(int(row['count']), base):.1f}%)", va="center", fontsize=10)
-
-    ax.set_title("Funnel: onboardingCompleted -> cvPath -> cvAnalysis completed -> cvEnhancedResult")
-    ax.set_xlabel("Users")
-    ax.set_ylabel("Stage")
-    ax.grid(axis="x", alpha=0.25)
-    fig.subplots_adjust(left=0.40, right=0.98, top=0.90, bottom=0.12)
-    fig.savefig(out_path, bbox_inches="tight")
-    plt.close(fig)
-
-
-def heatmap(
-    matrix: pd.DataFrame,
-    out_path: Path,
-    title: str,
-    xlabel: str,
-    ylabel: str,
-    annotate: bool = True,
-) -> None:
+def plot_heatmap_share(matrix: pd.DataFrame, out_path: Path, title: str, xlabel: str, ylabel: str) -> None:
     if matrix.empty:
         return
-    fig_h = max(6, 0.42 * matrix.shape[0] + 2)
-    fig_w = max(10, 0.42 * matrix.shape[1] + 4)
+    fig_h = max(5.8, 0.42 * matrix.shape[0] + 2)
+    fig_w = max(10.5, 0.5 * matrix.shape[1] + 4)
     fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-    sns.heatmap(matrix, cmap="YlGnBu", annot=annotate, fmt=".0f", linewidths=0.35, cbar_kws={"label": "Users"}, ax=ax)
+
+    display = matrix.copy()
+    display.columns = [shorten(c, 24) for c in display.columns]
+    display.index = [shorten(i, 36) for i in display.index]
+
+    sns.heatmap(
+        display,
+        cmap="YlGnBu",
+        annot=False,
+        linewidths=0.3,
+        cbar_kws={"label": "Share, %"},
+        ax=ax,
+    )
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
+    ax.tick_params(axis="x", rotation=45)
+    for label in ax.get_xticklabels():
+        label.set_ha("right")
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
 
 
-def histogram(series: pd.Series, out_path: Path, title: str, xlabel: str) -> None:
-    values = series.dropna().astype(float)
-    if values.empty:
-        return
-    fig, ax = plt.subplots(figsize=(10.5, 5.5))
-    sns.histplot(values, bins=24, kde=True, color="#2E86AB", ax=ax)
-    ax.axvline(values.median(), color="#F18F01", linestyle="--", label=f"median: {values.median():.1f}")
-    ax.axvline(values.mean(), color="#C73E1D", linestyle="--", label=f"mean: {values.mean():.1f}")
-    ax.legend(loc="upper right")
+def plot_stacked_100(matrix_counts: pd.DataFrame, out_path: Path, title: str, x_label: str) -> pd.DataFrame:
+    if matrix_counts.empty:
+        return pd.DataFrame()
+
+    share = row_normalize_percent(matrix_counts)
+    fig, ax = plt.subplots(figsize=(13.5, 6.8))
+
+    x = np.arange(len(share.index))
+    bottom = np.zeros(len(share.index))
+    colors = sns.color_palette("tab20", n_colors=share.shape[1])
+
+    for idx, col in enumerate(share.columns):
+        vals = share[col].values
+        ax.bar(x, vals, bottom=bottom, color=colors[idx], label=shorten(col, 28), width=0.82)
+        bottom += vals
+
+    ax.set_ylim(0, 100)
+    ax.set_xticks(x)
+    ax.set_xticklabels([shorten(i, 28) for i in share.index], rotation=45, ha="right")
+    ax.set_ylabel("Share, %")
+    ax.set_xlabel(x_label)
     ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel("Users")
-    ax.grid(alpha=0.25)
+    ax.grid(axis="y", alpha=0.2)
+    ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), frameon=False, ncol=1)
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
 
+    return share
 
-def top_n_with_other(series: pd.Series, top_n: int) -> pd.Series:
-    top_values = set(series.value_counts().head(top_n).index)
-    return series.map(lambda x: x if x in top_values else "Other")
+
+def plot_donut(series: pd.Series, out_path: Path, title: str) -> pd.DataFrame:
+    data = series.fillna("Not specified").astype(str).value_counts()
+    if data.empty:
+        return pd.DataFrame(columns=["category", "count", "share_%"])
+
+    if len(data) > 6:
+        top = data.head(5)
+        other = data.iloc[5:].sum()
+        data = pd.concat([top, pd.Series({"Other": other})])
+
+    if len(data) < 3:
+        return pd.DataFrame(columns=["category", "count", "share_%"])
+
+    fig, ax = plt.subplots(figsize=(7, 7))
+    colors = sns.color_palette("Set2", n_colors=len(data))
+    wedges, texts, autotexts = ax.pie(
+        data.values,
+        labels=[shorten(i, 24) for i in data.index],
+        autopct=lambda p: f"{p:.1f}%",
+        startangle=90,
+        counterclock=False,
+        wedgeprops={"width": 0.42, "edgecolor": "white"},
+        colors=colors,
+        pctdistance=0.8,
+    )
+    for t in autotexts:
+        t.set_fontsize(10)
+    ax.set_title(title)
+    fig.tight_layout()
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+
+    out = data.rename_axis("category").reset_index(name="count")
+    out["share_%"] = (out["count"] / out["count"].sum() * 100).round(1)
+    return out
 
 
 def parse_latex_dataset(users: pd.DataFrame, as_of_date: pd.Timestamp) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -186,6 +268,7 @@ def parse_latex_dataset(users: pd.DataFrame, as_of_date: pd.Timestamp) -> Tuple[
 
     for _, row in users.iterrows():
         parsed = parse_cv_latex(row.get("cvEnhancedResult", np.nan), as_of_date=as_of_date)
+
         summary_rows.append(
             {
                 "user_hash": row["user_hash"],
@@ -200,6 +283,18 @@ def parse_latex_dataset(users: pd.DataFrame, as_of_date: pd.Timestamp) -> Tuple[
                 "current_company_latex": parsed.get("current_company_latex", ""),
                 "current_region_latex": parsed.get("current_region_latex", ""),
                 "current_job_title_latex": parsed.get("current_job_title_latex", ""),
+                "current_source_latex": parsed.get("current_source_latex", ""),
+                "current_company_expheader": parsed.get("current_company_expheader", ""),
+                "current_region_expheader": parsed.get("current_region_expheader", ""),
+                "current_job_title_expheader": parsed.get("current_job_title_expheader", ""),
+                "header_role_latex": parsed.get("header_role_latex", ""),
+                "header_location_latex": parsed.get("header_location_latex", ""),
+                "english_level": parsed.get("english_level", "Unknown"),
+                "languages_count": parsed.get("languages_count", 0),
+                "languages_section_found": parsed.get("languages_section_found", False),
+                "degree_level": parsed.get("degree_level", "Unknown"),
+                "education_text_len": parsed.get("education_text_len", 0),
+                "education_section_found": parsed.get("education_section_found", False),
             }
         )
 
@@ -224,6 +319,46 @@ def parse_latex_dataset(users: pd.DataFrame, as_of_date: pd.Timestamp) -> Tuple[
     return pd.DataFrame(summary_rows), pd.DataFrame(jobs_rows)
 
 
+def choose_with_source(candidates: List[Tuple[object, str]], default: str = "Not specified") -> Tuple[str, str]:
+    for value, source in candidates:
+        text = clean_text(value)
+        if text:
+            return text, source
+    return default, "not_specified"
+
+
+def build_not_specified_diagnostics(df: pd.DataFrame) -> pd.DataFrame:
+    specs = [
+        ("domain", "domain_filled", "domain_source", "talentCard", {"inferred"}),
+        ("region", "region_filled", "region_source", "latex_expheader", {"talentCard", "latex_header"}),
+        ("company", "company_filled", "company_source", "latex_expheader", {"talentCard"}),
+        ("seniority", "seniority_filled", "seniority_source", "talentCard", {"inferred_job_title", "inferred_header_role"}),
+        ("industry", "industry_filled", "industry_source", "talentCard", set()),
+    ]
+
+    rows: List[Dict[str, object]] = []
+    for field, value_col, source_col, _, fallback_sources in specs:
+        source = df[source_col].fillna("not_specified").astype(str)
+        value = df[value_col].fillna("Not specified").astype(str)
+
+        missing_share = round((value.eq("Not specified").mean()) * 100, 1)
+        fallback_share = round((source.isin(fallback_sources).mean()) * 100, 1)
+
+        breakdown = (source.value_counts(normalize=True) * 100).round(1)
+        breakdown_text = "; ".join([f"{k}:{v:.1f}%" for k, v in breakdown.items()])
+
+        rows.append(
+            {
+                "field": field,
+                "share_missing": missing_share,
+                "share_filled_by_fallback": fallback_share,
+                "source_breakdown": breakdown_text,
+            }
+        )
+
+    return pd.DataFrame(rows)
+
+
 def build_notebook(path: Path) -> None:
     notebook_json = {
         "cells": [
@@ -232,7 +367,7 @@ def build_notebook(path: Path) -> None:
                 "metadata": {},
                 "source": [
                     "# MIS users resume bot\n",
-                    "Ноутбук для воспроизводимого запуска MIS-отчета (без вывода PII и сырых LaTeX).",
+                    "Запуск воспроизводимой сборки MIS без вывода PII и без публикации сырого LaTeX.",
                 ],
             },
             {
@@ -253,7 +388,7 @@ def build_notebook(path: Path) -> None:
                 "metadata": {},
                 "outputs": [],
                 "source": [
-                    "run(input_path='/Users/k/Downloads/prointerview-prod.users.csv', base_dir='analytics/mis_users_resume_bot')",
+                    "run(input_path='/mnt/data/prointerview-prod.users.csv', base_dir='analytics/mis_users_resume_bot')",
                 ],
             },
         ],
@@ -270,119 +405,109 @@ def build_notebook(path: Path) -> None:
 
 
 def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
-    users_summary = tables["dataset_profile"]
-    funnel = tables["funnel"]
-    domains = tables["domain_distribution"]
-    regions = tables["region_distribution"]
-    companies = tables["company_distribution"]
-    industries = tables["industry_distribution"]
-    skills_top = tables["skills_top"]
-    tools_top = tables["tools_top"]
+    profile = tables["dataset_profile"]
     validation = tables["validation_summary"]
+    diagnostics = tables["not_specified_diagnostics"]
 
-    total_users = int(users_summary.loc[users_summary["metric"] == "users_total", "value"].iloc[0])
-    onboarding = int(funnel.loc[funnel["stage"] == "1) onboardingCompleted", "count"].iloc[0])
-    cv_path = int(funnel.loc[funnel["stage"] == "2) cvPath exists", "count"].iloc[0])
-    analysis_completed = int(funnel.loc[funnel["stage"] == "3) cvAnalysisStatus=completed", "count"].iloc[0])
-    enhanced = int(funnel.loc[funnel["stage"] == "4) cvEnhancedResult exists", "count"].iloc[0])
+    p = dict(zip(profile["metric"], profile["value"]))
+    v = dict(zip(validation["metric"], validation["value"]))
 
-    top_domain = domains.head(3)
-    top_region = regions.head(3)
-    top_company = companies.head(3)
-    top_industry = industries.head(3)
+    top_domains = tables["domain_distribution"].head(3)
+    top_regions = tables["region_distribution"].head(3)
+    top_companies = tables["company_distribution"].head(3)
+    top_tools = tables["tools_top"].head(5)
 
-    val_map = dict(zip(validation["metric"], validation["value"]))
-    expheader_share = float(val_map.get("share_users_with_expheader_%", 0))
-    skills_share = float(val_map.get("share_users_with_skills_section_%", 0))
-    company_match = float(val_map.get("current_company_match_rate_%", 0))
+    industry_cov = float(v.get("coverage_industry_talentCard_%", 0))
 
     observations = [
-        f"`onboardingCompleted` у {onboarding} из {total_users} пользователей ({pct(onboarding, total_users):.1f}%).",
-        f"До этапа `cvAnalysisStatus=completed` доходят {analysis_completed} пользователей ({pct(analysis_completed, total_users):.1f}% от базы).",
-        f"`cvEnhancedResult` присутствует у {enhanced} пользователей ({pct(enhanced, total_users):.1f}%).",
-        f"LaTeX с `\\ExpHeader` распознан у {expheader_share:.1f}% пользователей, skills-секция найдена у {skills_share:.1f}%.",
-        f"Согласованность current company между talentCard и LaTeX (нормализовано) составляет {company_match:.1f}% среди сравнимых профилей.",
-        f"Топ-домен: {top_domain.iloc[0]['domain']} ({int(top_domain.iloc[0]['count'])} пользователей).",
-        f"Топ-регион (current): {top_region.iloc[0]['region_display']} ({int(top_region.iloc[0]['count'])}).",
-        f"Топ-компания (current): {top_company.iloc[0]['company_display']} ({int(top_company.iloc[0]['count'])}).",
-        f"Топ-индустрия current job: {top_industry.iloc[0]['industry_display']} ({int(top_industry.iloc[0]['count'])}).",
-        f"Самые частые инструменты: {', '.join(tools_top.head(5)['token_display'].tolist())}.",
+        f"База содержит {int(float(p['users_total']))} профилей.",
+        f"Покрытие `cvEnhancedResult`: {float(v['coverage_cvEnhancedResult_%']):.1f}%.",
+        f"Покрытие `talentCard.jobs`: {float(v['coverage_talentCard_jobs_%']):.1f}%.",
+        f"Покрытие `talentCard.overall_skills`: {float(v['coverage_overall_skills_%']):.1f}%.",
+        f"Покрытие `talentCard.specialist_category`: {float(v['coverage_specialist_category_%']):.1f}%.",
+        f"LaTeX-парсинг нашел `ExpHeader` у {float(v['share_users_with_expheader_%']):.1f}% пользователей.",
+        f"LaTeX skills section найдена у {float(v['share_users_with_skills_section_%']):.1f}% пользователей.",
+        f"Industry анализируется только на subset с заполненным industry: {industry_cov:.1f}% пользователей.",
+        f"Топ tools: {', '.join(top_tools['token_display'].tolist())}.",
     ]
 
-    observations_md = "\n".join([f"- {line}" for line in observations])
-    missingness_md = tables["missingness"].to_markdown(index=False)
-    validation_md = validation.to_markdown(index=False)
-    jobs_diff_md = tables["jobs_count_diff_distribution"].to_markdown(index=False)
+    readme = f"""# MIS: Users Resume Bot (Candidate Analytics)
 
-    readme = f"""# MIS: Users Resume Bot
-
-## 1) MIS Summary
-- Users total: **{total_users}**
-- onboardingCompleted: **{onboarding}** ({pct(onboarding, total_users):.1f}%)
-- cvPath exists: **{cv_path}** ({pct(cv_path, total_users):.1f}%)
-- cvAnalysisStatus=completed: **{analysis_completed}** ({pct(analysis_completed, total_users):.1f}%)
-- cvEnhancedResult exists: **{enhanced}** ({pct(enhanced, total_users):.1f}%)
+## 1) Summary
+- Users total: **{int(float(p['users_total']))}**
+- Coverage `cvEnhancedResult`: **{float(v['coverage_cvEnhancedResult_%']):.1f}%**
+- Coverage `talentCard.jobs`: **{float(v['coverage_talentCard_jobs_%']):.1f}%**
+- Coverage `talentCard.overall_skills`: **{float(v['coverage_overall_skills_%']):.1f}%**
+- Coverage `talentCard.specialist_category`: **{float(v['coverage_specialist_category_%']):.1f}%**
 
 Top-3 domains:
-{top_domain[['domain','count']].to_markdown(index=False)}
+{top_domains[['domain_filled', 'count']].to_markdown(index=False)}
 
 Top-3 regions:
-{top_region[['region_display','count']].to_markdown(index=False)}
+{top_regions[['region_display', 'count']].to_markdown(index=False)}
 
 Top-3 companies:
-{top_company[['company_display','count']].to_markdown(index=False)}
+{top_companies[['company_display', 'count']].to_markdown(index=False)}
 
 ### Key observations
-{observations_md}
+{"\n".join([f"- {x}" for x in observations])}
 
-## 2) Data Coverage & Quality
-### Missingness (key fields)
-{missingness_md}
+## 2) Coverage / Parsing validation
+{validation.to_markdown(index=False)}
 
-### LaTeX parsing validation
-{validation_md}
-
-### Jobs count comparison (talentCard vs LaTeX)
-{jobs_diff_md}
+Columns inventory (real CSV structure + non-null profile + length stats):
+- `outputs/tables/columns_inventory.csv`
 
 ## 3) Domains & Geography
 ![Weekly signups](outputs/figures/01_registrations_weekly.png)
-![Top domains](outputs/figures/04_top_domains.png)
-![Top regions](outputs/figures/05_top_regions.png)
-![Domain x Region heatmap](outputs/figures/09_heatmap_domain_region.png)
+![Top domains](outputs/figures/02_top_domains.png)
+![Top regions](outputs/figures/03_top_regions.png)
+![Domain x Region heatmap (row share)](outputs/figures/06_heatmap_domain_region_share.png)
+![Region composition by domains (100% stacked)](outputs/figures/07_stacked_region_domain_top10.png)
 
 ## 4) Companies & Seniority
-![Top companies](outputs/figures/06_top_companies.png)
-![Top industries](outputs/figures/07_top_industries.png)
-![Heatmap seniority x company](outputs/figures/10_heatmap_seniority_company.png)
-![Heatmap domain x company](outputs/figures/14_heatmap_domain_company.png)
+![Top companies](outputs/figures/04_top_companies.png)
+![Top industries (subset)](outputs/figures/05_top_industries_subset.png)
+![Seniority x Company (100% stacked)](outputs/figures/08_stacked_seniority_company_top15.png)
+![Domain x Company (100% stacked)](outputs/figures/09_stacked_domain_company_top15.png)
 
 ## 5) Skills & Stack
-![Top tools](outputs/figures/11_top_tools.png)
-![Top skills](outputs/figures/12_top_skills.png)
-![Heatmap domain x tools](outputs/figures/13_heatmap_domain_tools.png)
+![Top tools](outputs/figures/10_top_tools.png)
+![Top skills](outputs/figures/11_top_skills.png)
+![Domain x Tools heatmap (row share)](outputs/figures/12_heatmap_domain_tools_share.png)
 
-## 6) Product funnel and status
-![Funnel](outputs/figures/02_funnel.png)
-![CV analysis status](outputs/figures/03_cv_analysis_status.png)
-![Experience distribution](outputs/figures/08_experience_hist.png)
-![Profile quality score](outputs/figures/15_profile_quality_score.png)
+## 6) Стратификация выборки
+![Seniority donut](outputs/figures/13_donut_seniority_filled.png)
+![CV generation language donut](outputs/figures/14_donut_cv_generation_language.png)
+![Top-20 strata](outputs/figures/15_strata_top20.png)
 
-## 7) Appendix
-Generated tables:
-- `outputs/tables/validation_summary.csv`
-- `outputs/tables/mismatch_samples.csv`
-- `outputs/tables/region_mappings.csv`
-- `outputs/tables/company_mappings.csv`
-- `outputs/tables/industry_mappings.csv`
-- `outputs/tables/domain_region_heatmap.csv`
-- `outputs/tables/seniority_company_heatmap.csv`
-- `outputs/tables/domain_tools_heatmap.csv`
+Ключевые таблицы стратификации:
+- `outputs/tables/strata_top20.csv`
+- `outputs/tables/domain_distribution.csv`
+- `outputs/tables/role_family_distribution.csv`
+- `outputs/tables/seniority_distribution.csv`
+- `outputs/tables/experience_bin_distribution.csv`
+- `outputs/tables/leadership_distribution.csv`
+- `outputs/tables/cv_generation_language_distribution.csv`
+
+## 7) Not specified diagnostics
+{diagnostics.to_markdown(index=False)}
+
+Пустоты уменьшались по fallback-цепочкам:
+- `region_filled`: `latex_expheader -> talentCard -> latex_header`
+- `seniority_filled`: `talentCard -> inferred_job_title -> inferred_header_role`
+- `domain_filled`: `talentCard.specialist_category -> inferred role family`
+
+## 8) Appendix
+Артефакты:
+- Figures: `outputs/figures/*.png`
+- Tables: `outputs/tables/*.csv`
+- Notebook: `notebooks/mis_users_resume_bot.ipynb`
 
 How to reproduce:
 ```bash
-/opt/anaconda3/bin/python analytics/mis_users_resume_bot/src/build_mis.py \
-  --input /Users/k/Downloads/prointerview-prod.users.csv \
+python analytics/mis_users_resume_bot/src/build_mis.py \
+  --input /mnt/data/prointerview-prod.users.csv \
   --base-dir analytics/mis_users_resume_bot
 ```
 """
@@ -391,17 +516,22 @@ How to reproduce:
 
 
 def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
-    os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
-
     base = Path(base_dir)
-    outputs = base / "outputs"
-    figures_dir = outputs / "figures"
-    tables_dir = outputs / "tables"
-    figures_dir.mkdir(parents=True, exist_ok=True)
+    tables_dir = base / "outputs" / "tables"
+    figures_dir = base / "outputs" / "figures"
     tables_dir.mkdir(parents=True, exist_ok=True)
+    figures_dir.mkdir(parents=True, exist_ok=True)
 
-    users = pd.read_csv(input_path, low_memory=False)
-    users = normalize_empty_strings(users)
+    # Prevent stale artifacts from previous report versions.
+    for old_csv in tables_dir.glob("*.csv"):
+        old_csv.unlink()
+    for old_png in figures_dir.glob("*.png"):
+        old_png.unlink()
+
+    users_raw = pd.read_csv(input_path, low_memory=False)
+    columns_inventory = build_columns_inventory(users_raw)
+
+    users = normalize_empty_strings(users_raw)
 
     for col in DATE_COLUMNS:
         if col in users.columns:
@@ -411,9 +541,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     users["isBanned"] = parse_bool_series(users.get("isBanned", pd.Series(index=users.index, dtype=object)), default_false=True)
 
     users["user_hash"] = users["userId"].map(hash_user_id)
-    users["cvPath_present"] = users.get("cvPath", "").fillna("").astype(str).str.strip().ne("")
     users["cvEnhancedResult_present"] = users.get("cvEnhancedResult", "").fillna("").astype(str).str.strip().ne("")
-    users["cvAnalysis_completed"] = users.get("cvAnalysisStatus", "").fillna("").astype(str).str.strip().str.lower().eq("completed")
 
     as_of = users["updatedAt"].dropna().max() if "updatedAt" in users.columns else pd.NaT
     if pd.isna(as_of):
@@ -430,42 +558,100 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     users_enriched["jobs_count_talentCard"] = users_enriched["jobs_count_talentCard"].fillna(0).astype(int)
     users_enriched["jobs_count_latex"] = users_enriched["jobs_count_latex"].fillna(0).astype(int)
 
-    users_enriched["current_company_raw"] = users_enriched["current_company_latex"].fillna("")
-    users_enriched.loc[users_enriched["current_company_raw"].astype(str).str.strip().eq(""), "current_company_raw"] = (
-        users_enriched["current_company_talentCard"].fillna("")
+    # Filled fields with explicit source fallback chains.
+    company_rows = users_enriched.apply(
+        lambda r: choose_with_source(
+            [
+                (r.get("current_company_expheader", ""), "latex_expheader"),
+                (r.get("current_company_talentCard", ""), "talentCard"),
+            ]
+        ),
+        axis=1,
     )
+    users_enriched["company_filled"] = company_rows.map(lambda x: x[0])
+    users_enriched["company_source"] = company_rows.map(lambda x: x[1])
 
-    users_enriched["current_region_raw"] = users_enriched["current_region_latex"].fillna("")
-    users_enriched.loc[users_enriched["current_region_raw"].astype(str).str.strip().eq(""), "current_region_raw"] = (
-        users_enriched["current_region_talentCard"].fillna("")
+    region_rows = users_enriched.apply(
+        lambda r: choose_with_source(
+            [
+                (r.get("current_region_expheader", ""), "latex_expheader"),
+                (r.get("current_region_talentCard", ""), "talentCard"),
+                (r.get("header_location_latex", ""), "latex_header"),
+            ]
+        ),
+        axis=1,
     )
+    users_enriched["region_filled"] = region_rows.map(lambda x: x[0])
+    users_enriched["region_source"] = region_rows.map(lambda x: x[1])
 
-    users_enriched["current_job_title_raw"] = users_enriched["current_job_title_latex"].fillna("")
-    users_enriched.loc[users_enriched["current_job_title_raw"].astype(str).str.strip().eq(""), "current_job_title_raw"] = (
-        users_enriched["current_job_title_talentCard"].fillna("")
-    )
-
-    users_enriched["current_industry_raw"] = users_enriched["current_industry_talentCard"].fillna("")
-    users_enriched["current_seniority_raw"] = users_enriched["current_seniority_talentCard"].fillna("")
-
-    users_enriched["company_norm"] = users_enriched["current_company_raw"].map(normalize_company)
-    users_enriched["region_norm"] = users_enriched["current_region_raw"].map(normalize_region)
-    users_enriched["industry_norm"] = users_enriched["current_industry_raw"].map(normalize_industry)
-    users_enriched["country_guess"] = users_enriched["region_norm"].map(guess_country)
-
-    users_enriched["domain"] = users_enriched.get("talentCard.specialist_category", pd.Series(index=users_enriched.index, dtype=object)).fillna("Not specified").astype(str)
-    users_enriched["role_family"] = users_enriched.apply(
-        lambda r: infer_role_family(r.get("selectedPosition", ""), r.get("current_job_title_raw", ""), r.get("domain", "")),
+    users_enriched["current_job_title_filled"] = users_enriched.apply(
+        lambda r: choose_with_source(
+            [
+                (r.get("current_job_title_expheader", ""), "latex_expheader"),
+                (r.get("current_job_title_talentCard", ""), "talentCard"),
+                (r.get("header_role_latex", ""), "latex_header"),
+            ]
+        )[0],
         axis=1,
     )
 
-    users_enriched["seniority_norm"] = users_enriched["current_seniority_raw"].map(normalize_seniority)
-    mask_unknown = users_enriched["seniority_norm"].eq("Unknown")
-    users_enriched.loc[mask_unknown, "seniority_norm"] = users_enriched.loc[mask_unknown, "current_job_title_raw"].map(normalize_seniority)
+    def infer_seniority(row: pd.Series) -> Tuple[str, str]:
+        s_talent = normalize_seniority(row.get("current_seniority_talentCard", ""))
+        if s_talent != "Unknown":
+            return s_talent, "talentCard"
 
+        s_title = normalize_seniority(row.get("current_job_title_filled", ""))
+        if s_title != "Unknown":
+            return s_title, "inferred_job_title"
+
+        s_header = normalize_seniority(row.get("header_role_latex", ""))
+        if s_header != "Unknown":
+            return s_header, "inferred_header_role"
+
+        return "Not specified", "not_specified"
+
+    seniority_rows = users_enriched.apply(infer_seniority, axis=1)
+    users_enriched["seniority_filled"] = seniority_rows.map(lambda x: x[0])
+    users_enriched["seniority_source"] = seniority_rows.map(lambda x: x[1])
+
+    def infer_domain(row: pd.Series) -> Tuple[str, str]:
+        domain = clean_text(row.get("talentCard.specialist_category", ""))
+        if domain:
+            return domain, "talentCard"
+
+        infer_text = " ".join(
+            [
+                clean_text(row.get("selectedPosition", "")),
+                clean_text(row.get("current_job_title_filled", "")),
+                clean_text(row.get("header_role_latex", "")),
+            ]
+        )
+        if clean_text(infer_text):
+            inferred = infer_role_family(row.get("selectedPosition", ""), infer_text, "")
+            return ("Other" if inferred == "Other" else inferred), "inferred"
+
+        return "Not specified", "not_specified"
+
+    domain_rows = users_enriched.apply(infer_domain, axis=1)
+    users_enriched["domain_filled"] = domain_rows.map(lambda x: x[0])
+    users_enriched["domain_source"] = domain_rows.map(lambda x: x[1])
+
+    users_enriched["industry_filled"] = users_enriched["current_industry_talentCard"].fillna("").astype(str).str.strip()
+    users_enriched["industry_source"] = np.where(users_enriched["industry_filled"].ne(""), "talentCard", "not_specified")
+    users_enriched.loc[users_enriched["industry_filled"].eq(""), "industry_filled"] = "Not specified"
+
+    users_enriched["region_norm"] = users_enriched["region_filled"].map(normalize_region)
+    users_enriched["company_norm"] = users_enriched["company_filled"].map(normalize_company)
+    users_enriched["industry_norm"] = users_enriched["industry_filled"].map(normalize_industry)
+    users_enriched["country_guess"] = users_enriched["region_norm"].map(guess_country)
+
+    users_enriched["role_family"] = users_enriched.apply(
+        lambda r: infer_role_family(r.get("selectedPosition", ""), r.get("current_job_title_filled", ""), r.get("header_role_latex", "")),
+        axis=1,
+    )
     users_enriched["experience_bin"] = users_enriched["total_experience_years"].map(experience_bin)
     users_enriched["leadership_level"] = users_enriched.apply(
-        lambda r: leadership_level(r.get("current_job_title_raw", ""), r.get("seniority_norm", ""), r.get("total_experience_years", np.nan)),
+        lambda r: leadership_level(r.get("current_job_title_filled", ""), r.get("seniority_filled", ""), r.get("total_experience_years", np.nan)),
         axis=1,
     )
 
@@ -483,43 +669,70 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     users_enriched["skills_count"] = users_enriched["skills_list"].map(len)
     users_enriched["tools_count"] = users_enriched["tools_list"].map(len)
 
-    users_enriched = profile_quality_score(users_enriched)
-
-    # Coverage and validation.
+    # Core coverage and validation.
     total_users = len(users_enriched)
-    cv_enhanced_users = int(users_enriched["cvEnhancedResult_present"].sum())
-    expheader_users = int((users_enriched["expheader_count"].fillna(0) > 0).sum())
-    skills_section_users = int(users_enriched["skills_section_found"].fillna(False).sum())
+    cover_cv_enhanced = pct(int(users_enriched["cvEnhancedResult_present"].sum()), total_users)
+    cover_jobs = pct(int((users_enriched["jobs_count_talentCard"] > 0).sum()), total_users)
+    cover_overall_skills = pct(int(users.get("talentCard.overall_skills", "").fillna("").astype(str).str.strip().ne("").sum()), total_users)
+    cover_spec_cat = pct(int(users.get("talentCard.specialist_category", "").fillna("").astype(str).str.strip().ne("").sum()), total_users)
+    cover_industry = pct(int(users_enriched["industry_filled"].ne("Not specified").sum()), total_users)
 
-    compare_company = users_enriched[["user_hash", "current_company_talentCard", "current_company_latex"]].copy()
+    compare_company = users_enriched[["user_hash", "current_company_talentCard", "current_company_expheader"]].copy()
     compare_company["company_talent_norm"] = compare_company["current_company_talentCard"].map(normalize_company)
-    compare_company["company_latex_norm"] = compare_company["current_company_latex"].map(normalize_company)
+    compare_company["company_latex_norm"] = compare_company["current_company_expheader"].map(normalize_company)
     comparable_mask = compare_company["company_talent_norm"].ne("Not specified") & compare_company["company_latex_norm"].ne("Not specified")
     comparable_n = int(comparable_mask.sum())
     matches_n = int((compare_company.loc[comparable_mask, "company_talent_norm"] == compare_company.loc[comparable_mask, "company_latex_norm"]).sum())
+
+    jobs_diff = users_enriched[["jobs_count_talentCard", "jobs_count_latex"]].copy()
+    jobs_diff["diff_latex_minus_talent"] = jobs_diff["jobs_count_latex"] - jobs_diff["jobs_count_talentCard"]
+    jobs_diff_distribution = jobs_diff["diff_latex_minus_talent"].value_counts().rename_axis("diff").reset_index(name="users").sort_values("diff")
+
+    mismatch_samples = compare_company.loc[
+        comparable_mask & (compare_company["company_talent_norm"] != compare_company["company_latex_norm"]),
+        ["user_hash", "current_company_talentCard", "current_company_expheader", "company_talent_norm", "company_latex_norm"],
+    ].head(200)
 
     validation_summary = pd.DataFrame(
         {
             "metric": [
                 "users_total",
-                "users_with_cvEnhancedResult",
-                "share_users_with_cvEnhancedResult_%",
+                "coverage_cvEnhancedResult_%",
+                "coverage_talentCard_jobs_%",
+                "coverage_overall_skills_%",
+                "coverage_specialist_category_%",
+                "coverage_industry_talentCard_%",
+                "users_with_latex_block",
+                "share_users_with_latex_block_%",
                 "users_with_expheader",
                 "share_users_with_expheader_%",
                 "users_with_skills_section",
                 "share_users_with_skills_section_%",
+                "users_with_languages_section",
+                "share_users_with_languages_section_%",
+                "users_with_education_section",
+                "share_users_with_education_section_%",
                 "company_comparable_users",
                 "current_company_matches",
                 "current_company_match_rate_%",
             ],
             "value": [
                 total_users,
-                cv_enhanced_users,
-                pct(cv_enhanced_users, total_users),
-                expheader_users,
-                pct(expheader_users, total_users),
-                skills_section_users,
-                pct(skills_section_users, total_users),
+                cover_cv_enhanced,
+                cover_jobs,
+                cover_overall_skills,
+                cover_spec_cat,
+                cover_industry,
+                int(users_enriched["latex_found"].fillna(False).sum()),
+                pct(int(users_enriched["latex_found"].fillna(False).sum()), total_users),
+                int((users_enriched["expheader_count"].fillna(0) > 0).sum()),
+                pct(int((users_enriched["expheader_count"].fillna(0) > 0).sum()), total_users),
+                int(users_enriched["skills_section_found"].fillna(False).sum()),
+                pct(int(users_enriched["skills_section_found"].fillna(False).sum()), total_users),
+                int(users_enriched["languages_section_found"].fillna(False).sum()),
+                pct(int(users_enriched["languages_section_found"].fillna(False).sum()), total_users),
+                int(users_enriched["education_section_found"].fillna(False).sum()),
+                pct(int(users_enriched["education_section_found"].fillna(False).sum()), total_users),
                 comparable_n,
                 matches_n,
                 pct(matches_n, comparable_n),
@@ -527,135 +740,140 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         }
     )
 
-    jobs_count_diff = users_enriched[["jobs_count_talentCard", "jobs_count_latex"]].copy()
-    jobs_count_diff["diff_latex_minus_talent"] = jobs_count_diff["jobs_count_latex"] - jobs_count_diff["jobs_count_talentCard"]
-    jobs_count_diff_distribution = jobs_count_diff["diff_latex_minus_talent"].value_counts().rename_axis("diff").reset_index(name="users")
-    jobs_count_diff_distribution = jobs_count_diff_distribution.sort_values("diff")
-
-    mismatch_samples = compare_company.loc[
-        comparable_mask & (compare_company["company_talent_norm"] != compare_company["company_latex_norm"]),
-        ["user_hash", "current_company_talentCard", "current_company_latex", "company_talent_norm", "company_latex_norm"],
-    ].copy()
-    mismatch_samples = mismatch_samples.head(200)
-
-    # Product layer.
-    users_enriched["created_week"] = users_enriched["createdAt"].dt.to_period("W").astype(str)
+    # Distributions.
+    users_enriched["created_week"] = (
+        users_enriched["createdAt"].dt.tz_convert(None).dt.to_period("W").astype(str)
+        if getattr(users_enriched["createdAt"].dt, "tz", None) is not None
+        else users_enriched["createdAt"].dt.to_period("W").astype(str)
+    )
     weekly_signups = users_enriched.groupby("created_week").size().reset_index(name="new_users").sort_values("created_week")
 
-    funnel = pd.DataFrame(
-        {
-            "stage": [
-                "1) onboardingCompleted",
-                "2) cvPath exists",
-                "3) cvAnalysisStatus=completed",
-                "4) cvEnhancedResult exists",
-            ],
-            "count": [
-                int(users_enriched["onboardingCompleted"].sum()),
-                int((users_enriched["onboardingCompleted"] & users_enriched["cvPath_present"]).sum()),
-                int((users_enriched["onboardingCompleted"] & users_enriched["cvPath_present"] & users_enriched["cvAnalysis_completed"]).sum()),
-                int((users_enriched["onboardingCompleted"] & users_enriched["cvPath_present"] & users_enriched["cvAnalysis_completed"] & users_enriched["cvEnhancedResult_present"]).sum()),
-            ],
-        }
-    )
+    domain_distribution = users_enriched["domain_filled"].fillna("Not specified").astype(str).value_counts().rename_axis("domain_filled").reset_index(name="count")
+    role_family_distribution = users_enriched["role_family"].fillna("Other").astype(str).value_counts().rename_axis("role_family").reset_index(name="count")
 
-    cv_analysis_status = users_enriched.get("cvAnalysisStatus", pd.Series(index=users_enriched.index, dtype=object)).fillna("not_started").astype(str)
-    cv_analysis_status = cv_analysis_status.value_counts().rename_axis("status").reset_index(name="count")
+    seniority_order = ["Junior", "Middle", "Senior", "Lead", "C-level", "Not specified"]
+    seniority_distribution = users_enriched["seniority_filled"].fillna("Not specified").astype(str).value_counts().rename_axis("seniority_filled").reset_index(name="count")
+    seniority_distribution["_ord"] = seniority_distribution["seniority_filled"].map({k: i for i, k in enumerate(seniority_order)}).fillna(999)
+    seniority_distribution = seniority_distribution.sort_values(["_ord", "count"], ascending=[True, False]).drop(columns=["_ord"])
 
-    # Distributions.
-    domain_distribution = users_enriched["domain"].fillna("Not specified").astype(str).value_counts().rename_axis("domain").reset_index(name="count")
+    experience_distribution = users_enriched["experience_bin"].fillna("Unknown").astype(str).value_counts().rename_axis("experience_bin").reset_index(name="count")
+    leadership_distribution = users_enriched["leadership_level"].fillna("Low").astype(str).value_counts().rename_axis("leadership_level").reset_index(name="count")
 
-    region_distribution = (
-        users_enriched.assign(region_display=users_enriched["current_region_raw"].fillna("").replace("", "Not specified"))
-        .groupby(["region_display", "region_norm"], dropna=False)
-        .size()
+    cv_generation_language_distribution = (
+        users_enriched.get("cvGenerationLanguage", pd.Series(index=users_enriched.index, dtype=object))
+        .fillna("Not specified")
+        .astype(str)
+        .value_counts()
+        .rename_axis("cvGenerationLanguage")
         .reset_index(name="count")
-        .sort_values("count", ascending=False)
     )
 
-    company_distribution = (
-        users_enriched.assign(company_display=users_enriched["current_company_raw"].fillna("").replace("", "Not specified"))
-        .groupby(["company_display", "company_norm"], dropna=False)
-        .size()
-        .reset_index(name="count")
-        .sort_values("count", ascending=False)
-    )
+    region_distribution = distribution_with_display(users_enriched, "region_filled", "region_norm", "region")
+    company_distribution = distribution_with_display(users_enriched, "company_filled", "company_norm", "company")
+    industry_distribution = distribution_with_display(users_enriched, "industry_filled", "industry_norm", "industry")
 
-    industry_distribution = (
-        users_enriched.assign(industry_display=users_enriched["current_industry_raw"].fillna("").replace("", "Not specified"))
-        .groupby(["industry_display", "industry_norm"], dropna=False)
-        .size()
-        .reset_index(name="count")
-        .sort_values("count", ascending=False)
-    )
+    industry_subset = industry_distribution[industry_distribution["industry_norm"] != "Not specified"].copy()
 
-    seniority_distribution = users_enriched["seniority_norm"].value_counts().rename_axis("seniority").reset_index(name="count")
+    country_distribution = users_enriched["country_guess"].fillna("Unknown").astype(str).value_counts().rename_axis("country").reset_index(name="count")
+    english_level_distribution = users_enriched["english_level"].fillna("Unknown").astype(str).value_counts().rename_axis("english_level").reset_index(name="count")
+    degree_level_distribution = users_enriched["degree_level"].fillna("Unknown").astype(str).value_counts().rename_axis("degree_level").reset_index(name="count")
 
-    # Skills / tools.
+    # Skills/stack outputs.
     skills_top = aggregate_tokens(users_enriched, "skills_list")
     tools_top = aggregate_tokens(users_enriched, "tools_list")
-    tools_pairs = cooccurrence_pairs(users_enriched, "tools_list", min_count=3)
 
-    # Heatmaps.
-    domain_small = top_n_with_other(users_enriched["domain"].fillna("Not specified"), 12)
-    region_small = top_n_with_other(users_enriched["region_norm"].fillna("Not specified"), 25)
-    domain_region_heatmap = pd.crosstab(domain_small, region_small)
+    # Domain x Region (heatmap row-share) and stacked by regions.
+    domain_small = limit_categories(users_enriched["domain_filled"], max_n=10, other_label="Other")
+    region_small = limit_categories(users_enriched["region_norm"], max_n=15, other_label="Other")
 
-    company_small = top_n_with_other(users_enriched["company_norm"].fillna("Not specified"), 30)
-    seniority_order = ["Junior", "Middle", "Senior", "Lead", "C-level", "Unknown"]
-    seniority_small = users_enriched["seniority_norm"].fillna("Unknown")
-    seniority_company_heatmap = pd.crosstab(seniority_small, company_small)
-    seniority_company_heatmap = seniority_company_heatmap.reindex(seniority_order, fill_value=0)
+    domain_region_counts = pd.crosstab(domain_small, region_small)
+    domain_region_share = row_normalize_percent(domain_region_counts)
 
-    domain_company_heatmap = pd.crosstab(domain_small, company_small)
+    region_top10 = limit_categories(users_enriched["region_norm"], max_n=10, other_label="Other")
+    domain_for_regions = limit_categories(users_enriched["domain_filled"], max_n=10, other_label="Other")
+    region_domain_counts = pd.crosstab(region_top10, domain_for_regions)
 
-    top_tool_norms = tools_top.head(35)["token_norm"].tolist()
-    domain_tools_rows: List[Dict[str, object]] = []
-    for _, row in users_enriched[["domain", "tools_list"]].iterrows():
-        domain_raw = str(row["domain"]).strip()
-        domain = domain_raw if domain_raw else "Not specified"
-        tokens = {canonical_text(t) for t in (row["tools_list"] or []) if canonical_text(t) in top_tool_norms}
-        for token in tokens:
-            domain_tools_rows.append({"domain": domain, "tool_norm": token})
+    # Seniority x Company and Domain x Company as 100% stacked bars.
+    company_small = limit_categories(users_enriched["company_norm"], max_n=15, other_label="Other")
+    seniority_small = users_enriched["seniority_filled"].fillna("Not specified")
+    seniority_company_counts = pd.crosstab(company_small, seniority_small)
+    for cat in seniority_order:
+        if cat not in seniority_company_counts.columns:
+            seniority_company_counts[cat] = 0
+    seniority_company_counts = seniority_company_counts[seniority_order]
+    seniority_company_counts = seniority_company_counts.sort_values(by=seniority_order, ascending=False)
 
-    if domain_tools_rows:
-        domain_tools_df = pd.DataFrame(domain_tools_rows)
-        domain_tools_heatmap = pd.crosstab(
-            top_n_with_other(domain_tools_df["domain"], 12),
-            top_n_with_other(domain_tools_df["tool_norm"], 35),
-        )
-    else:
-        domain_tools_heatmap = pd.DataFrame()
+    domain_company_counts = pd.crosstab(company_small, domain_small)
 
-    # Missingness.
-    key_fields = [
+    # Domain x Tools heatmap (top-8 domains x top-20 tools, row share).
+    domain_top8 = domain_distribution.head(8)["domain_filled"].astype(str).tolist()
+    tools_top20 = tools_top.head(20)["token_norm"].tolist()
+    token_display_map = dict(zip(tools_top["token_norm"], tools_top["token_display"]))
+
+    user_tool_sets = users_enriched["tools_list"].map(lambda xs: {canonical_text(x) for x in (xs or []) if canonical_text(x)})
+    domain_tools_matrix = pd.DataFrame(0.0, index=domain_top8, columns=[token_display_map.get(t, t) for t in tools_top20])
+
+    for domain in domain_top8:
+        mask = users_enriched["domain_filled"].fillna("Not specified").astype(str).eq(domain)
+        denom = int(mask.sum())
+        if denom == 0:
+            continue
+        sets_subset = user_tool_sets[mask]
+        for tool_norm in tools_top20:
+            hits = int(sets_subset.map(lambda s: tool_norm in s).sum())
+            domain_tools_matrix.loc[domain, token_display_map.get(tool_norm, tool_norm)] = round(hits / denom * 100, 1)
+
+    # Extra skills slices by domain/region.
+    tools_by_domain_rows: List[Dict[str, object]] = []
+    for domain in domain_top8[:6]:
+        mask = users_enriched["domain_filled"].astype(str).eq(domain)
+        local = aggregate_tokens(users_enriched.loc[mask], "tools_list").head(5)
+        for _, r in local.iterrows():
+            tools_by_domain_rows.append({"domain": domain, "tool": r["token_display"], "count": int(r["count"])})
+    tools_by_domain_top = pd.DataFrame(tools_by_domain_rows)
+
+    region_top10_values = region_distribution.head(10)["region_norm"].tolist()
+    tools_by_region_rows: List[Dict[str, object]] = []
+    for region in region_top10_values:
+        mask = users_enriched["region_norm"].astype(str).eq(region)
+        local = aggregate_tokens(users_enriched.loc[mask], "tools_list").head(5)
+        for _, r in local.iterrows():
+            tools_by_region_rows.append({"region_norm": region, "tool": r["token_display"], "count": int(r["count"])})
+    tools_by_region_top = pd.DataFrame(tools_by_region_rows)
+
+    # Stratification.
+    strata_top20 = (
+        users_enriched.groupby(["domain_filled", "seniority_filled", "region_norm"]).size().reset_index(name="count").sort_values("count", ascending=False).head(20)
+    )
+    strata_top20["strata"] = strata_top20.apply(
+        lambda r: f"{r['domain_filled']} | {r['seniority_filled']} | {r['region_norm']}", axis=1
+    )
+
+    # Missingness and diagnostics.
+    missing_fields = [
         "createdAt",
         "updatedAt",
-        "onboardingCompleted",
-        "cvPath",
-        "cvAnalysisStatus",
         "cvEnhancedResult",
         "talentCard.specialist_category",
-        "talentCard.overall_summary",
         "talentCard.overall_skills",
         "talentCard.overall_tools",
+        "cvGenerationLanguage",
         "isBanned",
-        "banReason",
     ]
     missingness = pd.DataFrame(
         {
-            "field": key_fields,
-            "missing_%": [round(users[c].isna().mean() * 100, 1) if c in users.columns else 100.0 for c in key_fields],
-            "filled_%": [round((1 - users[c].isna().mean()) * 100, 1) if c in users.columns else 0.0 for c in key_fields],
+            "field": missing_fields,
+            "missing_%": [round(users[c].isna().mean() * 100, 1) if c in users.columns else 100.0 for c in missing_fields],
+            "filled_%": [round((1 - users[c].isna().mean()) * 100, 1) if c in users.columns else 0.0 for c in missing_fields],
         }
     ).sort_values("missing_%", ascending=False)
 
-    # Mapping tables raw->norm.
-    region_mappings = build_mapping_table(users_enriched["current_region_raw"], users_enriched["region_norm"], "region")
-    company_mappings = build_mapping_table(users_enriched["current_company_raw"], users_enriched["company_norm"], "company")
-    industry_mappings = build_mapping_table(users_enriched["current_industry_raw"], users_enriched["industry_norm"], "industry")
+    not_specified_diagnostics = build_not_specified_diagnostics(users_enriched)
 
-    # Summary tables.
+    region_mappings = build_mapping_table(users_enriched["region_filled"], users_enriched["region_norm"], "region")
+    company_mappings = build_mapping_table(users_enriched["company_filled"], users_enriched["company_norm"], "company")
+    industry_mappings = build_mapping_table(users_enriched["industry_filled"], users_enriched["industry_norm"], "industry")
+
     dataset_profile = pd.DataFrame(
         {
             "metric": [
@@ -663,77 +881,137 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
                 "columns_total",
                 "createdAt_min",
                 "createdAt_max",
-                "onboardingCompleted_true",
-                "banned_true",
+                "coverage_cvEnhancedResult_%",
+                "coverage_talentCard_jobs_%",
+                "coverage_overall_skills_%",
+                "coverage_specialist_category_%",
             ],
             "value": [
-                len(users),
+                total_users,
                 users.shape[1],
                 str(users["createdAt"].min()) if "createdAt" in users.columns else "",
                 str(users["createdAt"].max()) if "createdAt" in users.columns else "",
-                int(users_enriched["onboardingCompleted"].sum()),
-                int(users_enriched["isBanned"].sum()),
+                cover_cv_enhanced,
+                cover_jobs,
+                cover_overall_skills,
+                cover_spec_cat,
             ],
         }
     )
 
-    profile_quality_distribution = users_enriched["profile_quality_bucket"].value_counts().rename_axis("bucket").reset_index(name="count")
-
     tables: Dict[str, pd.DataFrame] = {
+        "columns_inventory": columns_inventory,
         "dataset_profile": dataset_profile,
+        "validation_summary": validation_summary,
+        "jobs_count_diff_distribution": jobs_diff_distribution,
+        "mismatch_samples": mismatch_samples,
         "missingness": missingness,
+        "not_specified_diagnostics": not_specified_diagnostics,
         "weekly_signups": weekly_signups,
-        "funnel": funnel,
-        "cv_analysis_status": cv_analysis_status,
         "domain_distribution": domain_distribution,
+        "role_family_distribution": role_family_distribution,
+        "seniority_distribution": seniority_distribution,
+        "experience_bin_distribution": experience_distribution,
+        "leadership_distribution": leadership_distribution,
+        "cv_generation_language_distribution": cv_generation_language_distribution,
         "region_distribution": region_distribution,
+        "country_distribution": country_distribution,
         "company_distribution": company_distribution,
         "industry_distribution": industry_distribution,
-        "seniority_distribution": seniority_distribution,
+        "industry_distribution_subset": industry_subset,
+        "english_level_distribution": english_level_distribution,
+        "degree_level_distribution": degree_level_distribution,
         "skills_top": skills_top,
         "tools_top": tools_top,
-        "tools_pairs": tools_pairs,
-        "validation_summary": validation_summary,
-        "jobs_count_diff_distribution": jobs_count_diff_distribution,
-        "mismatch_samples": mismatch_samples,
+        "tools_by_domain_top": tools_by_domain_top,
+        "tools_by_region_top": tools_by_region_top,
+        "domain_region_heatmap_share": domain_region_share.reset_index(),
+        "region_domain_stacked_top10": row_normalize_percent(region_domain_counts).reset_index(),
+        "seniority_company_stacked100": row_normalize_percent(seniority_company_counts).reset_index(),
+        "domain_company_stacked100": row_normalize_percent(domain_company_counts).reset_index(),
+        "domain_tools_heatmap": domain_tools_matrix.reset_index().rename(columns={"index": "domain_filled"}),
         "region_mappings": region_mappings,
         "company_mappings": company_mappings,
         "industry_mappings": industry_mappings,
-        "domain_region_heatmap": domain_region_heatmap.reset_index(),
-        "seniority_company_heatmap": seniority_company_heatmap.reset_index(),
-        "domain_company_heatmap": domain_company_heatmap.reset_index(),
-        "domain_tools_heatmap": domain_tools_heatmap.reset_index() if not domain_tools_heatmap.empty else pd.DataFrame(),
-        "profile_quality_distribution": profile_quality_distribution,
+        "strata_top20": strata_top20,
     }
 
-    for name, frame in tables.items():
-        save_table(frame, tables_dir / f"{name}.csv")
+    for name, table in tables.items():
+        save_table(table, tables_dir / f"{name}.csv")
 
     # Figures.
-    line_series(
+    plot_line(
         weekly_signups,
         x_col="created_week",
         y_col="new_users",
         out_path=figures_dir / "01_registrations_weekly.png",
-        title="User registrations by week",
+        title="Registrations by week",
         xlabel="Week",
         ylabel="Users",
     )
-    plot_funnel(funnel, figures_dir / "02_funnel.png")
-    barh_counts(cv_analysis_status, "status", "count", figures_dir / "03_cv_analysis_status.png", "CV analysis status", "Users", top_n=12)
-    barh_counts(domain_distribution, "domain", "count", figures_dir / "04_top_domains.png", "Top professional domains (specialist_category)", "Users", top_n=20)
-    barh_counts(region_distribution.rename(columns={"region_display": "region"}), "region", "count", figures_dir / "05_top_regions.png", "Top current regions", "Users", top_n=20)
-    barh_counts(company_distribution.rename(columns={"company_display": "company"}), "company", "count", figures_dir / "06_top_companies.png", "Top current companies", "Users", top_n=20)
-    barh_counts(industry_distribution.rename(columns={"industry_display": "industry"}), "industry", "count", figures_dir / "07_top_industries.png", "Top current industries", "Users", top_n=20)
-    histogram(users_enriched["total_experience_years"], figures_dir / "08_experience_hist.png", "Total experience (years)", "Years")
-    heatmap(domain_region_heatmap, figures_dir / "09_heatmap_domain_region.png", "Heatmap: Domain x Region", "Region", "Domain")
-    heatmap(seniority_company_heatmap, figures_dir / "10_heatmap_seniority_company.png", "Heatmap: Seniority x Company", "Company", "Seniority")
-    barh_counts(tools_top.rename(columns={"token_display": "tool"}), "tool", "count", figures_dir / "11_top_tools.png", "Top tools/stack", "Users", top_n=25)
-    barh_counts(skills_top.rename(columns={"token_display": "skill"}), "skill", "count", figures_dir / "12_top_skills.png", "Top skills", "Users", top_n=25)
-    if not domain_tools_heatmap.empty:
-        heatmap(domain_tools_heatmap, figures_dir / "13_heatmap_domain_tools.png", "Heatmap: Domain x Tools", "Tool", "Domain")
-    heatmap(domain_company_heatmap, figures_dir / "14_heatmap_domain_company.png", "Heatmap: Domain x Company", "Company", "Domain")
-    histogram(users_enriched["profile_quality_score"], figures_dir / "15_profile_quality_score.png", "Profile quality score", "Score")
+    plot_barh(domain_distribution, "domain_filled", "count", figures_dir / "02_top_domains.png", "Top domains (domain_filled)", top_n=10)
+    plot_barh(region_distribution.rename(columns={"region_display": "region"}), "region", "count", figures_dir / "03_top_regions.png", "Top regions (region_filled)", top_n=15)
+    plot_barh(company_distribution.rename(columns={"company_display": "company"}), "company", "count", figures_dir / "04_top_companies.png", "Top companies (company_filled)", top_n=15)
+    if not industry_subset.empty:
+        plot_barh(industry_subset.rename(columns={"industry_display": "industry"}), "industry", "count", figures_dir / "05_top_industries_subset.png", "Top industries (subset with non-empty industry)", top_n=15)
+
+    plot_heatmap_share(
+        domain_region_share,
+        figures_dir / "06_heatmap_domain_region_share.png",
+        "Domain x Region (row-normalized share)",
+        "Region",
+        "Domain",
+    )
+
+    plot_stacked_100(
+        region_domain_counts,
+        figures_dir / "07_stacked_region_domain_top10.png",
+        "Region composition by domains (100% stacked)",
+        "Region",
+    )
+
+    plot_stacked_100(
+        seniority_company_counts,
+        figures_dir / "08_stacked_seniority_company_top15.png",
+        "Seniority x Company (100% stacked)",
+        "Company",
+    )
+
+    plot_stacked_100(
+        domain_company_counts,
+        figures_dir / "09_stacked_domain_company_top15.png",
+        "Domain x Company (100% stacked)",
+        "Company",
+    )
+
+    plot_barh(tools_top.rename(columns={"token_display": "tool"}), "tool", "count", figures_dir / "10_top_tools.png", "Top tools / stack", top_n=20)
+    plot_barh(skills_top.rename(columns={"token_display": "skill"}), "skill", "count", figures_dir / "11_top_skills.png", "Top skills", top_n=20)
+
+    if not domain_tools_matrix.empty:
+        plot_heatmap_share(
+            domain_tools_matrix,
+            figures_dir / "12_heatmap_domain_tools_share.png",
+            "Domain x Tools (row-normalized share)",
+            "Tool",
+            "Domain",
+        )
+
+    seniority_donut = plot_donut(users_enriched["seniority_filled"], figures_dir / "13_donut_seniority_filled.png", "Seniority mix")
+    cv_lang_donut = plot_donut(users_enriched.get("cvGenerationLanguage", pd.Series(index=users_enriched.index, dtype=object)), figures_dir / "14_donut_cv_generation_language.png", "CV generation language mix")
+    if not seniority_donut.empty:
+        save_table(seniority_donut, tables_dir / "seniority_donut_distribution.csv")
+    if not cv_lang_donut.empty:
+        save_table(cv_lang_donut, tables_dir / "cv_generation_language_donut_distribution.csv")
+
+    if not strata_top20.empty:
+        plot_barh(
+            strata_top20.rename(columns={"strata": "strata_label"}),
+            "strata_label",
+            "count",
+            figures_dir / "15_strata_top20.png",
+            "Top-20 strata: domain x seniority x region",
+            top_n=20,
+        )
 
     build_notebook(base / "notebooks" / "mis_users_resume_bot.ipynb")
     build_readme(base, tables)
@@ -742,7 +1020,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build MIS report for users dataset")
+    parser = argparse.ArgumentParser(description="Build candidate MIS report for users dataset")
     parser.add_argument("--input", default="/mnt/data/prointerview-prod.users.csv", help="Path to source users CSV")
     parser.add_argument("--base-dir", default="analytics/mis_users_resume_bot", help="Base MIS directory")
     return parser.parse_args()
@@ -751,6 +1029,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     input_path = args.input
+
     if not Path(input_path).exists() and input_path == "/mnt/data/prointerview-prod.users.csv":
         alt = "/Users/k/Downloads/prointerview-prod.users.csv"
         if Path(alt).exists():

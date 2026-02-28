@@ -1,7 +1,9 @@
 metric,value
 users_total,730
-columns_total,154
+columns_total,152
 createdAt_min,2026-01-24 16:32:56.864000+00:00
 createdAt_max,2026-02-27 17:48:16.113000+00:00
-onboardingCompleted_true,527
-banned_true,60
+coverage_cvEnhancedResult_%,72.2
+coverage_talentCard_jobs_%,72.2
+coverage_overall_skills_%,72.2
+coverage_specialist_category_%,71.4

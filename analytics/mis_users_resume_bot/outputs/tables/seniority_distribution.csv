@@ -1,7 +1,7 @@
-seniority,count
-Unknown,396
-Senior,197
-C-level,94
-Lead,20
-Middle,12
-Junior,11
+seniority_filled,count
+Junior,17
+Middle,32
+Senior,220
+Lead,36
+C-level,132
+Not specified,293

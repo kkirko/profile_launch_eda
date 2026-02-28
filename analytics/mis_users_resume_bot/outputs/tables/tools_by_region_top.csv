@@ -1,0 +1,51 @@
+region_norm,tool,count
+Not specified,Jira,14
+Not specified,Confluence,11
+Not specified,Git,7
+Not specified,Miro,7
+Not specified,Figma,6
+Moscow,Jira,38
+Moscow,Confluence,37
+Moscow,Miro,20
+Moscow,Sql,19
+Moscow,Figma,13
+Minsk,Jira,11
+Minsk,Confluence,8
+Minsk,Figma,4
+Minsk,Miro,4
+Minsk,Sql,4
+Saint Petersburg,Ci/Cd,5
+Saint Petersburg,Postgresql,5
+Saint Petersburg,Git,5
+Saint Petersburg,Linux,4
+Saint Petersburg,Jira,4
+"Dubai, UAE",Power Bi,4
+"Dubai, UAE",Figma,3
+"Dubai, UAE",Google,3
+"Dubai, UAE",Jira,2
+"Dubai, UAE",1C,2
+Almaty,Docker,3
+Almaty,Postgresql,3
+Almaty,Jira,2
+Almaty,Kafka,2
+Almaty,Confluence,2
+"Warsaw, Poland",Jira,4
+"Warsaw, Poland",Figma,3
+"Warsaw, Poland",Miro,3
+"Warsaw, Poland",Confluence,3
+"Warsaw, Poland",Design Systems (Figma Components,1
+Remote,Jira,4
+Remote,Sql,3
+Remote,Notion,3
+Remote,Miro,3
+Remote,Git,2
+Tashkent,Jira,3
+Tashkent,Figma,3
+Tashkent,Sql,2
+Tashkent,Python,2
+Tashkent,Confluence,2
+Russia,Git,2
+Russia,Digital Transformation,1
+Russia,Sap,1
+Russia,1C:Enterprise / 1C:Erp,1
+Russia,Cloud/Devops (Ci/Cd,1

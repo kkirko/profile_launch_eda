@@ -95,6 +95,9 @@ def canonical_text(value: object) -> str:
     text = clean_text(value)
     if not text:
         return ""
+    text = text.replace("\\&", "&")
+    text = text.replace("``", '"').replace("''", '"')
+    text = text.replace("\\", " ")
     text = text.replace("ё", "е").lower().strip()
     text = re.sub(r"\s+", " ", text)
     return text
@@ -231,6 +234,7 @@ def normalize_company(company: object) -> str:
     if not raw:
         return "Not specified"
     c = canonical_text(raw)
+    c = c.replace('"', " ")
     c = re.sub(r"\b(ooo|ооо|ao|ао|oao|оао|zao|зао|llc|inc|ltd|corp)\b", "", c)
     c = re.sub(r"\s+", " ", c).strip(" -")
     if not c:
@@ -300,13 +304,20 @@ def merge_skills_tools(
     latex_skills: List[str] | None,
     latex_tools: List[str] | None,
 ) -> Tuple[List[str], List[str]]:
-    skills = split_skill_tokens(overall_skills)
-    tools = split_skill_tokens(overall_tools)
+    # Priority:
+    # 1) LaTeX skills/tools sections
+    # 2) talentCard.overall_skills
+    # 3) talentCard.overall_tools
+    skills: List[str] = []
+    tools: List[str] = []
 
     if latex_skills:
         skills.extend(latex_skills)
     if latex_tools:
         tools.extend(latex_tools)
+
+    skills.extend(split_skill_tokens(overall_skills))
+    tools.extend(split_skill_tokens(overall_tools))
 
     final_skills: List[str] = []
     final_tools: List[str] = []
@@ -316,7 +327,6 @@ def merge_skills_tools(
             final_tools.append(token)
         else:
             final_skills.append(token)
-
     final_tools.extend([tok for tok in tools if tok])
 
     # Deduplicate by canonical representation.

@@ -1,0 +1,31 @@
+domain,tool,count
+Other,Miro,2
+Other,Figma,2
+Other,Kpi Dashboards (Ms Excel,1
+Other,Sql,1
+Other,управление эффективностью,1
+Product/Project Management,Jira,94
+Product/Project Management,Confluence,79
+Product/Project Management,Miro,47
+Product/Project Management,Sql,35
+Product/Project Management,Figma,32
+Engineering/IT,Docker,45
+Engineering/IT,Git,36
+Engineering/IT,Postgresql,33
+Engineering/IT,Jira,30
+Engineering/IT,Python,27
+Finance/Legal/HR,Power Bi,12
+Finance/Legal/HR,Jira,10
+Finance/Legal/HR,Excel,8
+Finance/Legal/HR,Google Sheets,7
+Finance/Legal/HR,Confluence,7
+Operations/Administration,Jira,9
+Operations/Administration,Excel,8
+Operations/Administration,Miro,7
+Operations/Administration,Confluence,7
+Operations/Administration,Power Bi,6
+Marketing/Sales,Jira,5
+Marketing/Sales,Power Bi,5
+Marketing/Sales,Bitrix24,4
+Marketing/Sales,Confluence,4
+Marketing/Sales,Notion,3

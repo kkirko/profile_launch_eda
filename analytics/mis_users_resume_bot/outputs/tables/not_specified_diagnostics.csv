@@ -1,0 +1,6 @@
+field,share_missing,share_filled_by_fallback,source_breakdown
+domain,0.0,28.6,talentCard:71.4%; inferred:28.6%
+region,33.0,20.7,latex_expheader:46.3%; not_specified:33.0%; latex_header:14.0%; talentCard:6.7%
+company,27.8,0.5,latex_expheader:71.6%; not_specified:27.8%; talentCard:0.5%
+seniority,40.1,30.7,not_specified:40.1%; talentCard:29.2%; inferred_job_title:16.6%; inferred_header_role:14.1%
+industry,84.1,0.0,not_specified:84.1%; talentCard:15.9%

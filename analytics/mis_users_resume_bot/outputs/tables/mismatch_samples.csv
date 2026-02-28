@@ -1,77 +1,29 @@
-user_hash,current_company_talentCard,current_company_latex,company_talent_norm,company_latex_norm
-bf694ef194,Ernst & Young,Ernst \& Young,Ernst & Young,Ernst \& Young
-0c9e929e72,"ООО ""Автобейс""",ООО ``Автобейс'',"""Автобейс""",``Автобейс''
-808de58b0f,A&K American Educational Consulting (американский EdTech startup),A\&K American Educational Consulting (американский EdTech startup),A&K American Educational Consulting (Американский Edtech Startup),A\&K American Educational Consulting (Американский Edtech Startup)
-3af27802c6,"ENECA, отдел ""Искусственного интеллекта""","ENECA, отдел ``Искусственного интеллекта''","Eneca, Отдел ""Искусственного Интеллекта""","Eneca, Отдел ``Искусственного Интеллекта''"
+user_hash,current_company_talentCard,current_company_expheader,company_talent_norm,company_latex_norm
 511d211aec,INVITRO,Sravni.ru,Invitro,Sravni.Ru
-d78121d0d7,"ООО ""ЛАНИТ-Интеграция""",ООО ``ЛАНИТ-Интеграция'',"""Ланит-Интеграция""",``Ланит-Интеграция''
-3d323f3f5a,"ООО ""О Спорт""",ООО ``О Спорт'',"""О Спорт""",``О Спорт''
-b2cd05d4df,"ООО ""Студия Давыдова""",ООО ``Студия Давыдова'',"""Студия Давыдова""",``Студия Давыдова''
-ee334a8224,"АО ""Гулливер""",АО ``Гулливер'',"""Гулливер""",``Гулливер''
 a049130fc2,Фриланс (Литва/РБ),SLON Media,Фриланс (Литва/Рб),Slon Media
-28130f1f86,ФГБУ Институт прикладной геофизики,ФГБУ ``Институт прикладной геофизики'',Фгбу Институт Прикладной Геофизики,Фгбу ``Институт Прикладной Геофизики''
-5fa7d0bc3f,Aldi Süd International IT,"Aldi S\""ud International IT",Aldi Süd International It,"Aldi S\""Ud International It"
-ef9b7527e1,ALVAREZ & MARSAL Middle East,ALVAREZ \& MARSAL Middle East,Alvarez & Marsal Middle East,Alvarez \& Marsal Middle East
-d8675cd521,"ТОО ""Wisk telecom solutions""",ТОО ``Wisk telecom solutions'',"Тоо ""Wisk Telecom Solutions""",Тоо ``Wisk Telecom Solutions''
-a11f7b9b11,OVB Allfinanz España,OVB Allfinanz Espa\~na,Ovb Allfinanz España,Ovb Allfinanz Espa\~Na
-a57b28f2a8,"ТОО ""Wisk Telecom Solutions""",ТОО ``Wisk Telecom Solutions'',"Тоо ""Wisk Telecom Solutions""",Тоо ``Wisk Telecom Solutions''
-f6ca298347,Heinemann Duty Free & Travel Retail,Heinemann Duty Free \& Travel Retail,Heinemann Duty Free & Travel Retail,Heinemann Duty Free \& Travel Retail
-48fe59db8e,КМГ Кашаган БВ,"Филиал ``Норт Каспиан Оперейтинг Компани Н.В.'' в РК (представительский офис, Астана)",Кмг Кашаган Бв,"Филиал ``Норт Каспиан Оперейтинг Компани Н.В.'' В Рк (Представительский Офис, Астана)"
-79c47d9745,"Международный университет ""МИТСО""",Международный университет ``МИТСО'',"Международный Университет ""Митсо""",Международный Университет ``Митсо''
+5fa7d0bc3f,Aldi Süd International IT,"Aldi S\""ud International IT",Aldi Süd International It,Aldi S Ud International It
+a11f7b9b11,OVB Allfinanz España,OVB Allfinanz Espa\~na,Ovb Allfinanz España,Ovb Allfinanz Espa ~Na
+48fe59db8e,КМГ Кашаган БВ,"Филиал ``Норт Каспиан Оперейтинг Компани Н.В.'' в РК (представительский офис, Астана)",Кмг Кашаган Бв,"Филиал Норт Каспиан Оперейтинг Компани Н.В. В Рк (Представительский Офис, Астана)"
 ac4fab3e56,"ХОСТ, Группа компаний",ООО Крисклин,"Хост, Группа Компаний",Крисклин
-36f92a3dfc,"ООО ""Лонг Кэт""",ООО ``Лонг Кэт'',"""Лонг Кэт""",``Лонг Кэт''
 4d8e159009,"Krieger Digital (E-commerce, Hoeffner.de etc)","Innotech Group (FinTech, 10K+ employees)","Krieger Digital (E-Commerce, Hoeffner.De Etc)","Innotech Group (Fintech, 10K+ Employees)"
-62f3bc7654,Civitta CA,Terricon (Республика Узбекистан,Civitta Ca,Terricon (Республика Узбекистан
-f2452b9511,"ООО ""Автобейс""",ООО ``Автобейс'',"""Автобейс""",``Автобейс''
-338318dac7,"ОАО ""Бизнес Партнер"" (JSC ""Business Partner"")",ОАО ``Бизнес Партнер'' (JSC ``Business Partner''),"""Бизнес Партнер"" (Jsc ""Business Partner"")",``Бизнес Партнер'' (Jsc ``Business Partner'')
-a751c9a6c6,"OOO ""Philosophy IT""",OOO ``Philosophy IT'',"""Philosophy It""",``Philosophy It''
 62e414f833,компании РФ,Международная консалтинговая компания,Компании Рф,Международная Консалтинговая Компания
-ae239a9ab5,Social research (focus migration & integration),Social research (focus migration \& integration),Social Research (Focus Migration & Integration),Social Research (Focus Migration \& Integration)
 a973312352,Sberbank Technologies,Alfa-Bank Belarus,Sberbank Technologies,Alfa-Bank Belarus
-56f0788f1c,"ООО ""ИЛАДА ГРУП""",ООО ``ИЛАДА ГРУП'',"""Илада Груп""",``Илада Груп''
-4cf27276fd,"ООО ""АвтоЭксперт""",ООО ``АвтоЭксперт'',"""Автоэксперт""",``Автоэксперт''
-2f78b0f1a4,Alvarez & Marsal,Alvarez \& Marsal,Alvarez & Marsal,Alvarez \& Marsal
 f06e20731f,ToYou (https://toyou.io/en),"Sberbank --- Corporate Banking, Corporate Solutions Center",Toyou (Https://Toyou.Io/En),"Sberbank --- Corporate Banking, Corporate Solutions Center"
-0e221041a5,"Др. Редди'c Лабораторис, ООО","Др.\ Редди'c Лабораторис, ООО","Др. Редди'C Лабораторис,","Др.\ Редди'C Лабораторис,"
-7e352e422c,Zentek Services GmbH 	26 Co.,Zentek Services GmbH \& Co.,Zentek Services Gmbh 26 Co.,Zentek Services Gmbh \& Co.
-65392e23c3,Поток.Диджитал (ex. Alfa Potok),Поток.Диджитал (ex.\ Alfa Potok),Поток.Диджитал (Ex. Alfa Potok),Поток.Диджитал (Ex.\ Alfa Potok)
-be4ae9b956,Zodiac Интерьер&Керамика,Zodiac Интерьер\&Керамика,Zodiac Интерьер&Керамика,Zodiac Интерьер\&Керамика
-45820fd365,"АО ""Группа компаний ""ЕКС""",АО ``Группа компаний ``ЕКС'',"""Группа Компаний ""Екс""",``Группа Компаний ``Екс''
+7e352e422c,Zentek Services GmbH 	26 Co.,Zentek Services GmbH \& Co.,Zentek Services Gmbh 26 Co.,Zentek Services Gmbh & Co.
 f900bdafe5,Группа компаний Innostage (ИБ/ИТ интегратор),ИТ стартап компания (B2B и B2C направления),Группа Компаний Innostage (Иб/Ит Интегратор),Ит Стартап Компания (B2B И B2C Направления)
 20872a534b,Группа компаний Innostage,ИТ стартап компания (B2B и B2C направления),Группа Компаний Innostage,Ит Стартап Компания (B2B И B2C Направления)
-c3ad7a4df5,PROMAVTO Group --- R&D Center,PROMAVTO Group --- R\&D Center,Promavto Group --- R&D Center,Promavto Group --- R\&D Center
 5e290d9063,AVB Invest,Производитель вычислительной техники,Avb Invest,Производитель Вычислительной Техники
-79c9423dc0,"Central Aerohydrodynamic Institute (TsAGI), Strength & Durability Division","Central Aerohydrodynamic Institute (TsAGI), Strength \& Durability Division","Central Aerohydrodynamic Institute (Tsagi), Strength & Durability Division","Central Aerohydrodynamic Institute (Tsagi), Strength \& Durability Division"
-8b45b09f63,"ООО ""Воланта"" (кадровое агентство, стартап)","ООО ``Воланта'' (кадровое агентство, стартап)","""Воланта"" (Кадровое Агентство, Стартап)","``Воланта'' (Кадровое Агентство, Стартап)"
-2b7fcca4a3,Ikano Centres (Ikano Retail | IKEA),"LLC ``BRIZ'' (Morgan Stanley Real Estate Investing), Galeria Shopping Centre (Saint Petersburg, Russia)",Ikano Centres (Ikano Retail | Ikea),"``Briz'' (Morgan Stanley Real Estate Investing), Galeria Shopping Centre (Saint Petersburg, Russia)"
-15fe43f4e0,GAODI & Brusnika Soft,GAODI \& Brusnika Soft,Gaodi & Brusnika Soft,Gaodi \& Brusnika Soft
-17c3fff22f,"Bar Association ""Right Side""",Bar Association ``Right Side'',"Bar Association ""Right Side""",Bar Association ``Right Side''
-0fc78cbd84,"Bar Association ""Right Side""",Bar Association ``Right Side'',"Bar Association ""Right Side""",Bar Association ``Right Side''
-462fcddf3b,"Группа компаний ""Сигма Марин Технолоджи""",Группа компаний ``Сигма Марин Технолоджи'',"Группа Компаний ""Сигма Марин Технолоджи""",Группа Компаний ``Сигма Марин Технолоджи''
-8e7df05447,Крупный многоотраслевой холдинг (20+ компаний; оборот 1+ трлн рублей; 50 000+ сотрудников),"Крупный многоотраслевой холдинг (20+ компаний; оборот 1+ трлн рублей; 50\,000+ сотрудников)",Крупный Многоотраслевой Холдинг (20+ Компаний; Оборот 1+ Трлн Рублей; 50 000+ Сотрудников),"Крупный Многоотраслевой Холдинг (20+ Компаний; Оборот 1+ Трлн Рублей; 50\,000+ Сотрудников)"
-03e9a25139,"ООО ""AC КЛИНИК""",ООО ``AC КЛИНИК'',"""Ac Клиник""",``Ac Клиник''
-e5e198d1a1,NOTO360 (Fraud & Compliance),NOTO360 (Fraud \& Compliance),Noto360 (Fraud & Compliance),Noto360 (Fraud \& Compliance)
-b87029416d,"ООО ""ИЛАДА ГРУП""",ООО ``ИЛАДА ГРУП'',"""Илада Груп""",``Илада Груп''
-ef96101c86,Estée Lauder,Est\'ee Lauder,Estée Lauder,Est\'Ee Lauder
-47f6b638ad,"ООО ""Руслет"" (первый производитель канатных дорог в РФ)",ООО ``Руслет'' (первый производитель канатных дорог в РФ),"""Руслет"" (Первый Производитель Канатных Дорог В Рф)",``Руслет'' (Первый Производитель Канатных Дорог В Рф)
-8d8e0f934c,Full-cycle software development company (Healthcare & Finance),Full-cycle software development company (Healthcare \& Finance),Full-Cycle Software Development Company (Healthcare & Finance),Full-Cycle Software Development Company (Healthcare \& Finance)
-5bce746af9,Data Analytics Experience & Projects,Data Analytics Experience \& Projects,Data Analytics Experience & Projects,Data Analytics Experience \& Projects
+8e7df05447,Крупный многоотраслевой холдинг (20+ компаний; оборот 1+ трлн рублей; 50 000+ сотрудников),"Крупный многоотраслевой холдинг (20+ компаний; оборот 1+ трлн рублей; 50\,000+ сотрудников)",Крупный Многоотраслевой Холдинг (20+ Компаний; Оборот 1+ Трлн Рублей; 50 000+ Сотрудников),"Крупный Многоотраслевой Холдинг (20+ Компаний; Оборот 1+ Трлн Рублей; 50 ,000+ Сотрудников)"
+ef96101c86,Estée Lauder,Est\'ee Lauder,Estée Lauder,Est 'Ee Lauder
 1d87a1b6cd,ADANI,VMT,Adani,Vmt
 497e0b3ab9,ИП Махлин Д.Л.,Level garden,Ип Махлин Д.Л.,Level Garden
 5c32132d92,"Smart Communication (Messenger Marketing / AI Agency, B2B)",Hotline (ECommerce Startup),"Smart Communication (Messenger Marketing / Ai Agency, B2B)",Hotline (Ecommerce Startup)
-ff9fff2bc6,"SRDI ""Caspiy Munay Gas"" JSC",SRDI ``Caspiy Munay Gas'' JSC,"Srdi ""Caspiy Munay Gas"" Jsc",Srdi ``Caspiy Munay Gas'' Jsc
-3273080c62,"ООО ""РИТЭК"" (ЛУКОЙЛ)",ООО ``РИТЭК'' (ЛУКОЙЛ),"""Ритэк"" (Лукойл)",``Ритэк'' (Лукойл)
-b7eb6548df,Data Analytics Experience & Projects,Data Analytics Experience \& Projects,Data Analytics Experience & Projects,Data Analytics Experience \& Projects
-08cf97e302,"АО ""Эволента""",АО ``Эволента'',"""Эволента""",``Эволента''
 55c2257c1b,Управление премиальной недвижимостью,Bayhan / Second Home,Управление Премиальной Недвижимостью,Bayhan / Second Home
 69faf9bbcb,"ecom.tech (Самокат, ООО «Умное пространство» )","ecom.tech (Самокат, ООО «Умное пространство»)","Ecom.Tech (Самокат, «Умное Пространство» )","Ecom.Tech (Самокат, «Умное Пространство»)"
 ec5286132c,"Онлайн Медиа, проект Exkavator.ru",Skillbox,"Онлайн Медиа, Проект Exkavator.Ru",Skillbox
 6b29687dba,Jaguar Land Rover Russia,Jaguar Land Rover Overseas,Jaguar Land Rover Russia,Jaguar Land Rover Overseas
-9b643873e5,Dubizzle Group --- Bayut & Dubizzle,Dubizzle Group --- Bayut \& Dubizzle,Dubizzle Group --- Bayut & Dubizzle,Dubizzle Group --- Bayut \& Dubizzle
 8ea0b525f8,NDA,NDA (Online casino team backed by a large entertainment holding),Nda,Nda (Online Casino Team Backed By A Large Entertainment Holding)
-7c835671e7,STRABAG BRVZ GmbH & Co. KG,STRABAG BRVZ GmbH \& Co. KG,Strabag Brvz Gmbh & Co. Kg,Strabag Brvz Gmbh \& Co. Kg
 3463bfbb7a,amoCRM,Частная практика,Amocrm,Частная Практика
 00ddf507f2,Международная группа «RATIONAL» (с 2023 г. ООО «Компонент»)),Международная группа «RATIONAL» (с 2023 г. ООО «Компонент»),Международная Группа «Rational» (С 2023 Г. «Компонент»)),Международная Группа «Rational» (С 2023 Г. «Компонент»)
 8a1a7613e9,ПАО «Газпром нефть»,ПАО «Газпром»,Пао «Газпром Нефть»,Пао «Газпром»
-1722379b64,"ТОО ""Протэк-Алматы"" (Концерн ""Протэк"")",ТОО ``Протэк-Алматы'' (Концерн ``Протэк''),"Тоо ""Протэк-Алматы"" (Концерн ""Протэк"")",Тоо ``Протэк-Алматы'' (Концерн ``Протэк'')
 3d210be62a,Centromash,"Centromash, международная компания по сертификации товаров и услуг",Centromash,"Centromash, Международная Компания По Сертификации Товаров И Услуг"

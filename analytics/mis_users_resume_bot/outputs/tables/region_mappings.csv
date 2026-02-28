@@ -1,45 +1,49 @@
 region_raw,region_norm,count
-,Not specified,343
-Москва,Moscow,76
-"Dubai, UAE","Dubai, UAE",11
-"Moscow, Russia",Moscow,9
-Remote,Remote,9
-Санкт-Петербург,Saint Petersburg,9
+Not specified,Not specified,241
+Москва,Moscow,86
+"Dubai, UAE","Dubai, UAE",17
+Санкт-Петербург,Saint Petersburg,14
+"Warsaw, Poland","Warsaw, Poland",11
+"Moscow, Russia",Moscow,10
+Remote,Remote,10
+Moscow,Moscow,9
+"Minsk, Belarus",Minsk,8
 Russia,Russia,8
-Moscow,Moscow,7
-"Warsaw, Poland","Warsaw, Poland",7
+"Минск, Беларусь",Minsk,7
 Алматы,Almaty,6
+"Belgrade, Serbia","Belgrade, Serbia",5
+"Tbilisi, Georgia","Tbilisi, Georgia",5
 "Yerevan, Armenia",Yerevan,5
 Россия,Россия,5
 Ташкент,Tashkent,5
 "Almaty, Kazakhstan",Almaty,4
-"Belgrade, Serbia","Belgrade, Serbia",4
-"Minsk, Belarus",Minsk,4
+Kazakhstan,Kazakhstan,4
 Минск,Minsk,4
-"Минск, Беларусь",Minsk,4
 "Berlin, Germany","Berlin, Germany",3
+"Dubai, United Arab Emirates","Dubai, United Arab Emirates",3
 Germany,Germany,3
-Kazakhstan,Kazakhstan,3
 "London, UK","London, UK",3
-"Tbilisi, Georgia","Tbilisi, Georgia",3
 Uzbekistan,Uzbekistan,3
 "Москва, Россия",Moscow,3
 Томск,Томск,3
 "Abu Dhabi, UAE","Abu Dhabi, UAE",2
 "Amsterdam, Netherlands","Amsterdam, Netherlands",2
 "Boston, MA","Boston, MA",2
+"Budva, Montenegro","Budva, Montenegro",2
 Cyprus,Cyprus,2
 Dubai,Dubai,2
-"Dubai, United Arab Emirates","Dubai, United Arab Emirates",2
 "Helsinki, Finland","Helsinki, Finland",2
 Minsk,Minsk,2
+"Novi Sad, Serbia","Novi Sad, Serbia",2
 "Remote / San Jose, CA","Remote / San Jose, CA",2
 "Riga, Latvia","Riga, Latvia",2
 "St. Petersburg, Russia","St. Petersburg, Russia",2
+"Stuttgart, Germany","Stuttgart, Germany",2
 "Tashkent, Uzbekistan",Tashkent,2
 UAE,UAE,2
 "Vienna, Austria","Vienna, Austria",2
 "Vilnius, Lithuania","Vilnius, Lithuania",2
+"Алматы, Казахстан",Almaty,2
 Астана,Астана,2
 "Россия, Санкт-Петербург",Saint Petersburg,2
 "Санкт-Петербург, Россия",Saint Petersburg,2
@@ -48,51 +52,66 @@ UAE,UAE,2
 (аудит и управление R\&D-проектами в стратегических отраслях),(аудит и управление R\&D-проектами в стратегических отраслях),1
 "(торговля электрооборудованием, автоматизация инженерных систем, умный дом/офис; оборот 4+ млрд)","(торговля электрооборудованием, автоматизация инженерных систем, умный дом/офис; оборот 4+ млрд)",1
 Armenia,Armenia,1
+"Astana, Kazakhstan","Astana, Kazakhstan",1
 "Atyrau, Kazakhstan","Atyrau, Kazakhstan",1
 "Bangkok, Thailand","Bangkok, Thailand",1
+"Bangkok, Thailand (ready for relocation)","Bangkok, Thailand (ready for relocation)",1
 "Barcelona, Spain","Barcelona, Spain",1
 "Batumi, Georgia","Batumi, Georgia",1
 "Beijing, China","Beijing, China",1
 Belarus,Belarus,1
 Belarus and EU offices,Belarus and EU offices,1
+"Belgrade, Serbia (готова к релокации)","Belgrade, Serbia (готова к релокации)",1
 Berlin,Berlin,1
 "Berlin, Germany (remote)","Berlin, Germany (remote)",1
 "Bia{2}ystok, Poland","Bia{2}ystok, Poland",1
 "Bilbao, Spain","Bilbao, Spain",1
 "Bishkek, the Kyrgyz Republic","Bishkek, the Kyrgyz Republic",1
 "Boysun Gas Processing Plant, Uzbekistan","Boysun Gas Processing Plant, Uzbekistan",1
+"Buenos Aires, Argentina","Buenos Aires, Argentina",1
 "CEE, DACH, Nordics","CEE, DACH, Nordics",1
 "California, USA (Remote)","California, USA (Remote)",1
+"Cascais, Portugal","Cascais, Portugal",1
+"Dilijan, Armenia (open to remote work)","Dilijan, Armenia (open to remote work)",1
 "Dubai, UAE (Hybrid)","Dubai, UAE (Hybrid)",1
 "Dubai, UAE / Moscow, Russia",Moscow,1
 EU (remote),EU (remote),1
 "Ekaterinburg, Russia","Ekaterinburg, Russia",1
+English --- B2 \ \ German --- A2,English --- B2 \ \ German --- A2,1
 France / Luxembourg,France / Luxembourg,1
 Fully remote,Fully remote,1
+"G\""artringen, Germany","G\""artringen, Germany",1
 Girteka logistics group,Girteka logistics group,1
 HQ,HQ,1
 "Hamburg, Germany","Hamburg, Germany",1
 "Hybrid, Israel (Raanana)","Hybrid, Israel (Raanana)",1
 "International (Kazakhstan, CIS, Turkey, France)","International (Kazakhstan, CIS, Turkey, France)",1
 Israel,Israel,1
+Israel (open to remote),Israel (open to remote),1
 Italy,Italy,1
 KSA,KSA,1
 "Kazan, Russia","Kazan, Russia",1
+Kehl,Kehl,1
 "Krakow, Poland","Krakow, Poland",1
 Kraków,Kraków,1
 "Kuala Lumpur, Malaysia","Kuala Lumpur, Malaysia",1
 Kyiv / Madrid (remote),Kyiv,1
 "Lausanne, Switzerland","Lausanne, Switzerland",1
 "Leipzig, Germany","Leipzig, Germany",1
+"Limassol, Cyprus","Limassol, Cyprus",1
 Lisbon,Lisbon,1
+"Location \,","Location \,",1
 "London, SE16","London, SE16",1
 "London, UK (Remote)","London, UK (Remote)",1
 "M\'alaga, Spain","M\'alaga, Spain",1
 Madrid (Hybrid),Madrid (Hybrid),1
+"Madrid, Spain","Madrid, Spain",1
 "Magadan, Russia","Magadan, Russia",1
 "Malaga, Spain","Malaga, Spain",1
 "Miami, USA","Miami, USA",1
 "Minsk, Belarus (on-site) / Poland (remote)",Minsk,1
+"Minsk, Belarus (ready to relocate)",Minsk,1
+"Mogilev, Belarus","Mogilev, Belarus",1
 Montenegro,Montenegro,1
 Moscow / Dubai,Moscow,1
 "Moscow, Russia / Remote",Moscow,1
@@ -100,16 +119,21 @@ Moscow / Dubai,Moscow,1
 "Multiple cities, Russia","Multiple cities, Russia",1
 "Munich, Germany","Munich, Germany",1
 "NY, USA","NY, USA",1
+"New York, NY","New York, NY",1
 "New York, United States (Remote)","New York, United States (Remote)",1
 Norway,Norway,1
 "Odesa, Ukraine","Odesa, Ukraine",1
 Online casino team backed by a large entertainment holding,Online casino team backed by a large entertainment holding,1
+"Paphos, Cyprus","Paphos, Cyprus",1
+Personal Details: Citizenship -- Belarus,Personal Details: Citizenship -- Belarus,1
+"Personal Details: Citizenship --- Russia \,","Personal Details: Citizenship --- Russia \,",1
 "Perth, Australia","Perth, Australia",1
 Poland,Poland,1
 Poland (remote),Poland (remote),1
 Portugal,Portugal,1
 Product Company (25 employees),Product Company (25 employees),1
 Project: PJSC VTB Bank,Project: PJSC VTB Bank,1
+"Puteaux, France","Puteaux, France",1
 R\&D branch,R\&D branch,1
 Remote (Armenia),Remote (Armenia),1
 "Remote (Boston, MA, USA)","Remote (Boston, MA, USA)",1
@@ -117,23 +141,27 @@ Remote (Kazakhstan),Remote (Kazakhstan),1
 Remote (Moscow),Moscow,1
 Remote (based in Abu Dhabi); company based in Canada,Remote (based in Abu Dhabi); company based in Canada,1
 Remote / International,Remote / International,1
+Republic of Belarus,Republic of Belarus,1
 "Reus, Spain","Reus, Spain",1
 "Rhode Island, USA","Rhode Island, USA",1
 "Riga, Latvia (remote from Minsk)",Minsk,1
 "Rome, Italy","Rome, Italy",1
 "Roosendaal / Oosterhout, Netherlands","Roosendaal / Oosterhout, Netherlands",1
+"Rostov-on-Don, Russia","Rostov-on-Don, Russia",1
 "Ryde, NSW 2112","Ryde, NSW 2112",1
+"S\~ao Paulo, Brazil","S\~ao Paulo, Brazil",1
 "Saint Petersburg, Russia",Saint Petersburg,1
 "San Francisco, California, US","San Francisco, California, US",1
 "San Mateo, CA","San Mateo, CA",1
 Serbia,Serbia,1
+Slovenia,Slovenia,1
 "Sofia, Bulgaria","Sofia, Bulgaria",1
-"Stuttgart, Germany","Stuttgart, Germany",1
 Tbilisi,Tbilisi,1
 "Tel Aviv, Hamerkaz","Tel Aviv, Hamerkaz",1
 "Tel Aviv, Israel","Tel Aviv, Israel",1
 Thailand,Thailand,1
 Turkey,Turkey,1
+"Tuscany, Italy","Tuscany, Italy",1
 "UAE, Saudi Arabia, Europe, CIS, Russia","UAE, Saudi Arabia, Europe, CIS, Russia",1
 "UAE, Singapore","UAE, Singapore",1
 UK,UK,1
@@ -144,16 +172,26 @@ United Arab Emirates,United Arab Emirates,1
 United Kingdom,United Kingdom,1
 "Valencia, Spain","Valencia, Spain",1
 "Vancouver, Canada","Vancouver, Canada",1
+"Varna, Bulgaria","Varna, Bulgaria",1
 "Vilnius, Lithuania (remote)","Vilnius, Lithuania (remote)",1
 Warsaw (Hybrid); Astana (Remote),Warsaw (Hybrid); Astana (Remote),1
 "Yekaterinburg, Sverdlovsk Oblast, Russia","Yekaterinburg, Sverdlovsk Oblast, Russia",1
+"Yerevan, Armenia \",Yerevan,1
+"Yerevan, Armenia \,",Yerevan,1
 "Zurich, Switzerland","Zurich, Switzerland",1
+"\, готов к переезду: Санкт-Петербург \,",Saint Petersburg,1
+"\, удалённо \,","\, удалённо \,",1
 shate-m.by,shate-m.by,1
 startx.team,startx.team,1
+work permit: Russia,work permit: Russia,1
 www.avbinvest.com,www.avbinvest.com,1
+"İzmir, Türkiye","İzmir, Türkiye",1
 Бахрейн,Бахрейн,1
 Беларусь,Беларусь,1
 Владивосток,Владивосток,1
+"Волгоград, Россия (готов к релокации)","Волгоград, Россия (готов к релокации)",1
+"Гражданство: Россия \,","Гражданство: Россия \,",1
+"Гражданство: Россия, Болгария","Гражданство: Россия, Болгария",1
 Гродно,Гродно,1
 Дальний Восток,Дальний Восток,1
 "Европа, Азия, Россия","Европа, Азия, Россия",1
@@ -161,15 +199,24 @@ www.avbinvest.com,www.avbinvest.com,1
 "Заславль, Беларусь","Заславль, Беларусь",1
 Кишинев,Кишинев,1
 Кишинёв,Кишинёв,1
+Краснодар / Сочи / удаленно \ готовность к командировкам и переезду: да,Краснодар / Сочи / удаленно \ готовность к командировкам и переезду: да,1
 "Лиссабон, Португалия","Лиссабон, Португалия",1
 Литва/РБ,Литва/РБ,1
+"Локация: Минск, Вильнюс",Minsk,1
 Макрорегион Север (13 регионов РФ),Макрорегион Север (13 регионов РФ),1
 Международная корпоративная сеть,Международная корпоративная сеть,1
+"Минск, Беларусь (открыт для релокации и удаленной работы)",Minsk,1
+Москва (м. Аэропорт),Moscow,1
+"Москва (м.\ Дмитровская) \,",Moscow,1
+"Москва (м.\ Люблино) \,",Moscow,1
 Москва (удалённо),Moscow,1
 Москва (удалённо/гибрид),Moscow,1
+"Москва \,",Moscow,1
 "Москва, https://www.dalee.ru",Moscow,1
 "Москва, РФ",Moscow,1
+"Москва, Россия \,",Moscow,1
 "Москва, Россия \,|\, Лимасол, Кипр",Moscow,1
+"Нижний Новгород \,","Нижний Новгород \,",1
 Новосибирск,Новосибирск,1
 ОАЭ,ОАЭ,1
 Омск,Омск,1
@@ -179,9 +226,17 @@ www.avbinvest.com,www.avbinvest.com,1
 Производственно-инжиниринговая компания,Производственно-инжиниринговая компания,1
 РФ,РФ,1
 Разработка собственного ПО в области ИБ (350 человек),Разработка собственного ПО в области ИБ (350 человек),1
+Самара,Самара,1
+"Самара (готов к переезду: Москва, Санкт-Петербург",Moscow,1
+Самара \,Самара \,1
+"Самара, Россия \,","Самара, Россия \,",1
+"Санкт-Петербург (м.\ Озерки) \,",Saint Petersburg,1
 Сириус,Сириус,1
 Стамбул,Стамбул,1
+Ташкент (Юнусабадский район),Tashkent,1
 "Ташкент, Узбекистан",Tashkent,1
+Телефон,Телефон,1
+Телефон: не указан,Телефон: не указан,1
 "Темиртау, Караганда","Темиртау, Караганда",1
 "Удаленно, Англия","Удаленно, Англия",1
 Узбекистан,Узбекистан,1
@@ -190,4 +245,6 @@ www.avbinvest.com,www.avbinvest.com,1
 "Холдинг Т1, ГК Иннотех","Холдинг Т1, ГК Иннотех",1
 "Черногория, Герцег-Нови","Черногория, Герцег-Нови",1
 Эстония / Беларусь / Россия,Эстония / Беларусь / Россия,1
+г. Тюмень,г. Тюмень,1
+"готов к переезду (Москва, Санкт-Петербург), готов к командировкам",Moscow,1
 международная компания по сертификации товаров и услуг,международная компания по сертификации товаров и услуг,1

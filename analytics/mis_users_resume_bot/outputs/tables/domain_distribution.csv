@@ -1,10 +1,12 @@
-domain,count
-Not specified,209
+domain_filled,count
+Other,209
 Product/Project Management,193
 Engineering/IT,124
 Finance/Legal/HR,66
 Operations/Administration,57
-Marketing/Sales,47
+Marketing/Sales,49
 Design/Creative,17
-Other,11
 Healthcare/Education,6
+Data/ML/Analytics,5
+Product/Project,2
+Engineering/Software,2

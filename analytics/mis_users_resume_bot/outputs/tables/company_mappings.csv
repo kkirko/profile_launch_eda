@@ -1,5 +1,5 @@
 company_raw,company_norm,count
-,Not specified,203
+Not specified,Not Specified,203
 BostonGene,Bostongene,3
 Coherent Solutions,Coherent Solutions,3
 Delta Distribution LLC,Delta Distribution,3
@@ -11,8 +11,8 @@ Wargaming,Wargaming,3
 Сбер,Сбер,3
 AVO Services and Technology,Avo Services And Technology,2
 Bank CenterCredit,Bank Centercredit,2
-Bar Association ``Right Side'',Bar Association ``Right Side'',2
-Data Analytics Experience \& Projects,Data Analytics Experience \& Projects,2
+Bar Association ``Right Side'',Bar Association Right Side,2
+Data Analytics Experience \& Projects,Data Analytics Experience & Projects,2
 DeepHouse,Deephouse,2
 Ecom.tech,Ecom.Tech,2
 Engineering and Manufacturing Solutions JSC,Engineering And Manufacturing Solutions Jsc,2
@@ -31,8 +31,8 @@ Yandex,Yandex,2
 ИТ стартап компания (B2B и B2C направления),Ит Стартап Компания (B2B И B2C Направления),2
 "Иннотех, Группа компаний","Иннотех, Группа Компаний",2
 Национальный банк внешнеэкономической деятельности Республики Узбекистана,Национальный Банк Внешнеэкономической Деятельности Республики Узбекистана,2
-ООО ``Автобейс'',``Автобейс'',2
-ООО ``ИЛАДА ГРУП'',``Илада Груп'',2
+ООО ``Автобейс'',Автобейс,2
+ООО ``ИЛАДА ГРУП'',Илада Груп,2
 Проектная деятельность,Проектная Деятельность,2
 Частная практика,Частная Практика,2
 111PG,111Pg,1
@@ -41,13 +41,13 @@ A1,A1,1
 AFI Development,Afi Development,1
 AI Assistant Project (Retail),Ai Assistant Project (Retail),1
 AI Designer / Creative Producer (IQOS global initiatives),Ai Designer / Creative Producer (Iqos Global Initiatives),1
-ALVAREZ \& MARSAL Middle East,Alvarez \& Marsal Middle East,1
+ALVAREZ \& MARSAL Middle East,Alvarez & Marsal Middle East,1
 APLANA IT,Aplana It,1
 ATG,Atg,1
 AVO Bank (Uzbekistan),Avo Bank (Uzbekistan),1
 AVO SERVICES AND TECHNOLOGY,Avo Services And Technology,1
 AWATERA,Awatera,1
-A\&K American Educational Consulting (американский EdTech startup),A\&K American Educational Consulting (Американский Edtech Startup),1
+A\&K American Educational Consulting (американский EdTech startup),A&K American Educational Consulting (Американский Edtech Startup),1
 Aaron Metals,Aaron Metals,1
 Abris Management,Abris Management,1
 Accent Capital,Accent Capital,1
@@ -55,12 +55,12 @@ Adrenalin,Adrenalin,1
 Ag.ru,Ag.Ru,1
 Agrodigit (Subsidiary of Rostselmash),Agrodigit (Subsidiary Of Rostselmash),1
 Airport Management Company Ltd,Airport Management Company,1
-"Aldi S\""ud International IT","Aldi S\""Ud International It",1
+"Aldi S\""ud International IT",Aldi S Ud International It,1
 Alfa-Bank Belarus,Alfa-Bank Belarus,1
 AliExpress Россия,Aliexpress Россия,1
 Alibaba Group (Logistics branch),Alibaba Group (Logistics Branch),1
 Allur,Allur,1
-Alvarez \& Marsal,Alvarez \& Marsal,1
+Alvarez \& Marsal,Alvarez & Marsal,1
 Ambula Health,Ambula Health,1
 Andersenlab,Andersenlab,1
 Appcast,Appcast,1
@@ -90,11 +90,12 @@ BramblingTech,Bramblingtech,1
 CIAN,Cian,1
 Canvas Reply,Canvas Reply,1
 Career break,Career Break,1
-"Central Aerohydrodynamic Institute (TsAGI), Strength \& Durability Division","Central Aerohydrodynamic Institute (Tsagi), Strength \& Durability Division",1
+"Central Aerohydrodynamic Institute (TsAGI), Strength \& Durability Division","Central Aerohydrodynamic Institute (Tsagi), Strength & Durability Division",1
 "Centromash, международная компания по сертификации товаров и услуг","Centromash, Международная Компания По Сертификации Товаров И Услуг",1
 Chevron (Tengiz Asset),Chevron (Tengiz Asset),1
 Chevron Corporation,Chevron Corporation,1
 Cinematic Pixel,Cinematic Pixel,1
+Civitta CA,Civitta Ca,1
 CleverData (Lanit / Lansoft),Cleverdata (Lanit / Lansoft),1
 Cloud.ru,Cloud.Ru,1
 Codexplore,Codexplore,1
@@ -114,8 +115,8 @@ Digital Industrial Technologies,Digital Industrial Technologies,1
 Dogma,Dogma,1
 DotGov Solutions LLC,Dotgov Solutions,1
 Dualboot Partners LLC,Dualboot Partners,1
-Dubizzle Group --- Bayut \& Dubizzle,Dubizzle Group --- Bayut \& Dubizzle,1
-"ENECA, отдел ``Искусственного интеллекта''","Eneca, Отдел ``Искусственного Интеллекта''",1
+Dubizzle Group --- Bayut \& Dubizzle,Dubizzle Group --- Bayut & Dubizzle,1
+"ENECA, отдел ``Искусственного интеллекта''","Eneca, Отдел Искусственного Интеллекта",1
 ENTER Engineering Pte. LTD,Enter Engineering Pte.,1
 EPAM,Epam,1
 Easy in IT | Daniil Nikolaev,Easy In It | Daniil Nikolaev,1
@@ -125,8 +126,8 @@ Elanco Rus (Eli Lilly),Elanco Rus (Eli Lilly),1
 Elemtat,Elemtat,1
 Ellara,Ellara,1
 EmTalk,Emtalk,1
-Ernst \& Young,Ernst \& Young,1
-Est\'ee Lauder,Est\'Ee Lauder,1
+Ernst \& Young,Ernst & Young,1
+Est\'ee Lauder,Est 'Ee Lauder,1
 Eurochem Group (Digital Technologies and Platforms),Eurochem Group (Digital Technologies And Platforms),1
 Everwest UAB (Girteka logistics group),Everwest Uab (Girteka Logistics Group),1
 FLATLOGIC (Web and Mobile Development),Flatlogic (Web And Mobile Development),1
@@ -135,11 +136,11 @@ First Service Residential,First Service Residential,1
 "Free Zone Authority, Government of Ajman","Free Zone Authority, Government Of Ajman",1
 Freelance (NDA),Freelance (Nda),1
 Freelancer (Remote),Freelancer (Remote),1
-Full-cycle software development company (Healthcare \& Finance),Full-Cycle Software Development Company (Healthcare \& Finance),1
+Full-cycle software development company (Healthcare \& Finance),Full-Cycle Software Development Company (Healthcare & Finance),1
 FundCount Group LLC,Fundcount Group,1
 G5 Entertainment AB,G5 Entertainment Ab,1
 GAMZ B.V.,Gamz B.V.,1
-GAODI \& Brusnika Soft,Gaodi \& Brusnika Soft,1
+GAODI \& Brusnika Soft,Gaodi & Brusnika Soft,1
 GS STUDI LTD,Gs Studi,1
 GXO Logistics (Primark client),Gxo Logistics (Primark Client),1
 Gazprom Neft,Gazprom Neft,1
@@ -152,7 +153,7 @@ HR Consultant (Self-Employed),Hr Consultant (Self-Employed),1
 HUAWEI,Huawei,1
 HeadHunter Group,Headhunter Group,1
 HealthTech/IoT Mobile App (ThingsBoard with FHIR/Medplum integration),Healthtech/Iot Mobile App (Thingsboard With Fhir/Medplum Integration),1
-Heinemann Duty Free \& Travel Retail,Heinemann Duty Free \& Travel Retail,1
+Heinemann Duty Free \& Travel Retail,Heinemann Duty Free & Travel Retail,1
 Hewlett Packard Enterprise,Hewlett Packard Enterprise,1
 Home Credit Bank (home.kz),Home Credit Bank (Home.Kz),1
 Hotline (ECommerce Startup),Hotline (Ecommerce Startup),1
@@ -161,6 +162,7 @@ Human Apps Ltd.,Human Apps .,1
 ILF Consulting Engineers,Ilf Consulting Engineers,1
 INNOTECH (Digital Banking Solution by CNews IT),Innotech (Digital Banking Solution By Cnews It),1
 IT Project Manager (Contract Assignments),It Project Manager (Contract Assignments),1
+Ikano Centres (Ikano Retail | IKEA),Ikano Centres (Ikano Retail | Ikea),1
 "Impress (Healthcare; B2C, B2B, E-commerce, E-Health)","Impress (Healthcare; B2C, B2B, E-Commerce, E-Health)",1
 In8inity Telecom,In8Inity Telecom,1
 Independent Practice,Independent Practice,1
@@ -185,7 +187,6 @@ LLC GISGIS,Gisgis,1
 LLC LUKOMORYE-MAGADAN,Lukomorye-Magadan,1
 LLC Promio,Promio,1
 LLC Veido,Veido,1
-"LLC ``BRIZ'' (Morgan Stanley Real Estate Investing), Galeria Shopping Centre (Saint Petersburg, Russia)","``Briz'' (Morgan Stanley Real Estate Investing), Galeria Shopping Centre (Saint Petersburg, Russia)",1
 LSG Group,Lsg Group,1
 LTD WeilIt Marine Engineering,Weilit Marine Engineering,1
 La Lorraine Bakery Group,La Lorraine Bakery Group,1
@@ -219,7 +220,7 @@ NFON AG,Nfon Ag,1
 NIL Foundation,Nil Foundation,1
 NIS (Naftna Industrija Srbije),Nis (Naftna Industrija Srbije),1
 NLMK Group (iron and steel production),Nlmk Group (Iron And Steel Production),1
-NOTO360 (Fraud \& Compliance),Noto360 (Fraud \& Compliance),1
+NOTO360 (Fraud \& Compliance),Noto360 (Fraud & Compliance),1
 NSIGN,Nsign,1
 NSYS Group,Nsys Group,1
 Nemax Finance,Nemax Finance,1
@@ -228,10 +229,10 @@ Netcracker Technology,Netcracker Technology,1
 Nexters,Nexters,1
 Nova-engineering,Nova-Engineering,1
 Novaterm LLC (производство отопительного оборудования),Novaterm (Производство Отопительного Оборудования),1
-OOO ``Philosophy IT'',``Philosophy It'',1
+OOO ``Philosophy IT'',Philosophy It,1
 OTP Bank,Otp Bank,1
 OTUS (Online Education),Otus (Online Education),1
-OVB Allfinanz Espa\~na,Ovb Allfinanz Espa\~Na,1
+OVB Allfinanz Espa\~na,Ovb Allfinanz Espa ~Na,1
 "Obed.ru (foodtech startup), subsidiary of Vkusvill","Obed.Ru (Foodtech Startup), Subsidiary Of Vkusvill",1
 Okkam (ex. Dentsu),Okkam (Ex. Dentsu),1
 Orangesoft,Orangesoft,1
@@ -239,7 +240,7 @@ Organization for Security and Co-operation in Europe (OSCE),Organization For Sec
 Ortalex (консалтинг),Ortalex (Консалтинг),1
 Outsource Company,Outsource Company,1
 PERFECT AUTO,Perfect Auto,1
-PROMAVTO Group --- R\&D Center,Promavto Group --- R\&D Center,1
+PROMAVTO Group --- R\&D Center,Promavto Group --- R&D Center,1
 PST Home GmbH,Pst Home Gmbh,1
 ParanoidLab,Paranoidlab,1
 Parqour (Parking Management and Automation Services Provider),Parqour (Parking Management And Automation Services Provider),1
@@ -280,8 +281,8 @@ SCENTSCAPE,Scentscape,1
 SK hynix Memory Solutions Eastern Europe,Sk Hynix Memory Solutions Eastern Europe,1
 SLON Media,Slon Media,1
 SOFTSWISS,Softswiss,1
-SRDI ``Caspiy Munay Gas'' JSC,Srdi ``Caspiy Munay Gas'' Jsc,1
-STRABAG BRVZ GmbH \& Co. KG,Strabag Brvz Gmbh \& Co. Kg,1
+SRDI ``Caspiy Munay Gas'' JSC,Srdi Caspiy Munay Gas Jsc,1
+STRABAG BRVZ GmbH \& Co. KG,Strabag Brvz Gmbh & Co. Kg,1
 STRATOPLAN MANAGEMENT SCHOOL,Stratoplan Management School,1
 SaM Solutions,Sam Solutions,1
 Saber Interactive,Saber Interactive,1
@@ -303,7 +304,7 @@ Smart Driving Labs,Smart Driving Labs,1
 Smoove,Smoove,1
 Snip Technologies,Snip Technologies,1
 Social Discovery Group,Social Discovery Group,1
-Social research (focus migration \& integration),Social Research (Focus Migration \& Integration),1
+Social research (focus migration \& integration),Social Research (Focus Migration & Integration),1
 SoftClub Ltd.,Softclub .,1
 Softeq,Softeq,1
 Softline,Softline,1
@@ -318,14 +319,13 @@ TBC Uzbekistan (Финтех),Tbc Uzbekistan (Финтех),1
 TUMO Labs,Tumo Labs,1
 Teachbase,Teachbase,1
 Tengizchevroil,Tengizchevroil,1
-Terricon (Республика Узбекистан,Terricon (Республика Узбекистан,1
 Tet SIA,Tet Sia,1
 The Invaders,The Invaders,1
 Toloka,Toloka,1
 Tony Lead Company,Tony Lead Company,1
 Top Tier Authentics,Top Tier Authentics,1
 TİTAN2 IC İÇTAŞ İNŞAAT,Ti̇Tan2 Ic İÇtaş İNşaat,1
-UNDERD\O G --- concept bar,Underd\O G --- Concept Bar,1
+UNDERD\O G --- concept bar,Underd O G --- Concept Bar,1
 UP MENU,Up Menu,1
 USETECH,Usetech,1
 Umag,Umag,1
@@ -354,9 +354,9 @@ XSAT GLOBAL,Xsat Global,1
 Yango (Yango Ads),Yango (Yango Ads),1
 ZION Development --- FinTech software development (under NDA),Zion Development --- Fintech Software Development (Under Nda),1
 Zamwell Capital,Zamwell Capital,1
-Zentek Services GmbH \& Co.,Zentek Services Gmbh \& Co.,1
+Zentek Services GmbH \& Co.,Zentek Services Gmbh & Co.,1
 ZmeuSolutions Inc. (Online Education Start-Up),Zmeusolutions . (Online Education Start-Up),1
-Zodiac Интерьер\&Керамика,Zodiac Интерьер\&Керамика,1
+Zodiac Интерьер\&Керамика,Zodiac Интерьер&Керамика,1
 beeline Russia,Beeline Russia,1
 "ecom.tech (Самокат, ООО «Умное пространство»)","Ecom.Tech (Самокат, «Умное Пространство»)",1
 makelove employer branding agency,Makelove Employer Branding Agency,1
@@ -367,9 +367,9 @@ ubq.store,Ubq.Store,1
 А101 диджитал,А101 Диджитал,1
 АЙФЭЛЛ (iFellow),Айфэлл (Ifellow),1
 АНО «Центр поддержки и развития детских и молодёжных проектов «Твое Время»,Ано «Центр Поддержки И Развития Детских И Молодежных Проектов «Твое Время»,1
-АО ``Группа компаний ``ЕКС'',``Группа Компаний ``Екс'',1
-АО ``Гулливер'',``Гулливер'',1
-АО ``Эволента'',``Эволента'',1
+АО ``Группа компаний ``ЕКС'',Группа Компаний Екс,1
+АО ``Гулливер'',Гулливер,1
+АО ``Эволента'',Эволента,1
 АО «ГалоПолимер»,«Галополимер»,1
 АО «ИНЛАЙН ГРУП»,«Инлайн Груп»,1
 АО «Компания ТрансТелеКом» (контур РЖД),«Компания Транстелеком» (Контур Ржд),1
@@ -392,15 +392,15 @@ ubq.store,Ubq.Store,1
 Грин Стрим Инжиниринг Групп,Грин Стрим Инжиниринг Групп,1
 Группа компаний (офис в Москва-Сити),Группа Компаний (Офис В Москва-Сити),1
 Группа компаний IEK,Группа Компаний Iek,1
-Группа компаний ``Сигма Марин Технолоджи'',Группа Компаний ``Сигма Марин Технолоджи'',1
+Группа компаний ``Сигма Марин Технолоджи'',Группа Компаний Сигма Марин Технолоджи,1
 Группа компаний «Базовые решения»,Группа Компаний «Базовые Решения»,1
 Группа компаний Техпривод,Группа Компаний Техпривод,1
 ДОМ.РФ,Дом.Рф,1
 Делис Инфо,Делис Инфо,1
 Директор проектного департамента,Директор Проектного Департамента,1
 Дом.ру,Дом.Ру,1
-"Др.\ Редди'c Лабораторис, ООО","Др.\ Редди'C Лабораторис,",1
-ЗАО ``Дзеньги'' (FinTech),``Дзеньги'' (Fintech),1
+"Др.\ Редди'c Лабораторис, ООО","Др. Редди'C Лабораторис,",1
+ЗАО ``Дзеньги'' (FinTech),Дзеньги (Fintech),1
 ЗАО «Банковско-финансовая телесеть»,«Банковско-Финансовая Телесеть»,1
 ИВА,Ива,1
 ИП Екатерина Волкова (онлайн-образовательный проект «НАМАСТЕ»),Ип Екатерина Волкова (Онлайн-Образовательный Проект «Намасте»),1
@@ -414,28 +414,28 @@ ubq.store,Ubq.Store,1
 Корпорация Туризм.РФ,Корпорация Туризм.Рф,1
 Кросстех солюшнс групп,Кросстех Солюшнс Групп,1
 Крупная Группа компаний,Крупная Группа Компаний,1
-"Крупный многоотраслевой холдинг (20+ компаний; оборот 1+ трлн рублей; 50\,000+ сотрудников)","Крупный Многоотраслевой Холдинг (20+ Компаний; Оборот 1+ Трлн Рублей; 50\,000+ Сотрудников)",1
+"Крупный многоотраслевой холдинг (20+ компаний; оборот 1+ трлн рублей; 50\,000+ сотрудников)","Крупный Многоотраслевой Холдинг (20+ Компаний; Оборот 1+ Трлн Рублей; 50 ,000+ Сотрудников)",1
 "Крупный многопрофильный холдинг (ТОП-50 Forbes), NDA","Крупный Многопрофильный Холдинг (Топ-50 Forbes), Nda",1
 ЛАНИТ,Ланит,1
 Лаборатория Касперского,Лаборатория Касперского,1
 Мантера-Групп,Мантера-Групп,1
 Международная группа «RATIONAL» (с 2023 г. ООО «Компонент»),Международная Группа «Rational» (С 2023 Г. «Компонент»),1
 Международная консалтинговая компания,Международная Консалтинговая Компания,1
-Международный университет ``МИТСО'',Международный Университет ``Митсо'',1
+Международный университет ``МИТСО'',Международный Университет Митсо,1
 Микроволновые системы,Микроволновые Системы,1
 МойОфис (ООО «Новые Облачные Технологии»),Мойофис ( «Новые Облачные Технологии»),1
 Независимый стратегический советник,Независимый Стратегический Советник,1
-ОАО ``Бизнес Партнер'' (JSC ``Business Partner''),``Бизнес Партнер'' (Jsc ``Business Partner''),1
-ООО ``AC КЛИНИК'',``Ac Клиник'',1
-ООО ``АвтоЭксперт'',``Автоэксперт'',1
-"ООО ``Воланта'' (кадровое агентство, стартап)","``Воланта'' (Кадровое Агентство, Стартап)",1
-ООО ``ЛАНИТ-Интеграция'',``Ланит-Интеграция'',1
-ООО ``Лонг Кэт'',``Лонг Кэт'',1
-ООО ``О Спорт'',``О Спорт'',1
-ООО ``ПРАЙМ ГРУП'',``Прайм Груп'',1
-ООО ``РИТЭК'' (ЛУКОЙЛ),``Ритэк'' (Лукойл),1
-ООО ``Руслет'' (первый производитель канатных дорог в РФ),``Руслет'' (Первый Производитель Канатных Дорог В Рф),1
-ООО ``Студия Давыдова'',``Студия Давыдова'',1
+ОАО ``Бизнес Партнер'' (JSC ``Business Partner''),Бизнес Партнер (Jsc Business Partner ),1
+ООО ``AC КЛИНИК'',Ac Клиник,1
+ООО ``АвтоЭксперт'',Автоэксперт,1
+"ООО ``Воланта'' (кадровое агентство, стартап)","Воланта (Кадровое Агентство, Стартап)",1
+ООО ``ЛАНИТ-Интеграция'',Ланит-Интеграция,1
+ООО ``Лонг Кэт'',Лонг Кэт,1
+ООО ``О Спорт'',О Спорт,1
+ООО ``ПРАЙМ ГРУП'',Прайм Груп,1
+ООО ``РИТЭК'' (ЛУКОЙЛ),Ритэк (Лукойл),1
+ООО ``Руслет'' (первый производитель канатных дорог в РФ),Руслет (Первый Производитель Канатных Дорог В Рф),1
+ООО ``Студия Давыдова'',Студия Давыдова,1
 ООО «АльдераСофт»,«Альдерасофт»,1
 ООО «Сокроф»,«Сокроф»,1
 "ООО «Сэнд-Авто» (официальный дилер Hyundai, Kaiyi, Omoda, Jaecco)","«Сэнд-Авто» (Официальный Дилер Hyundai, Kaiyi, Omoda, Jaecco)",1
@@ -449,7 +449,7 @@ ubq.store,Ubq.Store,1
 ПАО «НК «РОСНЕФТЬ»,Пао «Нк «Роснефть»,1
 "Панавто, ООО","Панавто,",1
 Пнппк,Пнппк,1
-Поток.Диджитал (ex.\ Alfa Potok),Поток.Диджитал (Ex.\ Alfa Potok),1
+Поток.Диджитал (ex.\ Alfa Potok),Поток.Диджитал (Ex. Alfa Potok),1
 "Проекты (UAE, Singapore)","Проекты (Uae, Singapore)",1
 Производитель вычислительной техники,Производитель Вычислительной Техники,1
 "РНИ-Сервис, РОСНАНО","Рни-Сервис, Роснано",1
@@ -462,18 +462,18 @@ ubq.store,Ubq.Store,1
 Стратегический профиль,Стратегический Профиль,1
 Т1,Т1,1
 ТОО Meat Ingredients,Тоо Meat Ingredients,1
-ТОО ``Wisk Telecom Solutions'',Тоо ``Wisk Telecom Solutions'',1
-ТОО ``Wisk telecom solutions'',Тоо ``Wisk Telecom Solutions'',1
-ТОО ``Протэк-Алматы'' (Концерн ``Протэк''),Тоо ``Протэк-Алматы'' (Концерн ``Протэк''),1
+ТОО ``Wisk Telecom Solutions'',Тоо Wisk Telecom Solutions,1
+ТОО ``Wisk telecom solutions'',Тоо Wisk Telecom Solutions,1
+ТОО ``Протэк-Алматы'' (Концерн ``Протэк''),Тоо Протэк-Алматы (Концерн Протэк ),1
 ТОО Марвеком,Тоо Марвеком,1
 Торгово-производственная группа компаний (NDA),Торгово-Производственная Группа Компаний (Nda),1
 Торговый Дом Влв (VIVA LA VIKA),Торговый Дом Влв (Viva La Vika),1
 Транскапиталбанк АКБ,Транскапиталбанк Акб,1
 УК Полюс,Ук Полюс,1
-ФГБУ ``Институт прикладной геофизики'',Фгбу ``Институт Прикладной Геофизики'',1
+ФГБУ ``Институт прикладной геофизики'',Фгбу Институт Прикладной Геофизики,1
 ФГБУ «Институт прикладной геофизики»,Фгбу «Институт Прикладной Геофизики»,1
 Феодальная сеть баров (62 бара в России и СНГ),Феодальная Сеть Баров (62 Бара В России И Снг),1
-"Филиал ``Норт Каспиан Оперейтинг Компани Н.В.'' в РК (представительский офис, Астана)","Филиал ``Норт Каспиан Оперейтинг Компани Н.В.'' В Рк (Представительский Офис, Астана)",1
+"Филиал ``Норт Каспиан Оперейтинг Компани Н.В.'' в РК (представительский офис, Астана)","Филиал Норт Каспиан Оперейтинг Компани Н.В. В Рк (Представительский Офис, Астана)",1
 Фриланс (Литва/РБ),Фриланс (Литва/Рб),1
 Холдинг УРАЛХИМ,Холдинг Уралхим,1
 ЧП «ШАТЕ-М ПЛЮС»,Чп «Шате-М Плюс»,1

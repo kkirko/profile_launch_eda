@@ -15,250 +15,241 @@ ci/cd,26,Ci/Cd
 grafana,22,Grafana
 jenkins,21,Jenkins
 kubernetes,19,Kubernetes
-kafka,17,Kafka
 linux,17,Linux
+kafka,17,Kafka
 typescript,16,Typescript
+sap,16,Sap
 tableau,16,Tableau
 google sheets,16,Google Sheets
-sap,16,Sap
-aws,15,Aws
 react,15,React
-bitrix24,14,Bitrix24
+aws,15,Aws
 azure devops,14,Azure Devops
-1c,13,1C
+bitrix24,14,Bitrix24
 javascript,13,Javascript
+1c,13,1C
 oracle,12,Oracle
-gitlab,11,Gitlab
 mysql,11,Mysql
 google workspace,11,Google Workspace
-clickhouse,10,Clickhouse
-ms excel,10,Ms Excel
-mongodb,10,Mongodb
+gitlab,11,Gitlab
 terraform,10,Terraform
+mongodb,10,Mongodb
+ms excel,10,Ms Excel
+clickhouse,10,Clickhouse
 github,9,Github
-prometheus,8,Prometheus
 gitlab ci/cd,8,Gitlab Ci/Cd
+prometheus,8,Prometheus
 github actions,8,Github Actions
 java,8,Java
-django,7,Django
 python (pandas,7,Python (Pandas
 ms project,7,Ms Project
-trello,6,Trello
+django,7,Django
 google analytics,6,Google Analytics
 ci/cd (jenkins,6,Ci/Cd (Jenkins
-waterfall,5,Waterfall
-pl/sql,5,Pl/Sql
-kanban,5,Kanban
-digital transformation,5,Digital Transformation
-ms sql,5,Ms Sql
-react testing library,5,React Testing Library
-sql (postgresql,5,Sql (Postgresql
+trello,6,Trello
 sql (mysql,5,Sql (Mysql
+pl/sql,5,Pl/Sql
+waterfall,5,Waterfall
+react testing library,5,React Testing Library
+kanban,5,Kanban
 gitlab ci,5,Gitlab Ci
-bitrix,4,Bitrix
+ms sql,5,Ms Sql
+digital transformation,5,Digital Transformation
+sql (postgresql,5,Sql (Postgresql
 ansible,4,Ansible
+bitrix,4,Bitrix
+asana,4,Asana
 postman,4,Postman
-chatgpt,4,Chatgpt
-swagger,4,Swagger
+node.js,4,Node.Js
 scrum,4,Scrum
 c#,4,C#
-slack,4,Slack
-node.js,4,Node.Js
 1c:erp,4,1C:Erp
+swagger,4,Swagger
+chatgpt,4,Chatgpt
+slack,4,Slack
 amplitude,4,Amplitude
-asana,4,Asana
 gcp,4,Gcp
-sql (basic,3,Sql (Basic
-jira/confluence,3,Jira/Confluence
+ci/cd (gitlab ci/cd,3,Ci/Cd (Gitlab Ci/Cd
+ms office,3,Ms Office
 observability (prometheus,3,Observability (Prometheus
 vba,3,Vba
-google,3,Google
-aws (ec2,3,Aws (Ec2
-ci/cd (gitlab ci/cd,3,Ci/Cd (Gitlab Ci/Cd
-apache airflow,3,Apache Airflow
-ms sql server,3,Ms Sql Server
-оптимизация бизнес-процессов,3,оптимизация бизнес-процессов
-python (django,3,Python (Django
-google ads,3,Google Ads
-ms office,3,Ms Office
-claude,3,Claude
-xml,3,Xml
-snowflake,3,Snowflake
-negotiation,3,Negotiation
-power bi (dax,3,Power Bi (Dax
-atlassian jira,3,Atlassian Jira
-azure,3,Azure
 advanced excel,3,Advanced Excel
+apache airflow,3,Apache Airflow
+atlassian jira,3,Atlassian Jira
+snowflake,3,Snowflake
+python (django,3,Python (Django
+jira/confluence,3,Jira/Confluence
+azure,3,Azure
+google ads,3,Google Ads
+ms sql server,3,Ms Sql Server
+xml,3,Xml
+negotiation,3,Negotiation
 data governance,3,Data Governance
-governance,3,Governance
-управление рисками,3,управление рисками
+оптимизация бизнес-процессов,3,оптимизация бизнес-процессов
 javascript (es6+,3,Javascript (Es6+
+power bi (dax,3,Power Bi (Dax
+google,3,Google
+claude,3,Claude
+sql (basic,3,Sql (Basic
+governance,3,Governance
+aws (ec2,3,Aws (Ec2
 hadoop,3,Hadoop
-jira & confluence,2,Jira & Confluence
-sap s/4hana,2,Sap S/4Hana
-kibana,2,Kibana
-quickbooks,2,Quickbooks
-smartsheet,2,Smartsheet
-prototyping (figma,2,Prototyping (Figma
-airflow,2,Airflow
-go,2,Go
-uat & go-live,2,Uat & Go-Live
-test management (jira,2,Test Management (Jira
-sql (oracle pl/sql,2,Sql (Oracle Pl/Sql
-jira software,2,Jira Software
-defect management (jira,2,Defect Management (Jira
-draw.io,2,Draw.Io
-db testing (sql,2,Db Testing (Sql
-mysql (базовый,2,Mysql (Базовый
-sqlite (базовый,2,Sqlite (Базовый
-sap ecc,2,Sap Ecc
-бизнес-анализ,2,бизнес-анализ
-hybrid,2,Hybrid
-sharepoint,2,Sharepoint
-docker compose,2,Docker Compose
-c++,2,C++
-safe,2,Safe
-python (basic,2,Python (Basic
-agile,2,Agile
-git (bitbucket,2,Git (Bitbucket
-python automation & post-processing,2,Python Automation & Post-Processing
-microsoft azure,2,Microsoft Azure
-it pmo & governance,2,It Pmo & Governance
-go-to-market,2,Go-To-Market
-vendor management & negotiation,2,Vendor Management & Negotiation
-git (gitlab,2,Git (Gitlab
+управление рисками,3,управление рисками
+sql server,2,Sql Server
+ci/cd (azure devops,2,Ci/Cd (Azure Devops
 delivery governance,2,Delivery Governance
 contract negotiation,2,Contract Negotiation
 category management,2,Category Management
-erp (sap,2,Erp (Sap
+pyspark,2,Pyspark
 sap erp,2,Sap Erp
 crm,2,Crm
-tenders & negotiation,2,Tenders & Negotiation
-oracle bi,2,Oracle Bi
-adobe illustrator,2,Adobe Illustrator
-excel (advanced,2,Excel (Advanced
-basic python,2,Basic Python
-apache kafka,2,Apache Kafka
-framer,2,Framer
+agile,2,Agile
 midjourney,2,Midjourney
-huntflow,2,Huntflow
-django rest framework,2,Django Rest Framework
-oracle communications metasolv solution,2,Oracle Communications Metasolv Solution
-sql server,2,Sql Server
-oracle sql,2,Oracle Sql
-pyspark,2,Pyspark
-observability (grafana,2,Observability (Grafana
-oracle e-business suite,2,Oracle E-Business Suite
-salesforce,2,Salesforce
-mixpanel,2,Mixpanel
-react router,2,React Router
-управление командой,2,управление командой
-инструменты: jira,2,Инструменты: Jira
-linux/unix,2,Linux/Unix
-ci/cd (azure devops,2,Ci/Cd (Azure Devops
-ci/cd (gitlab,2,Ci/Cd (Gitlab
-google docs,2,Google Docs
-ispring,2,Ispring
-stakeholder management,2,Stakeholder Management
-powerpoint,2,Powerpoint
 ganttpro,2,Ganttpro
-cursor,2,Cursor
-sqlalchemy,2,Sqlalchemy
-sap bw,2,Sap Bw
+draw.io,2,Draw.Io
+c++,2,C++
+framer,2,Framer
+test management (jira,2,Test Management (Jira
+oracle sql,2,Oracle Sql
+basic python,2,Basic Python
+adobe illustrator,2,Adobe Illustrator
+go-to-market,2,Go-To-Market
+tenders & negotiation,2,Tenders & Negotiation
+kibana,2,Kibana
+python automation & post-processing,2,Python Automation & Post-Processing
+git (bitbucket,2,Git (Bitbucket
+erp (sap,2,Erp (Sap
+git (gitlab,2,Git (Gitlab
+airflow,2,Airflow
+vendor management & negotiation,2,Vendor Management & Negotiation
+it pmo & governance,2,It Pmo & Governance
 dbt,2,Dbt
-logos,1,Logos
-primavera,1,Primavera
-strategic negotiations,1,Strategic Negotiations
-government & sovereign stakeholder management,1,Government & Sovereign Stakeholder Management
-прототипирование (figma,1,Прототипирование (Figma
-bi (power bi,1,Bi (Power Bi
-ci/cd collaboration,1,Ci/Cd Collaboration
-delivery excellence (time-to-market,1,Delivery Excellence (Time-To-Market
-digital transformation (govtech,1,Digital Transformation (Govtech
-matlab,1,Matlab
-stakeholder management (government,1,Stakeholder Management (Government
-коммерческая стратегия и go-to-market,1,Коммерческая Стратегия И Go-To-Market
-budget tracking & household reporting,1,Budget Tracking & Household Reporting
-go-to-market & market entry,1,Go-To-Market & Market Entry
-mathcad,1,Mathcad
-scope & backlog governance,1,Scope & Backlog Governance
-autocad,1,Autocad
-sql data validation (postgresql,1,Sql Data Validation (Postgresql
-procurement & vendor management (dubai,1,Procurement & Vendor Management (Dubai
+oracle bi,2,Oracle Bi
+excel (advanced,2,Excel (Advanced
+oracle communications metasolv solution,2,Oracle Communications Metasolv Solution
+sap bw,2,Sap Bw
+microsoft azure,2,Microsoft Azure
+apache kafka,2,Apache Kafka
+jira software,2,Jira Software
+oracle e-business suite,2,Oracle E-Business Suite
+safe,2,Safe
+smartsheet,2,Smartsheet
+jira & confluence,2,Jira & Confluence
+инструменты: jira,2,Инструменты: Jira
+sharepoint,2,Sharepoint
+prototyping (figma,2,Prototyping (Figma
+бизнес-анализ,2,бизнес-анализ
+powerpoint,2,Powerpoint
+db testing (sql,2,Db Testing (Sql
+python (basic,2,Python (Basic
+observability (grafana,2,Observability (Grafana
+sql (oracle pl/sql,2,Sql (Oracle Pl/Sql
+linux/unix,2,Linux/Unix
+ci/cd (gitlab,2,Ci/Cd (Gitlab
+hybrid,2,Hybrid
+google docs,2,Google Docs
+quickbooks,2,Quickbooks
+defect management (jira,2,Defect Management (Jira
+react router,2,React Router
+huntflow,2,Huntflow
+ispring,2,Ispring
+mixpanel,2,Mixpanel
+django rest framework,2,Django Rest Framework
+stakeholder management,2,Stakeholder Management
+docker compose,2,Docker Compose
+cursor,2,Cursor
+sap ecc,2,Sap Ecc
+go,2,Go
+управление командой,2,управление командой
+sap s/4hana,2,Sap S/4Hana
+uat & go-live,2,Uat & Go-Live
+salesforce,2,Salesforce
+sqlite (базовый,2,Sqlite (Базовый
+mysql (базовый,2,Mysql (Базовый
+sqlalchemy,2,Sqlalchemy
 react query,1,React Query
-events & formal hosting,1,Events & Formal Hosting
-solidworks,1,Solidworks
-digital & retail transformation,1,Digital & Retail Transformation
-relocations & renovations,1,Relocations & Renovations
-vendor performance governance & slas,1,Vendor Performance Governance & Slas
-figma (базовый,1,Figma (Базовый
-eplan electric,1,Eplan Electric
-glassdoor,1,Glassdoor
-ultraformer,1,Ultraformer
-sketch,1,Sketch
-kafka administration,1,Kafka Administration
-netsuite (oracle,1,Netsuite (Oracle
-ai платформа «джун»,1,Ai Платформа «Джун»
-deepkeek и др,1,Deepkeek И Др
 ai инструменты (gemini,1,Ai Инструменты (Gemini
-advanced excel & powerpoint,1,Advanced Excel & Powerpoint
+peoplesoft,1,Peoplesoft
 1с,1,1с
+talent management strategy & governance,1,Talent Management Strategy & Governance
+sql data validation (postgresql,1,Sql Data Validation (Postgresql
 telegram,1,Telegram
+digital & retail transformation,1,Digital & Retail Transformation
 habr,1,Habr
+коммерческая стратегия и go-to-market,1,Коммерческая Стратегия И Go-To-Market
+glassdoor,1,Glassdoor
+budget tracking & household reporting,1,Budget Tracking & Household Reporting
+procurement & vendor management (dubai,1,Procurement & Vendor Management (Dubai
+events & formal hosting,1,Events & Formal Hosting
+amazinghiring,1,Amazinghiring
+relocations & renovations,1,Relocations & Renovations
+bi (power bi,1,Bi (Power Bi
+vendor performance governance & slas,1,Vendor Performance Governance & Slas
+strategic negotiations,1,Strategic Negotiations
+scala,1,Scala
+product analytics (google analytics,1,Product Analytics (Google Analytics
+figma (базовый,1,Figma (Базовый
+прототипирование (figma,1,Прототипирование (Figma
+scope & backlog governance,1,Scope & Backlog Governance
+logos,1,Logos
+java ee,1,Java Ee
+go-to-market & market entry,1,Go-To-Market & Market Entry
+jv shareholder governance (eni,1,Jv Shareholder Governance (Eni
+ai платформа «джун»,1,Ai Платформа «Джун»
+investment governance & phase-gate approvals,1,Investment Governance & Phase-Gate Approvals
+advanced excel & powerpoint,1,Advanced Excel & Powerpoint
+co2-лазерные платформы,1,Co2-Лазерные Платформы
+микротоковые аппараты,1,микротоковые аппараты
+аппараты skin для аппаратной чистки,1,Аппараты Skin Для Аппаратной Чистки
+netsuite (oracle,1,Netsuite (Oracle
+kafka administration,1,Kafka Administration
+hydrafacial,1,Hydrafacial
 apache kafka (взаимодействие,1,Apache Kafka (Взаимодействие
 information security & data governance,1,Information Security & Data Governance
-amazinghiring,1,Amazinghiring
 e-staff,1,E-Staff
-peoplesoft,1,Peoplesoft
-scala,1,Scala
-linkedin,1,Linkedin
-yango ads,1,Yango Ads
-jv shareholder governance (eni,1,Jv Shareholder Governance (Eni
-adobe photoshop,1,Adobe Photoshop
-investment governance & phase-gate approvals,1,Investment Governance & Phase-Gate Approvals
-soprano titanium,1,Soprano Titanium
-talent management strategy & governance,1,Talent Management Strategy & Governance
-product analytics (google analytics,1,Product Analytics (Google Analytics
-ulthera,1,Ulthera
-morpheus8,1,Morpheus8
-java ee,1,Java Ee
-java (8--17,1,Java (8--17
-bigquery,1,Bigquery
-data governance (dama-dmbok,1,Data Governance (Dama-Dmbok
 secret rf,1,Secret Rf
-hydrafacial,1,Hydrafacial
-аппараты skin для аппаратной чистки,1,Аппараты Skin Для Аппаратной Чистки
-микротоковые аппараты,1,микротоковые аппараты
+morpheus8,1,Morpheus8
+deepkeek и др,1,Deepkeek И Др
 apache/nginx/mysql/memcached,1,Apache/Nginx/Mysql/Memcached
-co2-лазерные платформы,1,Co2-Лазерные Платформы
-e-commerce (bitrix,1,E-Commerce (Bitrix
-kling,1,Kling
-erp: sap,1,Erp: Sap
-c/c++,1,C/C++
-яндекс.метрика,1,яндекс.метрика
+ulthera,1,Ulthera
+ultraformer,1,Ultraformer
+soprano titanium,1,Soprano Titanium
+data governance (dama-dmbok,1,Data Governance (Dama-Dmbok
+adobe photoshop,1,Adobe Photoshop
+sketch,1,Sketch
+bigquery,1,Bigquery
+stakeholder management (government,1,Stakeholder Management (Government
+digital transformation (govtech,1,Digital Transformation (Govtech
+java (8--17,1,Java (8--17
+ci/cd collaboration,1,Ci/Cd Collaboration
+government & sovereign stakeholder management,1,Government & Sovereign Stakeholder Management
+linkedin,1,Linkedin
+email/sms/whatsapp crm (mindbox,1,Email/Sms/Whatsapp Crm (Mindbox
+delivery excellence (time-to-market,1,Delivery Excellence (Time-To-Market
+yandex direct,1,Yandex Direct
 яндекс.директ,1,яндекс.директ
 lovable,1,Lovable
-finebi,1,Finebi
 dashboards (tableau,1,Dashboards (Tableau
 oracle mstr,1,Oracle Mstr
 marketing strategy (atl/btl/digital,1,Marketing Strategy (Atl/Btl/Digital
 government relations,1,Government Relations
 hris (sap successfactors,1,Hris (Sap Successfactors
+c/c++,1,C/C++
 c#/.net,1,C#/.Net
-youtrack,1,Youtrack
-greenplum,1,Greenplum
-yandex direct,1,Yandex Direct
 1c: бухгалтерия,1,1C: Бухгалтерия
+notebooklm,1,Notebooklm
 digital assets regulation,1,Digital Assets Regulation
 power bi (dashboards,1,Power Bi (Dashboards
 agile (scrum,1,Agile (Scrum
 mobile (ios/android,1,Mobile (Ios/Android
 erp,1,Erp
 iot,1,Iot
+api,1,Api
+youtrack,1,Youtrack
+fintech & digital assets regulation,1,Fintech & Digital Assets Regulation
+яндекс.метрика,1,яндекс.метрика
 appmagic,1,Appmagic
 superset,1,Superset
 azure data factory / synapse pipelines,1,Azure Data Factory / Synapse Pipelines
-azure sql,1,Azure Sql
 macroscop,1,Macroscop
 sigur,1,Sigur
 trassir,1,Trassir
@@ -274,41 +265,38 @@ sqlite (базовый уровень,1,Sqlite (Базовый Уровень
 basic sql,1,Basic Sql
 git/github,1,Git/Github
 digital products & learning experiences,1,Digital Products & Learning Experiences
-great expectations,1,Great Expectations
 governed self-service (git,1,Governed Self-Service (Git
 integration (sap s/4hana,1,Integration (Sap S/4Hana
 azure synapse,1,Azure Synapse
-api,1,Api
-fintech & digital assets regulation,1,Fintech & Digital Assets Regulation
-kubernetes (k8s,1,Kubernetes (K8S
-data governance & metadata management,1,Data Governance & Metadata Management
-runway,1,Runway
-veo 3,1,Veo 3
-sales logix,1,Sales Logix
+azure sql,1,Azure Sql
+github ci/cd,1,Github Ci/Cd
+pmo (governance,1,Pmo (Governance
+e-commerce (bitrix,1,E-Commerce (Bitrix
+style guides (google,1,Style Guides (Google
 grok,1,Grok
 nanobanana,1,Nanobanana
 algo trading,1,Algo Trading
 data governance (dama,1,Data Governance (Dama
 governance maturity assessment,1,Governance Maturity Assessment
 google suite,1,Google Suite
+data governance & metadata management,1,Data Governance & Metadata Management
 ci/cd pipelines,1,Ci/Cd Pipelines
-github ci/cd,1,Github Ci/Cd
 bi-аналитика и дашборды (power bi,1,Bi-Аналитика И Дашборды (Power Bi
-style guides (google,1,Style Guides (Google
 pmo governance & operating models,1,Pmo Governance & Operating Models
+digital transformation delivery,1,Digital Transformation Delivery
 digital,1,Digital
 digital capabilities building,1,Digital Capabilities Building
 owned media  social media governance,1,Owned Media  Social Media Governance
 owned media & social media governance,1,Owned Media & Social Media Governance
 r2r / o2c / p2p process excellence,1,R2R / O2C / P2P Process Excellence
 erp/crm/bi migrations (sap,1,Erp/Crm/Bi Migrations (Sap
+kubernetes (k8s,1,Kubernetes (K8S
+erp: sap,1,Erp: Sap
+yango ads,1,Yango Ads
+kling,1,Kling
+veo 3,1,Veo 3
+runway,1,Runway
 ip governance (trademarks,1,Ip Governance (Trademarks
-gdpr & privacy governance (cipp/e,1,Gdpr & Privacy Governance (Cipp/E
-risk governance & board reporting,1,Risk Governance & Board Reporting
-oracle pl/sql,1,Oracle Pl/Sql
-notebooklm,1,Notebooklm
-pmo (governance,1,Pmo (Governance
-digital transformation delivery,1,Digital Transformation Delivery
 pmo uplift and governance,1,Pmo Uplift And Governance
 process digitisation and workflow automation,1,Process Digitisation And Workflow Automation
 dashboards and reporting (power bi,1,Dashboards And Reporting (Power Bi
@@ -316,7 +304,7 @@ project governance,1,Project Governance
 методологии: agile (scrum,1,Методологии: Agile (Scrum
 pm 2,1,Pm 2
 p3.express,1,P3.Express
-email/sms/whatsapp crm (mindbox,1,Email/Sms/Whatsapp Crm (Mindbox
+autocad,1,Autocad
 google tag manager,1,Google Tag Manager
 hr analytics & dashboards (power bi,1,Hr Analytics & Dashboards (Power Bi
 hr tech (sap,1,Hr Tech (Sap
@@ -325,10 +313,16 @@ learning analytics (power bi,1,Learning Analytics (Power Bi
 governance & stakeholder management,1,Governance & Stakeholder Management
 contract negotiation (msa,1,Contract Negotiation (Msa
 kpi design & reporting (excel,1,Kpi Design & Reporting (Excel
-simulink,1,Simulink
-клиентский сервис (csi,1,Клиентский Сервис (Csi
-microsoft dynamics,1,Microsoft Dynamics
-sap (order/backlog support,1,Sap (Order/Backlog Support
+oracle pl/sql,1,Oracle Pl/Sql
+risk governance & board reporting,1,Risk Governance & Board Reporting
+gdpr & privacy governance (cipp/e,1,Gdpr & Privacy Governance (Cipp/E
+primavera,1,Primavera
+java (6--21,1,Java (6--21
+solidworks,1,Solidworks
+webtutor,1,Webtutor
+governance/комитеты,1,Governance/Комитеты
+java (8/11/17,1,Java (8/11/17
+due diligence объектов недвижимости,1,Due Diligence Объектов Недвижимости
 сделки с недвижимостью (купля-продажа,1,сделки с недвижимостью (купля-продажа
 будущая вещь,1,будущая вещь
 ипотека,1,ипотека
@@ -338,8 +332,8 @@ sap (order/backlog support,1,Sap (Order/Backlog Support
 quality engineering strategy & governance,1,Quality Engineering Strategy & Governance
 ci/cd collaboration (azure devops,1,Ci/Cd Collaboration (Azure Devops
 monitoring (prometheus,1,Monitoring (Prometheus
+sap (order/backlog support,1,Sap (Order/Backlog Support
 digital programme delivery,1,Digital Programme Delivery
-java (8/11/17,1,Java (8/11/17
 delivery governance (raid,1,Delivery Governance (Raid
 google workspace (g-suite) including google analytics (ga,1,Google Workspace (G-Suite) Including Google Analytics (Ga
 optimizely (experimentation,1,Optimizely (Experimentation
@@ -347,36 +341,35 @@ workfront,1,Workfront
 genai / ai tools,1,Genai / Ai Tools
 playwright (python/typescript,1,Playwright (Python/Typescript
 gitlab ci & jenkins,1,Gitlab Ci & Jenkins
-docker & kubernetes,1,Docker & Kubernetes
-webtutor,1,Webtutor
-due diligence объектов недвижимости,1,Due Diligence Объектов Недвижимости
-governance/комитеты,1,Governance/Комитеты
-digital & growth strategy,1,Digital & Growth Strategy
-бонусные схемы,1,бонусные схемы
+netsuite,1,Netsuite
+erp: axapta,1,Erp: Axapta
+power pivot,1,Power Pivot
+java (spring boot,1,Java (Spring Boot
+enterprise & government sales,1,Enterprise & Government Sales
+complex deal negotiation,1,Complex Deal Negotiation
+data analytics (ms excel,1,Data Analytics (Ms Excel
 performance review (goals setting,1,Performance Review (Goals Setting
 primalogic,1,Primalogic
 typescript/javascript,1,Typescript/Javascript
 go-to-market strategy,1,Go-To-Market Strategy
 google drive,1,Google Drive
 sdlc & ci/cd collaboration,1,Sdlc & Ci/Cd Collaboration
-java (spring boot,1,Java (Spring Boot
 excel/google sheets,1,Excel/Google Sheets
+power query,1,Power Query
 программы поддержки продаж и лояльности (мотивация,1,программы поддержки продаж и лояльности (мотивация
+бонусные схемы,1,бонусные схемы
 коммерческие переговоры,1,коммерческие переговоры
-netsuite,1,Netsuite
 бюджетирование и контроль затрат,1,бюджетирование и контроль затрат
 sqlite,1,Sqlite
 corporate governance,1,Corporate Governance
 oracle siebel crm,1,Oracle Siebel Crm
 java (понимание и доработки legacy,1,Java (Понимание И Доработки Legacy
 python (валидация данных,1,Python (Валидация Данных
-power query,1,Power Query
-power pivot,1,Power Pivot
-erp: axapta,1,Erp: Axapta
+docker & kubernetes,1,Docker & Kubernetes
 courselab,1,Courselab
+eplan electric,1,Eplan Electric
 kahoot,1,Kahoot
-google forms,1,Google Forms
-azure iot/iiot & purdue model,1,Azure Iot/Iiot & Purdue Model
+aws gpu,1,Aws Gpu
 cloud/devops (ci/cd,1,Cloud/Devops (Ci/Cd
 1c:enterprise / 1c:erp,1,1C:Enterprise / 1C:Erp
 ci/cd quality improvements (jenkins,1,Ci/Cd Quality Improvements (Jenkins
@@ -386,8 +379,8 @@ multicloud (aws,1,Multicloud (Aws
 azure landing zones,1,Azure Landing Zones
 windows & linux hardening,1,Windows & Linux Hardening
 aks & kubernetes,1,Aks & Kubernetes
+azure iot/iiot & purdue model,1,Azure Iot/Iiot & Purdue Model
 sql-to-text,1,Sql-To-Text
-qlikview,1,Qlikview
 govtech & digital transformation,1,Govtech & Digital Transformation
 hr operations & governance,1,Hr Operations & Governance
 sap successfactors,1,Sap Successfactors
@@ -397,10 +390,12 @@ engagedly,1,Engagedly
 ms office 365,1,Ms Office 365
 sap r/3,1,Sap R/3
 1c7/1c8,1,1C7/1C8
-aws gpu,1,Aws Gpu
 sql (mssql,1,Sql (Mssql
 astra linux,1,Astra Linux
 data platforms: python,1,Data Platforms: Python
+test strategy & planning,1,Test Strategy & Planning
+google forms,1,Google Forms
+qlikview,1,Qlikview
 minikube,1,Minikube
 wiremock,1,Wiremock
 автоматизация (excel,1,Автоматизация (Excel
@@ -408,8 +403,8 @@ digital sales (b2b/b2c,1,Digital Sales (B2B/B2C
 spark,1,Spark
 requirements review (figma,1,Requirements Review (Figma
 aws logs (s3,1,Aws Logs (S3
-test strategy & planning,1,Test Strategy & Planning
 test case design,1,Test Case Design
+power bi (уровень аналитика,1,Power Bi (Уровень Аналитика
 defect management,1,Defect Management
 release validation & sign-off,1,Release Validation & Sign-Off
 анализ логов и инцидентов (grafana,1,Анализ Логов И Инцидентов (Grafana
@@ -419,11 +414,15 @@ sap fi,1,Sap Fi
 microsoft sql server,1,Microsoft Sql Server
 release support (jenkins,1,Release Support (Jenkins
 pmo & portfolio governance,1,Pmo & Portfolio Governance
-power bi (уровень аналитика,1,Power Bi (Уровень Аналитика
-data analytics (ms excel,1,Data Analytics (Ms Excel
-complex deal negotiation,1,Complex Deal Negotiation
-enterprise & government sales,1,Enterprise & Government Sales
-test automation frameworks (c#,1,Test Automation Frameworks (C#
+scalable & high-availability architecture,1,Scalable & High-Availability Architecture
+distributed systems,1,Distributed Systems
+hibernate,1,Hibernate
+spring,1,Spring
+ces,1,Ces
+fcr,1,Fcr
+управление эффективностью,1,управление эффективностью
+сегментация рынка и маркетинговые кампании,1,сегментация рынка и маркетинговые кампании
+kubernetes (bare-metal,1,Kubernetes (Bare-Metal
 gitlab agent,1,Gitlab Agent
 gitflow,1,Gitflow
 observability: grafana,1,Observability: Grafana
@@ -433,26 +432,28 @@ go-to-market & pre-sales,1,Go-To-Market & Pre-Sales
 sap material master data (mdm,1,Sap Material Master Data (Mdm
 jira (tasks,1,Jira (Tasks
 microsoft excel & office,1,Microsoft Excel & Office
+test automation frameworks (c#,1,Test Automation Frameworks (C#
 microservices & kafka testing,1,Microservices & Kafka Testing
-kubernetes (eks,1,Kubernetes (Eks
 databases (postgresql,1,Databases (Postgresql
 security validation in tests (azure key vault,1,Security Validation In Tests (Azure Key Vault
 java (6-21,1,Java (6-21
-java (6--21,1,Java (6--21
+searchinform,1,Searchinform
 bitrix24 (crm,1,Bitrix24 (Crm
-docker-compose,1,Docker-Compose
-ci/cd: gitlab ci,1,Ci/Cd: Gitlab Ci
-мониторинг и логи: prometheus,1,Мониторинг И Логи: Prometheus
-aws organizations,1,Aws Organizations
-kubernetes (bare-metal,1,Kubernetes (Bare-Metal
-сегментация рынка и маркетинговые кампании,1,сегментация рынка и маркетинговые кампании
-управление эффективностью,1,управление эффективностью
-fcr,1,Fcr
+nps,1,Nps
+клиентский сервис (csi,1,Клиентский Сервис (Csi
+digital sales strategy,1,Digital Sales Strategy
+git bash,1,Git Bash
+mathcad,1,Mathcad
+matlab,1,Matlab
+simulink,1,Simulink
+sales logix,1,Sales Logix
+microsoft dynamics,1,Microsoft Dynamics
+digital & growth strategy,1,Digital & Growth Strategy
 analytics & dashboards (google analytics,1,Analytics & Dashboards (Google Analytics
 portfolio governance,1,Portfolio Governance
 sap activate,1,Sap Activate
-git bash,1,Git Bash
 java (core) основы,1,Java (Core) Основы
+google ai studio,1,Google Ai Studio
 python основы,1,Python Основы
 release & go-live management,1,Release & Go-Live Management
 sap (fi,1,Sap (Fi
@@ -462,88 +463,58 @@ product development systems,1,Product Development Systems
 doxis,1,Doxis
 diadoc,1,Diadoc
 commercial contracts & negotiations,1,Commercial Contracts & Negotiations
-google ai studio,1,Google Ai Studio
-digital sales strategy,1,Digital Sales Strategy
-searchinform,1,Searchinform
-nps,1,Nps
-ces,1,Ces
-aws sso,1,Aws Sso
-ci/cd (circleci,1,Ci/Cd (Circleci
-scalable & high-availability architecture,1,Scalable & High-Availability Architecture
-jira/confluence/yandex tracker,1,Jira/Confluence/Yandex Tracker
+docker-compose,1,Docker-Compose
+ci/cd: gitlab ci,1,Ci/Cd: Gitlab Ci
+мониторинг и логи: prometheus,1,Мониторинг И Логи: Prometheus
+react hook form,1,React Hook Form
+sap erp/srm,1,Sap Erp/Srm
+bpmn,1,Bpmn
+uml,1,Uml
 user story,1,User Story
 use case,1,Use Case
 гост 34 (документация,1,гост 34 (документация
 испытания,1,испытания
 интеграции (rest api,1,Интеграции (Rest Api
 linux (администрирование,1,Linux (Администрирование
-react hook form,1,React Hook Form
 ci/cd (gitlab ci,1,Ci/Cd (Gitlab Ci
+crm (bitrix24,1,Crm (Bitrix24
 industrial digital/automation,1,Industrial Digital/Automation
+jira/confluence/yandex tracker,1,Jira/Confluence/Yandex Tracker
 power bi/power apps,1,Power Bi/Power Apps
-sql (простые запросы,1,Sql (Простые Запросы
 operating model & governance,1,Operating Model & Governance
 google apps script,1,Google Apps Script
 negotiation & stakeholder management,1,Negotiation & Stakeholder Management
 ai agents & governed automation,1,Ai Agents & Governed Automation
 api management & governance (google apigee,1,Api Management & Governance (Google Apigee
 git (github,1,Git (Github
-spring,1,Spring
-hibernate,1,Hibernate
-distributed systems,1,Distributed Systems
-uml,1,Uml
-bpmn,1,Bpmn
-sap erp/srm,1,Sap Erp/Srm
 portfolio governance & decision rights,1,Portfolio Governance & Decision Rights
+governance & operating models,1,Governance & Operating Models
+aws organizations,1,Aws Organizations
+sla и операционная поддержка,1,Sla И Операционная Поддержка
+aws sso,1,Aws Sso
+kubernetes (eks,1,Kubernetes (Eks
+ci/cd (circleci,1,Ci/Cd (Circleci
+sql (простые запросы,1,Sql (Простые Запросы
 rest api,1,Rest Api
 soapui,1,Soapui
 json,1,Json
-gantpro,1,Gantpro
-ms visio,1,Ms Visio
 интеграции (rest/json,1,Интеграции (Rest/Json
 soap/xml,1,Soap/Xml
-sla и операционная поддержка,1,Sla И Операционная Поддержка
 управление стейкхолдерами,1,управление стейкхолдерами
+rxjava,1,Rxjava
 people management (acting tl,1,People Management (Acting Tl
+gantpro,1,Gantpro
+ms visio,1,Ms Visio
 analytics (google analytics,1,Analytics (Google Analytics
 google docs/drive,1,Google Docs/Drive
 marketing analytics (google analytics,1,Marketing Analytics (Google Analytics
 1c-bitrix,1,1C-Bitrix
 c/c++ (c++14/17/20,1,C/C++ (C++14/17/20
 qnx/linux,1,Qnx/Linux
-rxjava,1,Rxjava
-governance & operating models,1,Governance & Operating Models
-crm (bitrix24,1,Crm (Bitrix24
 falcongaze securetower,1,Falcongaze Securetower
-putty,1,Putty
+hp alm,1,Hp Alm
 zecurion dlp,1,Zecurion Dlp
-ai-enabled program governance (rag-based,1,Ai-Enabled Program Governance (Rag-Based
-google sheets (сводные таблицы,1,Google Sheets (Сводные Таблицы
-roadmaps & delivery governance,1,Roadmaps & Delivery Governance
-sap integration,1,Sap Integration
-crm (sap crm,1,Crm (Sap Crm
-program/pmo governance,1,Program/Pmo Governance
-erp transformation (sap s/4hana,1,Erp Transformation (Sap S/4Hana
-vendor management & commercial negotiation,1,Vendor Management & Commercial Negotiation
-enterprise architecture & erp governance,1,Enterprise Architecture & Erp Governance
-data governance principles,1,Data Governance Principles
-интеграции 1с:erp и sap erp/sap hybris,1,Интеграции 1С:Erp И Sap Erp/Sap Hybris
-dbrain,1,Dbrain
-advanced excel (pivot tables,1,Advanced Excel (Pivot Tables
-basic sql & python,1,Basic Sql & Python
-vendor negotiation,1,Vendor Negotiation
-supplier management & negotiation,1,Supplier Management & Negotiation
-contract renegotiation,1,Contract Renegotiation
-pricing & promotions (category,1,Pricing & Promotions (Category
-автоматизация hr-процессов (bitrix24,1,Автоматизация Hr-Процессов (Bitrix24
-кадровый резерв кадровое делопроизводство и комплаенс автоматизация hr-процессов (bitrix24,1,Кадровый Резерв Кадровое Делопроизводство И Комплаенс Автоматизация Hr-Процессов (Bitrix24
-embedded c/c++,1,Embedded C/C++
-автоматизация: excel,1,Автоматизация: Excel
-sap erp (fi/co,1,Sap Erp (Fi/Co
-логирование (kafka,1,Логирование (Kafka
-bi (oracle bi,1,Bi (Oracle Bi
-erp (1c,1,Erp (1C
-power bi report server,1,Power Bi Report Server
+бизнес-планирование и бюджетирование,1,бизнес-планирование и бюджетирование
 sla/kpi governance & service reviews,1,Sla/Kpi Governance & Service Reviews
 vendor management & contract negotiation,1,Vendor Management & Contract Negotiation
 azure networking,1,Azure Networking
@@ -553,49 +524,47 @@ government,1,Government
 аналитика и презентации (excel,1,Аналитика И Презентации (Excel
 проектный менеджмент (pmbok,1,Проектный Менеджмент (Pmbok
 agile/scrum,1,Agile/Scrum
-бизнес-планирование и бюджетирование,1,бизнес-планирование и бюджетирование
 bim & digital twin,1,Bim & Digital Twin
+dbrain,1,Dbrain
 microsoft office (excel,1,Microsoft Office (Excel
 1с: предприятие 8,1,1с: предприятие 8
 linux (centos,1,Linux (Centos
 almalinux,1,Almalinux
 astralinux,1,Astralinux
 sberlinux,1,Sberlinux
-linux (kernel,1,Linux (Kernel
-unreal engine 5,1,Unreal Engine 5
-unity,1,Unity
-bank payments (dmee,1,Bank Payments (Dmee
-opentext vim,1,Opentext Vim
-integration testing,1,Integration Testing
-data migration preparation,1,Data Migration Preparation
-algorithmic trading r&d,1,Algorithmic Trading R&D
-it governance & architecture boards,1,It Governance & Architecture Boards
-argocd,1,Argocd
-oracle fusion,1,Oracle Fusion
-product analytics (sql,1,Product Analytics (Sql
-technology strategy & governance,1,Technology Strategy & Governance
-cloud strategy (aws,1,Cloud Strategy (Aws
-sap s4hana,1,Sap S4Hana
-1c erp,1,1C Erp
-sql (transact-sql,1,Sql (Transact-Sql
-data quality & governance,1,Data Quality & Governance
-edi (sap-based,1,Edi (Sap-Based
-java (8--25,1,Java (8--25
-martech & measurement (power bi,1,Martech & Measurement (Power Bi
-integrated marketing (digital,1,Integrated Marketing (Digital
-growth strategy & digital acquisition,1,Growth Strategy & Digital Acquisition
-electronic bank statements (ebs,1,Electronic Bank Statements (Ebs
-sap query,1,Sap Query
-proprietary engines,1,Proprietary Engines
-cutover & go-live stabilization,1,Cutover & Go-Live Stabilization
-visual scripting,1,Visual Scripting
-basic c#,1,Basic C#
+логирование (kafka,1,Логирование (Kafka
+sap erp (fi/co,1,Sap Erp (Fi/Co
+автоматизация: excel,1,Автоматизация: Excel
+power bi report server,1,Power Bi Report Server
+erp (1c,1,Erp (1C
+sql for test validation,1,Sql For Test Validation
+test management & governance,1,Test Management & Governance
+figjam,1,Figjam
+opensearch,1,Opensearch
+grafana oncall,1,Grafana Oncall
+bash,1,Bash
+okr,1,Okr
+pmo governance (raid/rag/psr/steerco,1,Pmo Governance (Raid/Rag/Psr/Steerco
+aws codebuild,1,Aws Codebuild
+oboard for jira,1,Oboard For Jira
+technical: typescript,1,Technical: Typescript
+net framework,1,Net Framework
+net 6,1,Net 6
+restful apis,1,Restful Apis
+performance optimization,1,Performance Optimization
+vue 2/3,1,Vue 2/3
+excel (в т.ч. vba,1,Excel (В Т.Ч. Vba
+yandex metrica,1,Yandex Metrica
+firebase,1,Firebase
+appmetrica,1,Appmetrica
+sapr,1,Sapr
+google sheets (сводные таблицы,1,Google Sheets (Сводные Таблицы
+roadmaps & delivery governance,1,Roadmaps & Delivery Governance
+sap integration,1,Sap Integration
 google sheets/excel,1,Google Sheets/Excel
-perforce,1,Perforce
 svn,1,Svn
 appsflyer,1,Appsflyer
 monday.com,1,Monday.Com
-1c initiatives,1,1C Initiatives
 servicetitan,1,Servicetitan
 housecallpro,1,Housecallpro
 ai tools,1,Ai Tools
@@ -607,84 +576,93 @@ ai tools,1,Ai Tools
 документооборот и договорная документация,1,документооборот и договорная документация
 инструменты: azure devops,1,Инструменты: Azure Devops
 sap fico (fi-gl,1,Sap Fico (Fi-Gl
-sql for test validation,1,Sql For Test Validation
-test management & governance,1,Test Management & Governance
-sapr,1,Sapr
-\ kpi и мотивация \ оптимизация оргструктуры и фот \ автоматизация процессов (crm,1,\ Kpi И Мотивация \ Оптимизация Оргструктуры И Фот \ Автоматизация Процессов (Crm
-devsecops & ci/cd (sast/dast,1,Devsecops & Ci/Cd (Sast/Dast
-atlassian confluence,1,Atlassian Confluence
-переговоры и презентации (в т.ч. для первых лиц,1,переговоры и презентации (в т.ч. для первых лиц
-оптимизация и реинжиниринг бизнес-процессов,1,оптимизация и реинжиниринг бизнес-процессов
-kpi dashboards (ms excel,1,Kpi Dashboards (Ms Excel
-bitrix24 (crm/workflow/task tracking,1,Bitrix24 (Crm/Workflow/Task Tracking
-jira (defect management,1,Jira (Defect Management
-azure iaas/paas,1,Azure Iaas/Paas
-java test automation (selenium webdriver,1,Java Test Automation (Selenium Webdriver
-управление проектами,1,управление проектами
-c# (.net framework,1,C# (.Net Framework
-uat,1,Uat
-приоритизация бэклога,1,приоритизация бэклога
-gcp gke,1,Gcp Gke
-сбор и документирование требований,1,сбор и документирование требований
-azure (aks,1,Azure (Aks
-azure ad,1,Azure Ad
-azure monitor,1,Azure Monitor
-sdlc,1,Sdlc
-эдо) \ стандартизация и регламентация,1,эдо) \ стандартизация и регламентация
-irr,1,Irr
-canva,1,Canva
-управление бюджетом и подрядчиками,1,управление бюджетом и подрядчиками
-dbeaver,1,Dbeaver
-toad,1,Toad
-datalens,1,Datalens
-hexagonal,1,Hexagonal
-artifactory,1,Artifactory
-databases (postgres,1,Databases (Postgres
-program/portfolio governance,1,Program/Portfolio Governance
-elma365,1,Elma365
-business studio (bpmn,1,Business Studio (Bpmn
-hrlink (кэдо,1,Hrlink (Кэдо
-bi-системы,1,Bi-Системы
-gantt pro,1,Gantt Pro
-data governance & security,1,Data Governance & Security
-quality practices (ci/cd,1,Quality Practices (Ci/Cd
-sap / erp integration,1,Sap / Erp Integration
-governance (raci,1,Governance (Raci
-микросервисная архитектура,1,микросервисная архитектура
-sla,1,Sla
-мониторинг и операционная устойчивость,1,мониторинг и операционная устойчивость
-g-suite,1,G-Suite
-microsoft teams,1,Microsoft Teams
-appmetrica,1,Appmetrica
-digital workplace (microsoft 365,1,Digital Workplace (Microsoft 365
-grafana oncall,1,Grafana Oncall
-gantt-based planning,1,Gantt-Based Planning
-bash,1,Bash
-okr,1,Okr
-pmo governance (raid/rag/psr/steerco,1,Pmo Governance (Raid/Rag/Psr/Steerco
-adobe premiere pro,1,Adobe Premiere Pro
-aws codebuild,1,Aws Codebuild
-oboard for jira,1,Oboard For Jira
-adobe after effects,1,Adobe After Effects
-technical: typescript,1,Technical: Typescript
-net framework,1,Net Framework
-net 6,1,Net 6
-restful apis,1,Restful Apis
-performance optimization,1,Performance Optimization
-vue 2/3,1,Vue 2/3
-excel (в т.ч. vba,1,Excel (В Т.Ч. Vba
-adobe creative cloud,1,Adobe Creative Cloud
-yandex metrica,1,Yandex Metrica
-firebase,1,Firebase
-opensearch,1,Opensearch
-figjam,1,Figjam
-umbraco cms,1,Umbraco Cms
+cutover & go-live stabilization,1,Cutover & Go-Live Stabilization
+sap query,1,Sap Query
+bank payments (dmee,1,Bank Payments (Dmee
+electronic bank statements (ebs,1,Electronic Bank Statements (Ebs
+opentext vim,1,Opentext Vim
+perforce,1,Perforce
+basic c#,1,Basic C#
+program/pmo governance,1,Program/Pmo Governance
+visual scripting,1,Visual Scripting
+erp transformation (sap s/4hana,1,Erp Transformation (Sap S/4Hana
+vendor management & commercial negotiation,1,Vendor Management & Commercial Negotiation
+enterprise architecture & erp governance,1,Enterprise Architecture & Erp Governance
+data governance principles,1,Data Governance Principles
+ai-enabled program governance (rag-based,1,Ai-Enabled Program Governance (Rag-Based
+интеграции 1с:erp и sap erp/sap hybris,1,Интеграции 1С:Erp И Sap Erp/Sap Hybris
+advanced excel (pivot tables,1,Advanced Excel (Pivot Tables
+basic sql & python,1,Basic Sql & Python
+vendor negotiation,1,Vendor Negotiation
+supplier management & negotiation,1,Supplier Management & Negotiation
+contract renegotiation,1,Contract Renegotiation
+pricing & promotions (category,1,Pricing & Promotions (Category
+автоматизация hr-процессов (bitrix24,1,Автоматизация Hr-Процессов (Bitrix24
+кадровый резерв кадровое делопроизводство и комплаенс автоматизация hr-процессов (bitrix24,1,Кадровый Резерв Кадровое Делопроизводство И Комплаенс Автоматизация Hr-Процессов (Bitrix24
+embedded c/c++,1,Embedded C/C++
+linux (kernel,1,Linux (Kernel
+unreal engine 5,1,Unreal Engine 5
+unity,1,Unity
+proprietary engines,1,Proprietary Engines
 worksection,1,Worksection
+oracle rdbms,1,Oracle Rdbms
+kubernetes (k3s,1,Kubernetes (K3S
+adobe after effects,1,Adobe After Effects
+gantt-based planning,1,Gantt-Based Planning
+digital workplace (microsoft 365,1,Digital Workplace (Microsoft 365
+governance & risk alignment,1,Governance & Risk Alignment
+google sites,1,Google Sites
+sdlc,1,Sdlc
+сбор и документирование требований,1,сбор и документирование требований
+приоритизация бэклога,1,приоритизация бэклога
+uat,1,Uat
+управление проектами,1,управление проектами
+azure iaas/paas,1,Azure Iaas/Paas
+devsecops & ci/cd (sast/dast,1,Devsecops & Ci/Cd (Sast/Dast
+sap / erp integration,1,Sap / Erp Integration
+data governance & security,1,Data Governance & Security
+program/portfolio governance,1,Program/Portfolio Governance
+artifactory,1,Artifactory
+datalens,1,Datalens
+toad,1,Toad
+dbeaver,1,Dbeaver
+putty,1,Putty
+adobe premiere pro,1,Adobe Premiere Pro
+adobe creative cloud,1,Adobe Creative Cloud
+databases (postgres,1,Databases (Postgres
+bi (oracle bi,1,Bi (Oracle Bi
+greenplum,1,Greenplum
+finebi,1,Finebi
+great expectations,1,Great Expectations
+datahub,1,Datahub
+openmetadata,1,Openmetadata
+mlflow,1,Mlflow
+feast,1,Feast
+anaplan,1,Anaplan
+debezium,1,Debezium
+vertica,1,Vertica
+exasol,1,Exasol
+dmbok,1,Dmbok
+togaf,1,Togaf
+growth strategy & digital acquisition,1,Growth Strategy & Digital Acquisition
+integrated marketing (digital,1,Integrated Marketing (Digital
+martech & measurement (power bi,1,Martech & Measurement (Power Bi
+algorithmic trading r&d,1,Algorithmic Trading R&D
+1c initiatives,1,1C Initiatives
+crm (sap crm,1,Crm (Sap Crm
+hexagonal,1,Hexagonal
+elma365,1,Elma365
+spark performance tuning,1,Spark Performance Tuning
+azure (aks,1,Azure (Aks
+azure monitor,1,Azure Monitor
+g-suite,1,G-Suite
+canva,1,Canva
+microsoft teams,1,Microsoft Teams
+umbraco cms,1,Umbraco Cms
 ai tools (notebooklm,1,Ai Tools (Notebooklm
 deepseek,1,Deepseek
 gemini,1,Gemini
 figma (prototyping,1,Figma (Prototyping
-google sites,1,Google Sites
 azure information protection,1,Azure Information Protection
 microsoft 365,1,Microsoft 365
 dynamics 365,1,Dynamics 365
@@ -695,15 +673,38 @@ moodle,1,Moodle
 talantix,1,Talantix
 staffcop,1,Staffcop
 hadoop dwh support,1,Hadoop Dwh Support
-spark performance tuning,1,Spark Performance Tuning
-kubernetes (k3s,1,Kubernetes (K3S
-governance & risk alignment,1,Governance & Risk Alignment
-oracle rdbms,1,Oracle Rdbms
-project planning & governance,1,Project Planning & Governance
-mssql,1,Mssql
-customer journey mapping (cjm,1,Customer Journey Mapping (Cjm
+azure ad,1,Azure Ad
+gcp gke,1,Gcp Gke
+business studio (bpmn,1,Business Studio (Bpmn
+c# (.net framework,1,C# (.Net Framework
+hrlink (кэдо,1,Hrlink (Кэдо
+bi-системы,1,Bi-Системы
+gantt pro,1,Gantt Pro
+quality practices (ci/cd,1,Quality Practices (Ci/Cd
+governance (raci,1,Governance (Raci
+микросервисная архитектура,1,микросервисная архитектура
+sla,1,Sla
+мониторинг и операционная устойчивость,1,мониторинг и операционная устойчивость
+управление бюджетом и подрядчиками,1,управление бюджетом и подрядчиками
+irr,1,Irr
+kpi и мотивация оптимизация оргструктуры и фот автоматизация процессов (crm,1,Kpi И Мотивация Оптимизация Оргструктуры И Фот Автоматизация Процессов (Crm
+эдо) стандартизация и регламентация,1,эдо) стандартизация и регламентация
+atlassian confluence,1,Atlassian Confluence
+переговоры и презентации (в т.ч. для первых лиц,1,переговоры и презентации (в т.ч. для первых лиц
+оптимизация и реинжиниринг бизнес-процессов,1,оптимизация и реинжиниринг бизнес-процессов
+kpi dashboards (ms excel,1,Kpi Dashboards (Ms Excel
+bitrix24 (crm/workflow/task tracking,1,Bitrix24 (Crm/Workflow/Task Tracking
+jira (defect management,1,Jira (Defect Management
+java test automation (selenium webdriver,1,Java Test Automation (Selenium Webdriver
+integration testing,1,Integration Testing
+data migration preparation,1,Data Migration Preparation
+it governance & architecture boards,1,It Governance & Architecture Boards
+scada,1,Scada
+plm,1,Plm
+pdm,1,Pdm
+mom,1,Mom
+allure testops,1,Allure Testops
 qase,1,Qase
-openmetadata,1,Openmetadata
 browserstack,1,Browserstack
 devtools,1,Devtools
 teamcity,1,Teamcity
@@ -718,14 +719,17 @@ figma (контроль соответствия,1,Figma (Контроль Со�
 reporting & analytics (power bi,1,Reporting & Analytics (Power Bi
 data products & data governance,1,Data Products & Data Governance
 управление бэклогом (jira,1,Управление Бэклогом (Jira
-c++ (c++17/20,1,C++ (C++17/20
+track&trace,1,Track&Trace
+производственная цифровизация (mes,1,Производственная Цифровизация (Mes
 blueprints-to-c++ migration,1,Blueprints-To-C++ Migration
-regulated govtech environments,1,Regulated Govtech Environments
-sales operations & sales excellence,1,Sales Operations & Sales Excellence
-hp alm,1,Hp Alm
-allure testops,1,Allure Testops
-erp (в т.ч. sap-класса,1,Erp (В Т.Ч. Sap-Класса
-mom,1,Mom
+ecm,1,Ecm
+trading,1,Trading
+dexs,1,Dexs
+perps & trader segmentation,1,Perps & Trader Segmentation
+tokenomics & raffle economics,1,Tokenomics & Raffle Economics
+solana,1,Solana
+ethereum,1,Ethereum
+layer 1 / layer 2,1,Layer 1 / Layer 2
 crypto marketing & community growth,1,Crypto Marketing & Community Growth
 bizdev,1,Bizdev
 sap bw/bpc,1,Sap Bw/Bpc
@@ -736,22 +740,17 @@ sap crm,1,Sap Crm
 regional go-to-market (mena,1,Regional Go-To-Market (Mena
 executive governance & reporting,1,Executive Governance & Reporting
 advanced analytics & power bi,1,Advanced Analytics & Power Bi
-mlflow,1,Mlflow
 цифровая трансформация (erp,1,Цифровая Трансформация (Erp
 wms,1,Wms
-ecm,1,Ecm
-производственная цифровизация (mes,1,Производственная Цифровизация (Mes
-scada,1,Scada
-track&trace,1,Track&Trace
-plm,1,Plm
-pdm,1,Pdm
-excel (power pivot,1,Excel (Power Pivot
-azure virtual desktop,1,Azure Virtual Desktop
-ethereum,1,Ethereum
+c++ (c++17/20,1,C++ (C++17/20
+regulated govtech environments,1,Regulated Govtech Environments
+defi: amm,1,Defi: Amm
+digital pathology platforms & annotation tools,1,Digital Pathology Platforms & Annotation Tools
+spss,1,Spss
 globaldata,1,Globaldata
+zymewire,1,Zymewire
 competitive landscape research,1,Competitive Landscape Research
 ai-augmented project planning & reporting,1,Ai-Augmented Project Planning & Reporting
-jira & confluence (admin) \,1,Jira & Confluence (Admin) \
 ci/cd (github actions,1,Ci/Cd (Github Actions
 linux/macos/windows,1,Linux/Macos/Windows
 mysql/mariadb/postgresql,1,Mysql/Mariadb/Postgresql
@@ -761,17 +760,19 @@ amocrm,1,Amocrm
 wrike,1,Wrike
 google таблицы,1,Google Таблицы
 jira workflows & documentation,1,Jira Workflows & Documentation
-jira workflows & documentation \,1,Jira Workflows & Documentation \
-datahub,1,Datahub
 sap hr,1,Sap Hr
 elasticsearch,1,Elasticsearch
 1с (enterprise,1,1С (Enterprise
 docflow,1,Docflow
 itsm,1,Itsm
-zymewire,1,Zymewire
-spss,1,Spss
-sap (fte,1,Sap (Fte
 plm windchill,1,Plm Windchill
+jira / confluence (admin,1,Jira / Confluence (Admin
+sales operations & sales excellence,1,Sales Operations & Sales Excellence
+jira & confluence (admin),1,Jira & Confluence (Admin)
+excel (power pivot,1,Excel (Power Pivot
+erp (в т.ч. sap-класса,1,Erp (В Т.Ч. Sap-Класса
+azure virtual desktop,1,Azure Virtual Desktop
+sap (fte,1,Sap (Fte
 servicenow (assets,1,Servicenow (Assets
 cis,1,Cis
 financial forecasting,1,Financial Forecasting
@@ -780,8 +781,6 @@ backlog & standups,1,Backlog & Standups
 risk & change management,1,Risk & Change Management
 sql (ms sql,1,Sql (Ms Sql
 go-to-market (b2b,1,Go-To-Market (B2B
-git \,1,Git \
-jira \,1,Jira \
 sap bo,1,Sap Bo
 corporate governance (board reporting,1,Corporate Governance (Board Reporting
 defect tracking (jira,1,Defect Tracking (Jira
@@ -789,44 +788,10 @@ automation basics (python,1,Automation Basics (Python
 digital-маркетинг (сайт,1,Digital-Маркетинг (Сайт
 sap erp & 1c integrations,1,Sap Erp & 1C Integrations
 jira & confluence (admin,1,Jira & Confluence (Admin
-jira / confluence (admin,1,Jira / Confluence (Admin
-digital pathology platforms & annotation tools,1,Digital Pathology Platforms & Annotation Tools
-layer 1 / layer 2,1,Layer 1 / Layer 2
-solana,1,Solana
-segmentation,1,Segmentation
-multi-stream governance,1,Multi-Stream Governance
-oracle sql / pl/sql,1,Oracle Sql / Pl/Sql
-kubernetes / openshift,1,Kubernetes / Openshift
-sap business bydesign,1,Sap Business Bydesign
-1c:предприятие,1,1C:Предприятие
-togaf,1,Togaf
-dmbok,1,Dmbok
-operational excellence,1,Operational Excellence
-pmo governance,1,Pmo Governance
-risk & dependency management,1,Risk & Dependency Management
-budget & cost management,1,Budget & Cost Management
-resource allocation,1,Resource Allocation
-vendor/outsourcing management,1,Vendor/Outsourcing Management
-kpi reporting (sla,1,Kpi Reporting (Sla
-mttr,1,Mttr
-mtta,1,Mtta
-cycle time,1,Cycle Time
-exasol,1,Exasol
-1c:firstbit,1,1C:Firstbit
-program/project governance,1,Program/Project Governance
-java (8/11/17/21/25,1,Java (8/11/17/21/25
-фасилитация,1,фасилитация
-cloud & infrastructure: hybrid cloud,1,Cloud & Infrastructure: Hybrid Cloud
-roadmap,1,Roadmap
-personas,1,Personas
-jtbd,1,Jtbd
-nps and csat measurement,1,Nps And Csat Measurement
-data visualization and storytelling,1,Data Visualization And Storytelling
-автоматизация hr-процессов (sap,1,Автоматизация Hr-Процессов (Sap
-ci/cd и репозитории (self-hosted gitlab,1,Ci/Cd И Репозитории (Self-Hosted Gitlab
-industrial digital transformation,1,Industrial Digital Transformation
+yield farming,1,Yield Farming
+ci/cd (повышение зрелости процессов,1,Ci/Cd (Повышение Зрелости Процессов
+argocd,1,Argocd
 data governance & stewardship,1,Data Governance & Stewardship
-elt/etl orchestration (apache airflow,1,Elt/Etl Orchestration (Apache Airflow
 streaming (kafka,1,Streaming (Kafka
 aws (s3,1,Aws (S3
 digital identity,1,Digital Identity
@@ -837,33 +802,76 @@ high-load services,1,High-Load Services
 agile planning,1,Agile Planning
 технологический контекст (понимание): java,1,Технологический Контекст (Понимание): Java
 методологии и практики: agile,1,Методологии И Практики: Agile
-sap hana / sap s/4hana cloud private edition (rise with sap,1,Sap Hana / Sap S/4Hana Cloud Private Edition (Rise With Sap
-iaas/paas/saas,1,Iaas/Paas/Saas
-tokenomics & raffle economics,1,Tokenomics & Raffle Economics
+roadmap,1,Roadmap
+фасилитация,1,фасилитация
+multi-stream governance,1,Multi-Stream Governance
+java (8/11/17/21/25,1,Java (8/11/17/21/25
+oracle sql / pl/sql,1,Oracle Sql / Pl/Sql
+kubernetes / openshift,1,Kubernetes / Openshift
+sap business bydesign,1,Sap Business Bydesign
+1c:предприятие,1,1C:Предприятие
+operational excellence,1,Operational Excellence
+elt/etl orchestration (apache airflow,1,Elt/Etl Orchestration (Apache Airflow
+industrial digital transformation,1,Industrial Digital Transformation
+risk & dependency management,1,Risk & Dependency Management
+ci/cd и репозитории (self-hosted gitlab,1,Ci/Cd И Репозитории (Self-Hosted Gitlab
+oracle fusion,1,Oracle Fusion
+product analytics (sql,1,Product Analytics (Sql
+technology strategy & governance,1,Technology Strategy & Governance
+cloud strategy (aws,1,Cloud Strategy (Aws
+sap s4hana,1,Sap S4Hana
+1c erp,1,1C Erp
+sql (transact-sql,1,Sql (Transact-Sql
+data quality & governance,1,Data Quality & Governance
+edi (sap-based,1,Edi (Sap-Based
+java (8--25,1,Java (8--25
+project planning & governance,1,Project Planning & Governance
+mssql,1,Mssql
+customer journey mapping (cjm,1,Customer Journey Mapping (Cjm
+segmentation,1,Segmentation
+personas,1,Personas
+jtbd,1,Jtbd
+nps and csat measurement,1,Nps And Csat Measurement
+data visualization and storytelling,1,Data Visualization And Storytelling
+автоматизация hr-процессов (sap,1,Автоматизация Hr-Процессов (Sap
+pmo governance,1,Pmo Governance
+budget & cost management,1,Budget & Cost Management
+requirements governance (прослеживаемость vision--testing,1,Requirements Governance (Прослеживаемость Vision--Testing
+figma/pixso,1,Figma/Pixso
+erp-трансформации: sap (fi,1,Erp-Трансформации: Sap (Fi
+sql (базово,1,Sql (Базово
+автоматизация финансов (oracle netsuite,1,Автоматизация Финансов (Oracle Netsuite
+category & portfolio management,1,Category & Portfolio Management
+fmcg go-to-market (rtm,1,Fmcg Go-To-Market (Rtm
+new category launch (rrp,1,New Category Launch (Rrp
+investment governance,1,Investment Governance
 sap (бизнес-заказчик,1,Sap (Бизнес-Заказчик
+digital pr & integrated campaigns,1,Digital Pr & Integrated Campaigns
 design systems (figma components,1,Design Systems (Figma Components
 python 3.11,1,Python 3.11
 docker/docker compose,1,Docker/Docker Compose
-anaplan,1,Anaplan
 prometheus/grafana,1,Prometheus/Grafana
 sql (в т.ч. explain analyze,1,Sql (В Т.Ч. Explain Analyze
 tableau prep,1,Tableau Prep
-feast,1,Feast
 thinkcell,1,Thinkcell
 upslide,1,Upslide
 service delivery governance,1,Service Delivery Governance
 ит governance,1,Ит Governance
-requirements governance (прослеживаемость vision--testing,1,Requirements Governance (Прослеживаемость Vision--Testing
-ci/cd (повышение зрелости процессов,1,Ci/Cd (Повышение Зрелости Процессов
-defi: amm,1,Defi: Amm
-yield farming,1,Yield Farming
-trading,1,Trading
-dexs,1,Dexs
-perps & trader segmentation,1,Perps & Trader Segmentation
-digital pr & integrated campaigns,1,Digital Pr & Integrated Campaigns
-investment governance,1,Investment Governance
+sql (запросы,1,Sql (Запросы
+vendor governance & compliance controls,1,Vendor Governance & Compliance Controls
+resource allocation,1,Resource Allocation
+service desk / itsm (jira service desk,1,Service Desk / Itsm (Jira Service Desk
+vendor/outsourcing management,1,Vendor/Outsourcing Management
+kpi reporting (sla,1,Kpi Reporting (Sla
+mttr,1,Mttr
+mtta,1,Mtta
+cycle time,1,Cycle Time
+1c:firstbit,1,1C:Firstbit
+program/project governance,1,Program/Project Governance
+sap hana / sap s/4hana cloud private edition (rise with sap,1,Sap Hana / Sap S/4Hana Cloud Private Edition (Rise With Sap
+cloud & infrastructure: hybrid cloud,1,Cloud & Infrastructure: Hybrid Cloud
+iaas/paas/saas,1,Iaas/Paas/Saas
 vmware,1,Vmware
-new category launch (rrp,1,New Category Launch (Rrp
 vdi,1,Vdi
 aruba sd-branch,1,Aruba Sd-Branch
 serviceguard clusters,1,Serviceguard Clusters
@@ -872,15 +880,4 @@ dwh/bi,1,Dwh/Bi
 micro focus vertica,1,Micro Focus Vertica
 microsoft project,1,Microsoft Project
 stakeholder management (b2b/b2g/ngo,1,Stakeholder Management (B2B/B2G/Ngo
-service desk / itsm (jira service desk,1,Service Desk / Itsm (Jira Service Desk
-vertica,1,Vertica
-vendor governance & compliance controls,1,Vendor Governance & Compliance Controls
-figma/pixso,1,Figma/Pixso
-sql (запросы,1,Sql (Запросы
-erp-трансформации: sap (fi,1,Erp-Трансформации: Sap (Fi
-debezium,1,Debezium
-sql (базово,1,Sql (Базово
-автоматизация финансов (oracle netsuite,1,Автоматизация Финансов (Oracle Netsuite
-category & portfolio management,1,Category & Portfolio Management
-fmcg go-to-market (rtm,1,Fmcg Go-To-Market (Rtm
 crm/erp: sap r/3,1,Crm/Erp: Sap R/3

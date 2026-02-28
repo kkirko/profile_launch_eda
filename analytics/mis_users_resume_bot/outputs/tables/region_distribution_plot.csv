@@ -1,168 +1,119 @@
 region_norm,count,region_display
-Moscow,122,Москва
-Russia,31,Russia
-Minsk,25,"Minsk, Belarus"
+Moscow,124,Москва
+Russia,27,Russia
+Minsk,26,"Minsk, Belarus"
 Dubai,24,"Dubai, UAE"
-"Санкт, Петербург",14,Санкт-Петербург
-Almaty,12,Алматы
+Saint Petersburg,23,Санкт-Петербург
+Germany,13,"Berlin, Germany"
 Warsaw,12,"Warsaw, Poland"
-Remote,11,Remote
+Remote,12,Remote
+Almaty,12,Алматы
 Tashkent,9,Ташкент
+Serbia,9,"Belgrade, Serbia"
+USA,8,"California, USA (Remote)"
 Belarus,8,Belarus
+Kazakhstan,8,Kazakhstan
 Yerevan,7,"Yerevan, Armenia"
+Spain,7,"Barcelona, Spain"
+United Kingdom,7,"London, UK"
 Tbilisi,6,"Tbilisi, Georgia"
 UAE,6,UAE
-Kazakhstan,6,Kazakhstan
-"Belgrade, Serbia",5,"Belgrade, Serbia"
 Uzbekistan,5,Uzbekistan
 Poland,5,"Bia{2}ystok, Poland"
-Turkey,4,Турция
-Germany,3,Germany
-Saint Petersburg,3,"St. Petersburg, Russia"
-Томск,3,Томск
-"London, Uk",3,"London, UK"
+Israel,4,"Hybrid, Israel (Raanana)"
+Cyprus,4,Cyprus
+Montenegro,4,"Budva, Montenegro"
+Netherlands,3,"Amsterdam, Netherlands"
+Abu Dhabi,3,"Abu Dhabi, UAE"
+Samara,3,Самара
+Armenia,3,Armenia
 Vilnius,3,"Vilnius, Lithuania"
-"Berlin, Germany",3,"Berlin, Germany"
-Кишинев,2,Кишинев
-"Helsinki, Finland",2,"Helsinki, Finland"
-"Novi Sad, Serbia",2,"Novi Sad, Serbia"
-Астана,2,Астана
-"Vienna, Austria",2,"Vienna, Austria"
-"Stuttgart, Germany",2,"Stuttgart, Germany"
-Armenia,2,Armenia
-"Riga, Latvia",2,"Riga, Latvia"
-Самара,2,Самара
+Turkey,3,Турция
+Thailand,3,"Bangkok, Thailand"
+Томск,3,Томск
 "Remote, San Jose, Ca",2,"Remote / San Jose, CA"
-"Boston, Ma",2,"Boston, MA"
-"Budva, Montenegro",2,"Budva, Montenegro"
+Астана,2,Астана
+Latvia,2,"Riga, Latvia"
 Саранск,2,Саранск
-"Amsterdam, Netherlands",2,"Amsterdam, Netherlands"
-Abu Dhabi,2,"Abu Dhabi, UAE"
-Cyprus,2,Cyprus
-"San Francisco, California, Us",1,"San Francisco, California, US"
-United Kingdom,1,United Kingdom
-"San Mateo, Ca",1,"San Mateo, CA"
-Serbia,1,Serbia
-"Vancouver, Canada",1,"Vancouver, Canada"
-"Valencia, Spain",1,"Valencia, Spain"
-Usa/Рф/Кипр/Рб,1,USA/РФ/Кипр/РБ
-"Union, Ai Saas",1,Union --- AI SaaS
-"Shate, M.By",1,shate-m.by
-Slovenia,1,Slovenia
-Ukraine,1,"Odesa, Ukraine"
-"Uk, Europe (Remote & On, Site)",1,UK / Europe (Remote \& On-site)
-Uk,1,UK
-"Sofia, Bulgaria",1,"Sofia, Bulgaria"
-"Tuscany, Italy",1,"Tuscany, Italy"
-Startx.Team,1,startx.team
-Thailand,1,Thailand
-"Tel Aviv, Israel",1,"Tel Aviv, Israel"
-"Tel Aviv, Hamerkaz",1,"Tel Aviv, Hamerkaz"
-"(Аудит И Управление R&D, Проектами В Стратегических Отраслях)",1,(аудит и управление R\&D-проектами в стратегических отраслях)
-"Varna, Bulgaria",1,"Varna, Bulgaria"
-Стамбул,1,Стамбул
-Онлайн,1,Онлайн
-Покров,1,Покров
-"Производственно, Инжиниринговая Компания",1,Производственно-инжиниринговая компания
-Разработка Собственного По В Области Иб (350 Человек),1,Разработка собственного ПО в области ИБ (350 человек)
-"Санкт, Петербург (М. Озерки)",1,"Санкт-Петербург (м.\ Озерки) \,"
-Сириус,1,Сириус
-Телефон,1,Телефон
-Новосибирск,1,Новосибирск
-Телефон: Не Указан,1,Телефон: не указан
-"Темиртау, Караганда",1,"Темиртау, Караганда"
+Кишинев,2,Кишинев
+Finland,2,"Helsinki, Finland"
+"Boston, Ma",2,"Boston, MA"
+Bulgaria,2,"Sofia, Bulgaria"
+Austria,2,"Vienna, Austria"
 "Удаленно, Англия",1,"Удаленно, Англия"
 Ульяновск,1,Ульяновск
 "Управление Активами, Фондами И Коммерческой Недвижимостью",1,"Управление активами, фондами и коммерческой недвижимостью"
-"Холдинг Т1, Гк Иннотех",1,"Холдинг Т1, ГК Иннотех"
-Омск,1,Омск
-Нижний Новгород,1,"Нижний Новгород \,"
-Www.Avbinvest.Com,1,www.avbinvest.com
-Гродно,1,Гродно
-"Zurich, Switzerland",1,"Zurich, Switzerland"
-Бахрейн,1,Бахрейн
-Владивосток,1,Владивосток
-Г. Тюмень,1,г. Тюмень
-"S ~Ao Paulo, Brazil",1,"S\~ao Paulo, Brazil"
-"Готов К Переезду: Санкт, Петербург",1,"\, готов к переезду: Санкт-Петербург \,"
-Дальний Восток,1,Дальний Восток
-Международная Корпоративная Сеть,1,Международная корпоративная сеть
+"Tel Aviv, Hamerkaz",1,"Tel Aviv, Hamerkaz"
+"Темиртау, Караганда",1,"Темиртау, Караганда"
+Телефон: Не Указан,1,Телефон: не указан
+Телефон,1,Телефон
+"Tuscany, Italy",1,"Tuscany, Italy"
+Стамбул,1,Стамбул
+Сириус,1,Сириус
+Ukraine,1,"Odesa, Ukraine"
+Union --- Ai Saas,1,Union --- AI SaaS
 Екатеринбург,1,Екатеринбург
+Дальний Восток,1,Дальний Восток
+Международная Компания По Сертификации Товаров И Услуг,1,международная компания по сертификации товаров и услуг
+Гродно,1,Гродно
+Г. Тюмень,1,г. Тюмень
+Владивосток,1,Владивосток
+Бахрейн,1,Бахрейн
 "Краснодар, Сочи, Удаленно Готовность К Командировкам И Переезду: Да",1,Краснодар / Сочи / удаленно \ готовность к командировкам и переезду: да
 "Лиссабон, Португалия",1,"Лиссабон, Португалия"
-Литва/Рб,1,Литва/РБ
-Макрорегион Север (13 Регионов Рф),1,Макрорегион Север (13 регионов РФ)
-Международная Компания По Сертификации Товаров И Услуг,1,международная компания по сертификации товаров и услуг
-"Готов К Переезду (Москва, Санкт, Петербург), Готов К Командировкам",1,"готов к переезду (Москва, Санкт-Петербург), готов к командировкам"
-Remote (Kazakhstan),1,Remote (Kazakhstan)
-"Ryde, Nsw 2112",1,"Ryde, NSW 2112"
-Israel (Open To Remote),1,Israel (open to remote)
-Georgia,1,"Batumi, Georgia"
-Girteka Logistics Group,1,Girteka logistics group
-"Hamburg, Germany",1,"Hamburg, Germany"
-Hq,1,HQ
-"Hybrid, Israel (Raanana)",1,"Hybrid, Israel (Raanana)"
-Israel,1,Israel
-Italy,1,Italy
+Международная Корпоративная Сеть,1,Международная корпоративная сеть
+Разработка Собственного По В Области Иб (350 Человек),1,Разработка собственного ПО в области ИБ (350 человек)
+"Zurich, Switzerland",1,"Zurich, Switzerland"
+Нижний Новгород,1,"Нижний Новгород \,"
+Омск,1,Омск
+Www.Avbinvest.Com,1,www.avbinvest.com
+Покров,1,Покров
+Производственно-Инжиниринговая Компания,1,Производственно-инжиниринговая компания
+Startx.Team,1,startx.team
+(Аудит И Управление R&D-Проектами В Стратегических Отраслях),1,(аудит и управление R\&D-проектами в стратегических отраслях)
+Slovenia,1,Slovenia
 Fully Remote,1,Fully remote
-"İZmir, Türkiye",1,"İzmir, Türkiye"
-Kehl,1,Kehl
-Kraków,1,Kraków
-Ksa,1,KSA
 "Kuala Lumpur, Malaysia",1,"Kuala Lumpur, Malaysia"
-Kyiv,1,Kyiv / Madrid (remote)
-"G ""Artringen, Germany",1,"G\""artringen, Germany"
+Ksa,1,KSA
+Kraków,1,Kraków
+Kehl,1,Kehl
+"İZmir, Türkiye",1,"İzmir, Türkiye"
+Italy,1,Italy
+Hq,1,HQ
+Girteka Logistics Group,1,Girteka logistics group
+Georgia,1,"Batumi, Georgia"
 "France, Luxembourg",1,France / Luxembourg
-"Leipzig, Germany",1,"Leipzig, Germany"
-"Berlin, Germany (Remote)",1,"Berlin, Germany (remote)"
-"Bangkok, Thailand",1,"Bangkok, Thailand"
-"Bangkok, Thailand (Ready For Relocation)",1,"Bangkok, Thailand (ready for relocation)"
-"Barcelona, Spain",1,"Barcelona, Spain"
-"Beijing, China",1,"Beijing, China"
-"Belgrade, Serbia (Готова К Релокации)",1,"Belgrade, Serbia (готова к релокации)"
-Berlin,1,Berlin
-"Bilbao, Spain",1,"Bilbao, Spain"
+Shate-M.By,1,shate-m.by
 Eu (Remote),1,EU (remote)
-"Bishkek, The Kyrgyz Republic",1,"Bishkek, the Kyrgyz Republic"
-"Buenos Aires, Argentina",1,"Buenos Aires, Argentina"
-"California, Usa (Remote)",1,"California, USA (Remote)"
-"Cascais, Portugal",1,"Cascais, Portugal"
+English --- B2 German --- A2,1,English --- B2 \ \ German --- A2
 "Cee, Dach, Nordics",1,"CEE, DACH, Nordics"
-"English, B2 German, A2",1,English --- B2 \ \ German --- A2
+"Cascais, Portugal",1,"Cascais, Portugal"
+Canada,1,"Vancouver, Canada"
+"Buenos Aires, Argentina",1,"Buenos Aires, Argentina"
+"Bishkek, The Kyrgyz Republic",1,"Bishkek, the Kyrgyz Republic"
+Berlin,1,Berlin
+"Beijing, China",1,"Beijing, China"
+Kyiv,1,Kyiv / Madrid (remote)
 "Lausanne, Switzerland",1,"Lausanne, Switzerland"
-"Limassol, Cyprus",1,"Limassol, Cyprus"
-"Roosendaal, Oosterhout, Netherlands",1,"Roosendaal / Oosterhout, Netherlands"
-"Remote (Boston, Ma, Usa)",1,"Remote (Boston, MA, USA)"
-Product Company (25 Employees),1,Product Company (25 employees)
-Project: Pjsc Vtb Bank,1,Project: PJSC VTB Bank
-"Puteaux, France",1,"Puteaux, France"
-R&D Branch,1,R\&D branch
-Remote (Armenia),1,Remote (Armenia)
-"Remote (Based In Abu Dhabi), Company Based In Canada",1,Remote (based in Abu Dhabi); company based in Canada
-"(Торговля Электрооборудованием, Автоматизация Инженерных Систем, Умный Дом/Офис, Оборот 4+ Млрд)",1,"(торговля электрооборудованием, автоматизация инженерных систем, умный дом/офис; оборот 4+ млрд)"
-"Perth, Australia",1,"Perth, Australia"
-Remote (Moscow),1,Remote (Moscow)
-"Remote, International",1,Remote / International
-"Reus, Spain",1,"Reus, Spain"
-"Rhode Island, Usa",1,"Rhode Island, USA"
-"Riga, Latvia (Remote From Minsk)",1,"Riga, Latvia (remote from Minsk)"
-"Rome, Italy",1,"Rome, Italy"
-Portugal,1,Portugal
-"Paphos, Cyprus",1,"Paphos, Cyprus"
 Lisbon,1,Lisbon
-"Malaga, Spain",1,"Malaga, Spain"
-Location,1,"Location \,"
-"London, Se16",1,"London, SE16"
-"London, Uk (Remote)",1,"London, UK (Remote)"
-"M 'Alaga, Spain",1,"M\'alaga, Spain"
-Madrid (Hybrid),1,Madrid (Hybrid)
-"Madrid, Spain",1,"Madrid, Spain"
-"Miami, Usa",1,"Miami, USA"
+Lithuania,1,Литва/РБ
+"San Mateo, Ca",1,"San Mateo, CA"
+"S ~Ao Paulo, Brazil",1,"S\~ao Paulo, Brazil"
+"Ryde, Nsw 2112",1,"Ryde, NSW 2112"
+"Rome, Italy",1,"Rome, Italy"
+"Remote, International",1,Remote / International
+"(Торговля Электрооборудованием, Автоматизация Инженерных Систем, Умный Дом, Офис, Оборот 4+ Млрд)",1,"(торговля электрооборудованием, автоматизация инженерных систем, умный дом/офис; оборот 4+ млрд)"
+R&D Branch,1,R\&D branch
+"Puteaux, France",1,"Puteaux, France"
+Project: Pjsc Vtb Bank,1,Project: PJSC VTB Bank
+Product Company (25 Employees),1,Product Company (25 employees)
+Portugal,1,Portugal
+"Perth, Australia",1,"Perth, Australia"
 Online Casino Team Backed By A Large Entertainment Holding,1,Online casino team backed by a large entertainment holding
-Montenegro,1,Montenegro
-"Munich, Germany",1,"Munich, Germany"
-"New York, Ny",1,"New York, NY"
-"New York, United States (Remote)",1,"New York, United States (Remote)"
+Novosibirsk,1,Новосибирск
 Norway,1,Norway
-"Ny, Usa",1,"NY, USA"
-"Черногория, Герцег, Нови",1,"Черногория, Герцег-Нови"
+"New York, Ny",1,"New York, NY"
+Madrid (Hybrid),1,Madrid (Hybrid)
+"London, Se16",1,"London, SE16"
+Location,1,"Location \,"
+"Холдинг Т1, Гк Иннотех",1,"Холдинг Т1, ГК Иннотех"

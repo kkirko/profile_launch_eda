@@ -1,49 +1,49 @@
 region_norm,tool,count
-Not specified,Jira,14
-Not specified,Confluence,11
-Not specified,Git,7
-Not specified,Miro,7
-Not specified,Figma,6
 Moscow,Jira,38
-Moscow,Confluence,36
-Moscow,Miro,19
+Moscow,Confluence,37
+Moscow,Miro,20
 Moscow,Sql,19
-Moscow,Figma,12
-Russia,Confluence,7
-Russia,Git,7
-Russia,Sql,5
-Russia,Python,5
+Moscow,Figma,13
+Russia,Confluence,6
+Russia,Git,6
 Russia,Jira,5
-Minsk,Jira,10
+Russia,Miro,4
+Russia,Sql,4
+Minsk,Jira,11
 Minsk,Confluence,8
-Minsk,Miro,4
 Minsk,Figma,4
+Minsk,Miro,4
 Minsk,Sql,4
 Dubai,Power Bi,6
 Dubai,Jira,4
 Dubai,Sql,3
 Dubai,Figma,3
 Dubai,Google,3
-"Санкт, Петербург",Ci/Cd,4
-"Санкт, Петербург",Confluence,4
-"Санкт, Петербург",Django,4
-"Санкт, Петербург",Postgresql,4
-"Санкт, Петербург",Linux,3
-Almaty,Docker,3
-Almaty,Postgresql,3
-Almaty,Jira,2
-Almaty,Kafka,2
-Almaty,Confluence,2
+Saint Petersburg,Ci/Cd,5
+Saint Petersburg,Git,5
+Saint Petersburg,Postgresql,5
+Saint Petersburg,Python,4
+Saint Petersburg,Django,4
+Germany,Sql,5
+Germany,Jira,4
+Germany,Aws,3
+Germany,Kubernetes,3
+Germany,Confluence,3
 Warsaw,Jira,5
 Warsaw,Confluence,4
 Warsaw,Figma,3
 Warsaw,Miro,3
 Warsaw,Notion,2
+Remote,Sql,4
 Remote,Jira,4
 Remote,Notion,3
 Remote,Miro,3
-Remote,Sql,3
-Remote,Python,2
+Remote,Figma,2
+Almaty,Docker,3
+Almaty,Postgresql,3
+Almaty,Jira,2
+Almaty,Kafka,2
+Almaty,Confluence,2
 Tashkent,Jira,3
 Tashkent,Figma,3
 Tashkent,Sql,2

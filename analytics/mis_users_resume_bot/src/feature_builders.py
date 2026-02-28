@@ -13,7 +13,7 @@ from latex_parser import clean_text, is_tool_token, parse_period
 
 
 COUNTRY_SYNONYMS: Dict[str, set[str]] = {
-    "Russia": {"russia", "россия", "рф", "russian federation", "российская федерация"},
+    "Russia": {"russia", "россия", "рф", "russian federation", "российская федерация", "ru"},
     "Belarus": {"belarus", "беларусь", "белоруссия", "republic of belarus", "республика беларусь"},
     "Kazakhstan": {"kazakhstan", "казахстан", "republic of kazakhstan", "республика казахстан"},
     "UAE": {"uae", "u.a.e", "united arab emirates", "оаэ", "объединенные арабские эмираты"},
@@ -25,13 +25,37 @@ COUNTRY_SYNONYMS: Dict[str, set[str]] = {
     "Uzbekistan": {"uzbekistan", "узбекистан"},
     "Armenia": {"armenia", "армения"},
     "Lithuania": {"lithuania", "литва"},
+    "Serbia": {"serbia", "сербия"},
+    "Germany": {"germany", "германия", "deutschland"},
+    "United Kingdom": {"united kingdom", "uk", "great britain", "england", "великобритания"},
+    "USA": {"usa", "us", "united states", "соединенные штаты", "сша"},
+    "Cyprus": {"cyprus", "кипр"},
+    "Latvia": {"latvia", "латвия"},
+    "Bulgaria": {"bulgaria", "болгария"},
+    "Montenegro": {"montenegro", "черногория"},
+    "Netherlands": {"netherlands", "нидерланды", "holland"},
+    "Spain": {"spain", "испания"},
+    "Finland": {"finland", "финляндия"},
+    "Austria": {"austria", "австрия"},
+    "Canada": {"canada", "канада"},
+    "Thailand": {"thailand", "тайланд", "таиланд"},
+    "Israel": {"israel", "израиль"},
 }
 
 CITY_SYNONYMS: Dict[str, set[str]] = {
     "Moscow": {"moscow", "москва", "moskva"},
-    "Saint Petersburg": {"saint petersburg", "st petersburg", "st. petersburg", "санкт петербург", "спб"},
+    "Saint Petersburg": {
+        "saint petersburg",
+        "st petersburg",
+        "st. petersburg",
+        "st-petersburg",
+        "saint-petersburg",
+        "санкт петербург",
+        "санкт-петербург",
+        "спб",
+    },
     "Minsk": {"minsk", "минск"},
-    "Almaty": {"almaty", "алматы", "alma-ata", "алма-ата"},
+    "Almaty": {"almaty", "алматы", "alma-ata", "алма-ата", "alma ata"},
     "Kyiv": {"kyiv", "kiev", "киев"},
     "Tashkent": {"tashkent", "ташкент"},
     "Yerevan": {"yerevan", "ереван"},
@@ -40,7 +64,9 @@ CITY_SYNONYMS: Dict[str, set[str]] = {
     "Tbilisi": {"tbilisi", "тбилиси"},
     "Doha": {"doha", "доха"},
     "Dubai": {"dubai", "дубай"},
-    "Abu Dhabi": {"abu dhabi", "абу даби"},
+    "Abu Dhabi": {"abu dhabi", "абу даби", "abu-dhabi"},
+    "Samara": {"samara", "самара"},
+    "Novosibirsk": {"novosibirsk", "новосибирск"},
 }
 
 CITY_TO_COUNTRY: Dict[str, str] = {
@@ -57,6 +83,8 @@ CITY_TO_COUNTRY: Dict[str, str] = {
     "Doha": "Qatar",
     "Dubai": "UAE",
     "Abu Dhabi": "UAE",
+    "Samara": "Russia",
+    "Novosibirsk": "Russia",
 }
 
 ROLE_FAMILY_RULES = [
@@ -119,24 +147,34 @@ def canonical_text(value: object) -> str:
     return text
 
 
+def _geo_token(token: object) -> str:
+    text = canonical_text(token)
+    if not text:
+        return ""
+    text = text.replace("-", " ")
+    text = re.sub(r"[^\w\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
 def _normalize_geo_separators(text: str) -> str:
     out = text
     out = re.sub(r"[|•;]+", ",", out)
-    out = re.sub(r"\s+/\s+", ",", out)
-    out = re.sub(r"\s*-\s*", ",", out)
+    out = re.sub(r"\s*/\s*", ",", out)
+    out = re.sub(r"\s+(?:-|—|–)\s+", ",", out)
     out = re.sub(r"\s*,\s*", ",", out)
     out = re.sub(r",{2,}", ",", out)
     return out.strip(" ,")
 
 
 def _match_synonym(token: str, mapping: Dict[str, set[str]]) -> str:
-    t = canonical_text(token)
+    t = _geo_token(token)
     if not t:
         return ""
     padded = f" {t} "
     for canonical, variants in mapping.items():
         for variant in variants:
-            v = canonical_text(variant)
+            v = _geo_token(variant)
             if not v:
                 continue
             if t == v:
@@ -269,12 +307,22 @@ def normalize_region(region: object) -> str:
     if not c:
         return "Not specified"
 
-    if c in {"not specified", "other"}:
-        return "Not specified" if c == "not specified" else "Other"
-    if c in {"remote", "remotely", "удаленно", "удаленно, россия", "удаленно, remote"}:
+    if c in {"not specified", "unknown", "n/a"}:
+        return "Not specified"
+    if c in {"other"}:
+        return "Other"
+    if c in {"remote", "remotely", "удаленно", "удаленно,россия", "удаленно,remote", "онлайн"}:
         return "Remote"
 
-    tokens = [t for t in c.split(",") if t]
+    if "," not in c:
+        city_full = _match_synonym(c, CITY_SYNONYMS)
+        if city_full:
+            return city_full
+        country_full = _match_synonym(c, COUNTRY_SYNONYMS)
+        if country_full:
+            return country_full
+
+    tokens = [t.strip() for t in c.split(",") if t.strip()]
     if not tokens:
         tokens = [c]
 

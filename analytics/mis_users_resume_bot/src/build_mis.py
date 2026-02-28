@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import re
+import textwrap
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -49,6 +50,8 @@ DATE_COLUMNS = [
     "cvAnalysisStartedAt",
 ]
 
+GENERIC_EXCLUDE = {"other", "not specified", "unknown"}
+
 
 def pct(n: int, d: int) -> float:
     return round((n / d * 100), 1) if d else 0.0
@@ -62,6 +65,24 @@ def save_table(df: pd.DataFrame, path: Path) -> None:
 def shorten(value: object, max_len: int = 44) -> str:
     text = str(value)
     return text if len(text) <= max_len else text[: max_len - 3] + "..."
+
+
+def wrap_label(value: object, max_len: int = 44, wrap_width: int = 28) -> str:
+    text = shorten(value, max_len=max_len)
+    return textwrap.fill(text, width=wrap_width)
+
+
+def filter_generic(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    mask = ~df[col].fillna("").astype(str).str.strip().str.lower().isin(GENERIC_EXCLUDE)
+    return df[mask].copy()
+
+
+def is_meaningful_barplot(df: pd.DataFrame, label_col: str, value_col: str) -> bool:
+    if df.empty:
+        return False
+    uniq = df[label_col].fillna("").astype(str).str.strip().replace("", np.nan).dropna().nunique()
+    total = float(df[value_col].fillna(0).sum())
+    return bool(uniq >= 2 and total >= 2)
 
 
 def non_empty(value: object) -> bool:
@@ -140,14 +161,25 @@ def plot_line(df: pd.DataFrame, x_col: str, y_col: str, out_path: Path, title: s
     plt.close(fig)
 
 
-def plot_barh(df: pd.DataFrame, label_col: str, value_col: str, out_path: Path, title: str, top_n: int) -> None:
-    if df.empty:
-        return
+def plot_barh(
+    df: pd.DataFrame,
+    label_col: str,
+    value_col: str,
+    out_path: Path,
+    title: str,
+    top_n: int,
+    max_label_len: int = 44,
+    wrap_width: int = 30,
+) -> bool:
+    if not is_meaningful_barplot(df, label_col, value_col):
+        return False
     top = df.head(top_n).copy()
-    labels = [shorten(x, 55) for x in top[label_col].astype(str)]
+    if not is_meaningful_barplot(top, label_col, value_col):
+        return False
+    labels = [wrap_label(x, max_len=max_label_len, wrap_width=wrap_width) for x in top[label_col].astype(str)]
     values = top[value_col].astype(float).values
 
-    fig, ax = plt.subplots(figsize=(12.5, max(5.5, 0.5 * len(top) + 2)))
+    fig, ax = plt.subplots(figsize=(14.0, max(6.0, 0.55 * len(top) + 2.2)))
     colors = sns.color_palette("viridis", n_colors=len(top))
     ax.barh(labels, values, color=colors)
     ax.invert_yaxis()
@@ -160,9 +192,11 @@ def plot_barh(df: pd.DataFrame, label_col: str, value_col: str, out_path: Path, 
     ax.set_xlabel("Candidates")
     ax.set_ylabel("")
     ax.grid(axis="x", alpha=0.25)
+    fig.subplots_adjust(left=0.38, right=0.97, top=0.92, bottom=0.08)
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
+    return True
 
 
 def plot_heatmap_share(matrix: pd.DataFrame, out_path: Path, title: str, xlabel: str, ylabel: str) -> None:
@@ -197,6 +231,8 @@ def plot_heatmap_share(matrix: pd.DataFrame, out_path: Path, title: str, xlabel:
 
 def plot_stacked_100(matrix_counts: pd.DataFrame, out_path: Path, title: str, x_label: str) -> pd.DataFrame:
     if matrix_counts.empty:
+        return pd.DataFrame()
+    if matrix_counts.shape[0] < 2 or matrix_counts.to_numpy().sum() < 2:
         return pd.DataFrame()
 
     share = row_normalize_percent(matrix_counts)
@@ -239,24 +275,30 @@ def plot_donut(series: pd.Series, out_path: Path, title: str) -> pd.DataFrame:
     if len(data) < 3:
         return pd.DataFrame(columns=["category", "count", "share_%"])
 
-    fig, ax = plt.subplots(figsize=(4.2, 4.2))
+    fig, ax = plt.subplots(figsize=(4.0, 4.0))
     colors = sns.color_palette("Set2", n_colors=len(data))
-    wedges, texts, autotexts = ax.pie(
+    wedges, _, autotexts = ax.pie(
         data.values,
-        labels=[shorten(i, 18) for i in data.index],
+        labels=None,
         autopct=lambda p: f"{p:.1f}%",
         startangle=90,
         counterclock=False,
         wedgeprops={"width": 0.42, "edgecolor": "white"},
         colors=colors,
-        pctdistance=0.74,
-        labeldistance=1.02,
+        pctdistance=0.76,
     )
-    for t in texts:
-        t.set_fontsize(8)
     for t in autotexts:
         t.set_fontsize(7)
-    ax.set_title(title, fontsize=10)
+    ax.legend(
+        wedges,
+        [shorten(i, 16) for i in data.index],
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.18),
+        ncol=2,
+        frameon=False,
+        fontsize=7,
+    )
+    ax.set_title(title, fontsize=9)
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
@@ -469,6 +511,16 @@ def build_notebook(path: Path) -> None:
     path.write_text(json.dumps(notebook_json, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _img_md(base_dir: Path, rel_path: str, title: str) -> str:
+    return f"![{title}]({rel_path})" if (base_dir / rel_path).exists() else ""
+
+
+def _to_markdown_top(df: pd.DataFrame, cols: List[str], n: int = 3) -> str:
+    if df.empty:
+        return "(empty)"
+    return df[cols].head(n).to_markdown(index=False)
+
+
 def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     profile = tables["dataset_profile"]
     validation = tables["validation_summary"]
@@ -491,17 +543,17 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         geo_audit["raw_region"].astype(str).str.contains(r"russia|россия|рф|russian federation", case=False, regex=True)
         & geo_audit["region_norm"].astype(str).eq("Russia")
     ]["count"].sum()
-    region_ns_share = float(
-        region_ns_breakdown.loc[region_ns_breakdown["metric"] == "share_of_dataset_%", "value"].iloc[0]
-    ) if not region_ns_breakdown.empty else 0.0
-    company_ns_share = float(
-        company_ns_breakdown.loc[company_ns_breakdown["metric"] == "share_of_dataset_%", "value"].iloc[0]
-    ) if not company_ns_breakdown.empty else 0.0
-    alt_geo_used = (
-        int(region_alt_cols["selected_in_fallback"].fillna(False).sum())
-        if "selected_in_fallback" in region_alt_cols.columns
-        else 0
+    region_ns_share = (
+        float(region_ns_breakdown.loc[region_ns_breakdown["metric"] == "share_of_dataset_%", "value"].iloc[0])
+        if not region_ns_breakdown.empty
+        else 0.0
     )
+    company_ns_share = (
+        float(company_ns_breakdown.loc[company_ns_breakdown["metric"] == "share_of_dataset_%", "value"].iloc[0])
+        if not company_ns_breakdown.empty
+        else 0.0
+    )
+    alt_geo_used = int(region_alt_cols["selected_in_fallback"].fillna(False).sum()) if "selected_in_fallback" in region_alt_cols.columns else 0
 
     observations = [
         f"База содержит {int(float(p['users_total']))} профилей.",
@@ -518,133 +570,250 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         f"Топ tools: {', '.join(top_tools['token_display'].tolist())}.",
     ]
 
-    diagnostics_md = diagnostics.to_markdown(index=False)
-    validation_md = validation.to_markdown(index=False)
-    top_domains_md = top_domains[["domain_filled", "count"]].to_markdown(index=False) if not top_domains.empty else "(empty)"
-    top_regions_md = top_regions[["region_display", "count"]].to_markdown(index=False) if not top_regions.empty else "(empty)"
-    top_companies_md = top_companies[["company_display", "count"]].to_markdown(index=False) if not top_companies.empty else "(empty)"
-    deep_dive_summary_md = tables["not_specified_deep_dive_summary"].to_markdown(index=False)
+    lines: List[str] = []
+    lines.append("# MIS: Users Resume Bot (Candidate Analytics)")
+    lines.append("")
+    lines.append("## 1) Summary")
+    lines.append(f"- Users total: **{int(float(p['users_total']))}**")
+    lines.append(f"- Coverage `cvEnhancedResult`: **{float(v['coverage_cvEnhancedResult_%']):.1f}%**")
+    lines.append(f"- Coverage `talentCard.jobs`: **{float(v['coverage_talentCard_jobs_%']):.1f}%**")
+    lines.append(f"- Coverage `talentCard.overall_skills`: **{float(v['coverage_overall_skills_%']):.1f}%**")
+    lines.append(f"- Coverage `talentCard.specialist_category`: **{float(v['coverage_specialist_category_%']):.1f}%**")
+    lines.append("")
+    lines.append("Top-3 domains (excluding Other/Not specified):")
+    lines.append(_to_markdown_top(top_domains, ["domain_filled", "count"]))
+    lines.append("")
+    lines.append("Top-3 regions (excluding Other/Not specified):")
+    lines.append(_to_markdown_top(top_regions, ["region_display", "count"]))
+    lines.append("")
+    lines.append("Top-3 companies (excluding Other/Not specified):")
+    lines.append(_to_markdown_top(top_companies, ["company_display", "count"]))
+    lines.append("")
+    lines.append("### Key observations")
+    lines.extend([f"- {x}" for x in observations])
+    lines.append("")
+    lines.append("## 2) Coverage / Parsing validation")
+    lines.append(validation.to_markdown(index=False))
+    lines.append("")
+    lines.append("Columns inventory (real CSV structure + non-null profile + length stats):")
+    lines.append("- `outputs/tables/columns_inventory.csv`")
+    lines.append("")
+    lines.append("## 3) Domains & Geography")
+    for rel, title in [
+        ("outputs/figures/02_top_domains.png", "Top domains"),
+        ("outputs/figures/03_top_regions.png", "Top regions"),
+        ("outputs/figures/06_heatmap_domain_region_share.png", "Domain x Region heatmap (row share)"),
+        ("outputs/figures/07_stacked_region_domain_top10.png", "Region composition by domains (100% stacked)"),
+    ]:
+        img = _img_md(base_dir, rel, title)
+        if img:
+            lines.append(img)
+    lines.append("")
+    lines.append("## 4) Companies & Seniority")
+    for rel, title in [
+        ("outputs/figures/04_top_companies.png", "Top companies"),
+        ("outputs/figures/05_top_industries_subset.png", "Top industries (subset)"),
+        ("outputs/figures/08_stacked_seniority_company_top15.png", "Seniority x Company (100% stacked)"),
+        ("outputs/figures/09_stacked_domain_company_top15.png", "Domain x Company (100% stacked)"),
+    ]:
+        img = _img_md(base_dir, rel, title)
+        if img:
+            lines.append(img)
+    lines.append("")
+    lines.append("## 5) Skills & Stack")
+    for rel, title in [
+        ("outputs/figures/10_top_tools.png", "Top tools"),
+        ("outputs/figures/11_top_skills.png", "Top skills"),
+        ("outputs/figures/12_heatmap_domain_tools_share.png", "Domain x Tools heatmap (row share)"),
+    ]:
+        img = _img_md(base_dir, rel, title)
+        if img:
+            lines.append(img)
+    lines.append("")
+    lines.append("## 6) Стратификация выборки")
+    donut_a = (base_dir / "outputs/figures/13_donut_seniority_filled.png").exists()
+    donut_b = (base_dir / "outputs/figures/14_donut_cv_generation_language.png").exists()
+    if donut_a and donut_b:
+        lines.append('<p><img src="outputs/figures/13_donut_seniority_filled.png" width="49%"><img src="outputs/figures/14_donut_cv_generation_language.png" width="49%"></p>')
+    else:
+        if donut_a:
+            lines.append("![Seniority mix](outputs/figures/13_donut_seniority_filled.png)")
+        if donut_b:
+            lines.append("![CV generation language mix](outputs/figures/14_donut_cv_generation_language.png)")
+    img_strata = _img_md(base_dir, "outputs/figures/15_strata_top20.png", "Top-20 strata")
+    if img_strata:
+        lines.append("")
+        lines.append(img_strata)
+    lines.append("")
+    lines.append("Ключевые таблицы стратификации:")
+    lines.extend(
+        [
+            "- `outputs/tables/strata_top20.csv`",
+            "- `outputs/tables/domain_distribution.csv`",
+            "- `outputs/tables/role_family_distribution.csv`",
+            "- `outputs/tables/seniority_distribution.csv`",
+            "- `outputs/tables/experience_bin_distribution.csv`",
+            "- `outputs/tables/leadership_distribution.csv`",
+            "- `outputs/tables/cv_generation_language_distribution.csv`",
+        ]
+    )
+    lines.append("")
+    lines.append("## 7) Not specified research")
+    lines.append(diagnostics.to_markdown(index=False))
+    lines.append("")
+    lines.append("Пустоты уменьшались по fallback-цепочкам:")
+    lines.append("- `region_filled`: `latex_expheader -> talentCard -> latex_header -> alt_geo_columns`")
+    lines.append("- `seniority_filled`: `talentCard -> inferred_job_title -> inferred_header_role`")
+    lines.append("- `domain_filled`: `talentCard.specialist_category -> inferred role family`")
+    lines.append("")
+    lines.append("Таблицы исследования Not specified:")
+    lines.extend(
+        [
+            "- `outputs/tables/not_specified_deep_dive_summary.csv`",
+            "- `outputs/tables/not_specified_deep_dive_region_not_specified_breakdown.csv`",
+            "- `outputs/tables/not_specified_deep_dive_region_not_specified_domain.csv`",
+            "- `outputs/tables/not_specified_deep_dive_region_not_specified_seniority.csv`",
+            "- `outputs/tables/not_specified_deep_dive_region_alt_columns.csv`",
+            "- `outputs/tables/not_specified_deep_dive_company_not_specified_breakdown.csv`",
+            "- `outputs/tables/not_specified_deep_dive_company_not_specified_job_titles.csv`",
+            "- `outputs/tables/not_specified_deep_dive_company_not_specified_region.csv`",
+        ]
+    )
+    lines.append("")
+    lines.append("## 8) Domain Other")
+    lines.append("Исследование домена `Other` вынесено в отдельный отчёт: `REPORT_OTHERS.md`.")
+    lines.append("")
+    lines.append("## 9) Appendix")
+    lines.append("Артефакты:")
+    lines.extend(
+        [
+            "- Figures: `outputs/figures/*.png`",
+            "- Tables: `outputs/tables/*.csv`",
+            "- Other report: `REPORT_OTHERS.md` + `outputs/others/*`",
+            "- Notebook: `notebooks/mis_users_resume_bot.ipynb`",
+            "- Geo mapping audit: `outputs/tables/geo_mapping_audit.csv`",
+            "- Geo mapping top-50: `outputs/tables/geo_mapping_top50.csv`",
+        ]
+    )
+    lines.append("")
+    lines.append("How to reproduce:")
+    lines.append("```bash")
+    lines.append("python analytics/mis_users_resume_bot/src/build_mis.py \\")
+    lines.append("  --input /mnt/data/prointerview-prod.users.csv \\")
+    lines.append("  --base-dir analytics/mis_users_resume_bot")
+    lines.append("```")
+    lines.append("")
 
-    readme = f"""# MIS: Users Resume Bot (Candidate Analytics)
+    (base_dir / "README.md").write_text("\n".join(lines), encoding="utf-8")
 
-## 1) Summary
-- Users total: **{int(float(p['users_total']))}**
-- Coverage `cvEnhancedResult`: **{float(v['coverage_cvEnhancedResult_%']):.1f}%**
-- Coverage `talentCard.jobs`: **{float(v['coverage_talentCard_jobs_%']):.1f}%**
-- Coverage `talentCard.overall_skills`: **{float(v['coverage_overall_skills_%']):.1f}%**
-- Coverage `talentCard.specialist_category`: **{float(v['coverage_specialist_category_%']):.1f}%**
 
-Top-3 domains:
-{top_domains_md}
+def _other_bucket(text: str) -> str:
+    t = canonical_text(text)
+    rules = [
+        ("Data/Analytics", [r"\bdata\b", r"analyt", r"\bbi\b", r"ml", r"ai", r"sql", r"python"]),
+        ("SWE/IT", [r"engineer", r"developer", r"devops", r"sre", r"backend", r"frontend", r"fullstack", r"it"]),
+        ("Product/Project", [r"product", r"project", r"program", r"scrum", r"pm\b", r"delivery"]),
+        ("Design", [r"design", r"ux", r"ui", r"figma"]),
+        ("Sales/Marketing", [r"sales", r"marketing", r"growth", r"crm"]),
+        ("HR", [r"hr", r"recruit", r"talent", r"кадр"]),
+        ("Finance/Legal", [r"finance", r"audit", r"account", r"legal", r"юрист", r"финанс"]),
+        ("Ops", [r"operations", r"logistic", r"supply", r"admin", r"операц", r"админ"]),
+        ("Education/Research", [r"research", r"education", r"teacher", r"lect", r"науч", r"образован"]),
+        ("Healthcare", [r"health", r"medical", r"clinic", r"мед"]),
+    ]
+    for label, patterns in rules:
+        if any(re.search(p, t) for p in patterns):
+            return label
+    return "Other-unknown"
 
-Top-3 regions:
-{top_regions_md}
 
-Top-3 companies:
-{top_companies_md}
+def build_others_report(base_dir: Path, others_tables: Dict[str, pd.DataFrame], others_stats: Dict[str, float]) -> None:
+    def md(df_name: str, cols: List[str], n: int) -> str:
+        frame = others_tables.get(df_name, pd.DataFrame())
+        if frame.empty:
+            return "(empty)"
+        return frame[cols].head(n).to_markdown(index=False)
 
-### Key observations
-{"\n".join([f"- {x}" for x in observations])}
+    lines: List[str] = []
+    lines.append("# REPORT_OTHERS: Domain Other Deep Dive")
+    lines.append("")
+    lines.append("## 1) Size")
+    lines.append(f"- Other users: **{int(others_stats.get('other_users', 0))}**")
+    lines.append(f"- Share of all users: **{others_stats.get('share_all_pct', 0.0):.1f}%**")
+    lines.append(f"- Other users with `cvEnhancedResult`: **{int(others_stats.get('other_with_cv_count', 0))}**")
+    lines.append(f"- Share among users with `cvEnhancedResult`: **{others_stats.get('share_among_cv_pct', 0.0):.1f}%**")
+    lines.append("")
+    lines.append("## 2) Coverage")
+    lines.append(md("coverage", ["metric", "value"], 20))
+    lines.append("")
+    lines.append("## 3) Who Are These Candidates")
+    lines.append("Top-30 titles across all jobs history:")
+    lines.append(md("titles_all_history", ["job_title", "count", "share_%"], 30))
+    lines.append("")
+    lines.append("Top-20 current titles:")
+    lines.append(md("current_titles", ["current_job_title_filled", "count", "share_%"], 20))
+    lines.append("")
+    lines.append("Top-30 companies across all jobs history:")
+    lines.append(md("companies_all_history", ["company", "count", "share_%"], 30))
+    lines.append("")
+    lines.append("Most frequent title keywords:")
+    lines.append(md("title_keywords", ["title_keyword", "count", "share_%"], 30))
+    lines.append("")
+    lines.append("## 4) Skills & Stack")
+    lines.append("Top tools:")
+    lines.append(md("tools_top", ["tool", "count", "share_%"], 30))
+    lines.append("")
+    lines.append("Top skills:")
+    lines.append(md("skills_top", ["skill", "count", "share_%"], 30))
+    lines.append("")
+    lines.append("## 5) Geography & Seniority")
+    lines.append("Top regions:")
+    lines.append(md("regions_top", ["region_norm", "count", "share_%"], 20))
+    lines.append("")
+    lines.append("Seniority:")
+    lines.append(md("seniority_top", ["seniority_filled", "count", "share_%"], 20))
+    lines.append("")
+    lines.append("## 6) Rule-Based Buckets")
+    lines.append(md("bucket_distribution", ["bucket", "count", "share_%"], 20))
+    lines.append("")
+    lines.append("## 7) Figures")
+    for rel, title in [
+        ("outputs/others/figures/01_other_titles_history_top30.png", "Top titles across all jobs"),
+        ("outputs/others/figures/02_other_companies_history_top30.png", "Top companies across all jobs"),
+        ("outputs/others/figures/03_other_tools_top30.png", "Top tools in Other"),
+        ("outputs/others/figures/04_other_bucket_distribution.png", "Rule-based buckets"),
+    ]:
+        img = _img_md(base_dir, rel, title)
+        if img:
+            lines.append(img)
+    lines.append("")
+    lines.append("## 8) Appendix")
+    lines.append("- Tables: `outputs/others/tables/*.csv`")
+    lines.append("- Figures: `outputs/others/figures/*.png`")
+    lines.append("")
 
-## 2) Coverage / Parsing validation
-{validation_md}
-
-Columns inventory (real CSV structure + non-null profile + length stats):
-- `outputs/tables/columns_inventory.csv`
-
-## 3) Domains & Geography
-![Weekly signups](outputs/figures/01_registrations_weekly.png)
-![Top domains](outputs/figures/02_top_domains.png)
-![Top regions](outputs/figures/03_top_regions.png)
-![Domain x Region heatmap (row share)](outputs/figures/06_heatmap_domain_region_share.png)
-![Region composition by domains (100% stacked)](outputs/figures/07_stacked_region_domain_top10.png)
-
-## 4) Companies & Seniority
-![Top companies](outputs/figures/04_top_companies.png)
-![Top industries (subset)](outputs/figures/05_top_industries_subset.png)
-![Seniority x Company (100% stacked)](outputs/figures/08_stacked_seniority_company_top15.png)
-![Domain x Company (100% stacked)](outputs/figures/09_stacked_domain_company_top15.png)
-
-## 5) Skills & Stack
-![Top tools](outputs/figures/10_top_tools.png)
-![Top skills](outputs/figures/11_top_skills.png)
-![Domain x Tools heatmap (row share)](outputs/figures/12_heatmap_domain_tools_share.png)
-
-## 6) Стратификация выборки
-<p>
-  <img src="outputs/figures/13_donut_seniority_filled.png" width="48%" />
-  <img src="outputs/figures/14_donut_cv_generation_language.png" width="48%" />
-</p>
-
-![Top-20 strata](outputs/figures/15_strata_top20.png)
-
-Ключевые таблицы стратификации:
-- `outputs/tables/strata_top20.csv`
-- `outputs/tables/domain_distribution.csv`
-- `outputs/tables/role_family_distribution.csv`
-- `outputs/tables/seniority_distribution.csv`
-- `outputs/tables/experience_bin_distribution.csv`
-- `outputs/tables/leadership_distribution.csv`
-- `outputs/tables/cv_generation_language_distribution.csv`
-
-## 7) Not specified diagnostics
-{diagnostics_md}
-
-Пустоты уменьшались по fallback-цепочкам:
-- `region_filled`: `latex_expheader -> talentCard -> latex_header -> alt_geo_columns`
-- `seniority_filled`: `talentCard -> inferred_job_title -> inferred_header_role`
-- `domain_filled`: `talentCard.specialist_category -> inferred role family`
-
-## 8) Other/Not specified deep dive
-{deep_dive_summary_md}
-
-Таблицы deep dive:
-- `outputs/tables/not_specified_deep_dive_domain_titles.csv`
-- `outputs/tables/not_specified_deep_dive_domain_selected_position.csv`
-- `outputs/tables/not_specified_deep_dive_domain_tools.csv`
-- `outputs/tables/not_specified_deep_dive_domain_skills.csv`
-- `outputs/tables/not_specified_deep_dive_region_not_specified_breakdown.csv`
-- `outputs/tables/not_specified_deep_dive_region_not_specified_domain.csv`
-- `outputs/tables/not_specified_deep_dive_region_not_specified_seniority.csv`
-- `outputs/tables/not_specified_deep_dive_region_alt_columns.csv`
-- `outputs/tables/not_specified_deep_dive_company_not_specified_breakdown.csv`
-- `outputs/tables/not_specified_deep_dive_company_not_specified_job_titles.csv`
-- `outputs/tables/not_specified_deep_dive_company_not_specified_region.csv`
-
-Графики deep dive:
-![Domain Other/Not specified titles](outputs/figures/16_deep_dive_domain_titles.png)
-![Region Not specified by domain](outputs/figures/17_deep_dive_region_not_specified_domain.png)
-![Company Not specified top titles](outputs/figures/18_deep_dive_company_not_specified_titles.png)
-
-## 9) Appendix
-Артефакты:
-- Figures: `outputs/figures/*.png`
-- Tables: `outputs/tables/*.csv`
-- Notebook: `notebooks/mis_users_resume_bot.ipynb`
-- Geo mapping audit: `outputs/tables/geo_mapping_audit.csv`
-
-How to reproduce:
-```bash
-python analytics/mis_users_resume_bot/src/build_mis.py \
-  --input /mnt/data/prointerview-prod.users.csv \
-  --base-dir analytics/mis_users_resume_bot
-```
-"""
-
-    (base_dir / "README.md").write_text(readme, encoding="utf-8")
+    (base_dir / "REPORT_OTHERS.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     base = Path(base_dir)
     tables_dir = base / "outputs" / "tables"
     figures_dir = base / "outputs" / "figures"
+    others_tables_dir = base / "outputs" / "others" / "tables"
+    others_figures_dir = base / "outputs" / "others" / "figures"
     tables_dir.mkdir(parents=True, exist_ok=True)
     figures_dir.mkdir(parents=True, exist_ok=True)
+    others_tables_dir.mkdir(parents=True, exist_ok=True)
+    others_figures_dir.mkdir(parents=True, exist_ok=True)
 
     # Prevent stale artifacts from previous report versions.
     for old_csv in tables_dir.glob("*.csv"):
         old_csv.unlink()
     for old_png in figures_dir.glob("*.png"):
+        old_png.unlink()
+    for old_csv in others_tables_dir.glob("*.csv"):
+        old_csv.unlink()
+    for old_png in others_figures_dir.glob("*.png"):
         old_png.unlink()
 
     users_raw = pd.read_csv(input_path, low_memory=False)
@@ -868,12 +1037,6 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     )
 
     # Distributions.
-    users_enriched["created_week"] = (
-        users_enriched["createdAt"].dt.tz_convert(None).dt.to_period("W").astype(str)
-        if getattr(users_enriched["createdAt"].dt, "tz", None) is not None
-        else users_enriched["createdAt"].dt.to_period("W").astype(str)
-    )
-    weekly_signups = users_enriched.groupby("created_week").size().reset_index(name="new_users").sort_values("created_week")
 
     domain_distribution = users_enriched["domain_filled"].fillna("Not specified").astype(str).value_counts().rename_axis("domain_filled").reset_index(name="count")
     role_family_distribution = users_enriched["role_family"].fillna("Other").astype(str).value_counts().rename_axis("role_family").reset_index(name="count")
@@ -899,22 +1062,10 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     company_distribution = distribution_with_display(users_enriched, "company_filled", "company_norm", "company")
     industry_distribution = distribution_with_display(users_enriched, "industry_filled", "industry_norm", "industry")
 
-    domain_distribution_plot = domain_distribution[
-        ~domain_distribution["domain_filled"].astype(str).str.lower().isin({"other", "not specified"})
-    ].copy()
-    region_distribution_plot = region_distribution[
-        ~region_distribution["region_norm"].astype(str).str.lower().isin({"other", "not specified"})
-    ].copy()
-    company_distribution_plot = company_distribution[
-        ~company_distribution["company_norm"].astype(str).str.lower().isin({"other", "not specified"})
-    ].copy()
-
-    if domain_distribution_plot.empty:
-        domain_distribution_plot = domain_distribution.copy()
-    if region_distribution_plot.empty:
-        region_distribution_plot = region_distribution.copy()
-    if company_distribution_plot.empty:
-        company_distribution_plot = company_distribution.copy()
+    domain_distribution_plot = filter_generic(domain_distribution, "domain_filled")
+    region_distribution_plot = filter_generic(region_distribution, "region_norm")
+    company_distribution_plot = filter_generic(company_distribution, "company_norm")
+    seniority_distribution_plot = filter_generic(seniority_distribution, "seniority_filled")
 
     industry_subset = industry_distribution[industry_distribution["industry_norm"] != "Not specified"].copy()
 
@@ -928,44 +1079,41 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
 
     # Domain x Region (heatmap row-share) and stacked by regions.
     domain_analysis = users_enriched[
-        ~users_enriched["domain_filled"].fillna("Not specified").astype(str).str.lower().isin({"other", "not specified"})
+        ~users_enriched["domain_filled"].fillna("Not specified").astype(str).str.lower().isin(GENERIC_EXCLUDE)
     ].copy()
-    if domain_analysis.empty:
-        domain_analysis = users_enriched.copy()
+    domain_top_values = domain_distribution_plot.head(10)["domain_filled"].astype(str).tolist()
+    region_top_values = region_distribution_plot.head(15)["region_norm"].astype(str).tolist()
+    domain_analysis = domain_analysis[
+        domain_analysis["domain_filled"].astype(str).isin(domain_top_values)
+        & domain_analysis["region_norm"].astype(str).isin(region_top_values)
+    ].copy()
 
-    domain_small = limit_categories(domain_analysis["domain_filled"], max_n=10, other_label="Other")
-    region_small = limit_categories(domain_analysis["region_norm"], max_n=15, other_label="Other")
-
-    domain_region_counts = pd.crosstab(domain_small, region_small)
+    domain_region_counts = pd.crosstab(domain_analysis["domain_filled"], domain_analysis["region_norm"])
     domain_region_share = row_normalize_percent(domain_region_counts)
 
     region_domain_base = users_enriched[
-        ~users_enriched["region_norm"].fillna("Not specified").astype(str).str.lower().isin({"not specified", "other"})
+        ~users_enriched["region_norm"].fillna("Not specified").astype(str).str.lower().isin(GENERIC_EXCLUDE)
+        & users_enriched["domain_filled"].astype(str).isin(domain_top_values)
     ].copy()
-    if region_domain_base.empty:
-        region_domain_base = users_enriched.copy()
-
-    region_top10 = limit_categories(region_domain_base["region_norm"], max_n=10, other_label="Other")
-    domain_for_regions = limit_categories(region_domain_base["domain_filled"], max_n=10, other_label="Other")
-    region_domain_counts = pd.crosstab(region_top10, domain_for_regions)
+    region_top10_values = region_distribution_plot.head(10)["region_norm"].astype(str).tolist()
+    region_domain_base = region_domain_base[region_domain_base["region_norm"].astype(str).isin(region_top10_values)].copy()
+    region_domain_counts = pd.crosstab(region_domain_base["region_norm"], region_domain_base["domain_filled"])
 
     # Seniority x Company and Domain x Company as 100% stacked bars.
     company_analysis = users_enriched[
-        ~users_enriched["company_norm"].fillna("Not specified").astype(str).str.lower().isin({"not specified", "other"})
+        ~users_enriched["company_norm"].fillna("Not specified").astype(str).str.lower().isin(GENERIC_EXCLUDE)
     ].copy()
-    if company_analysis.empty:
-        company_analysis = users_enriched.copy()
+    top_company_values = company_distribution_plot.head(15)["company_norm"].astype(str).tolist()
+    company_analysis = company_analysis[company_analysis["company_norm"].astype(str).isin(top_company_values)].copy()
 
-    company_small = limit_categories(company_analysis["company_norm"], max_n=15, other_label="Other")
     seniority_small = company_analysis["seniority_filled"].fillna("Not specified")
-    seniority_company_counts = pd.crosstab(company_small, seniority_small)
-    for cat in seniority_order:
-        if cat not in seniority_company_counts.columns:
-            seniority_company_counts[cat] = 0
-    seniority_company_counts = seniority_company_counts[seniority_order]
-    seniority_company_counts = seniority_company_counts.sort_values(by=seniority_order, ascending=False)
+    seniority_small = seniority_small.where(~seniority_small.astype(str).str.lower().isin(GENERIC_EXCLUDE), np.nan)
+    seniority_company_counts = pd.crosstab(company_analysis["company_norm"], seniority_small).dropna(axis=1, how="all")
 
-    domain_company_counts = pd.crosstab(company_small, company_analysis["domain_filled"])
+    domain_company_base = company_analysis[
+        company_analysis["domain_filled"].astype(str).isin(domain_top_values)
+    ].copy()
+    domain_company_counts = pd.crosstab(domain_company_base["company_norm"], domain_company_base["domain_filled"])
 
     # Domain x Tools heatmap (top-8 domains x top-20 tools, row share).
     domain_top8 = domain_distribution_plot.head(8)["domain_filled"].astype(str).tolist()
@@ -994,7 +1142,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             tools_by_domain_rows.append({"domain": domain, "tool": r["token_display"], "count": int(r["count"])})
     tools_by_domain_top = pd.DataFrame(tools_by_domain_rows)
 
-    region_top10_values = region_distribution.head(10)["region_norm"].tolist()
+    region_top10_values = region_distribution_plot.head(10)["region_norm"].tolist()
     tools_by_region_rows: List[Dict[str, object]] = []
     for region in region_top10_values:
         mask = users_enriched["region_norm"].astype(str).eq(region)
@@ -1036,40 +1184,6 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     not_specified_deep_dive_summary = not_specified_diagnostics[
         not_specified_diagnostics["field"].isin(deep_fields)
     ].copy()
-
-    # Domain = Other/Not specified deep dive.
-    domain_deep = users_enriched[
-        users_enriched["domain_filled"].fillna("Not specified").astype(str).isin(["Other", "Not specified"])
-    ].copy()
-    domain_titles = (
-        domain_deep.groupby(["domain_filled", "current_job_title_filled"])
-        .size()
-        .reset_index(name="count")
-        .sort_values("count", ascending=False)
-        .head(20)
-    )
-    domain_selected_position = (
-        domain_deep.groupby(["domain_filled", "selectedPosition"])
-        .size()
-        .reset_index(name="count")
-        .sort_values("count", ascending=False)
-        .head(20)
-    )
-
-    domain_tools_rows: List[Dict[str, object]] = []
-    domain_skills_rows: List[Dict[str, object]] = []
-    for dom in ["Other", "Not specified"]:
-        subset = domain_deep[domain_deep["domain_filled"] == dom]
-        local_tools = top_tokens_from_list(subset, "tools_list", 20, "tool")
-        local_skills = top_tokens_from_list(subset, "skills_list", 20, "skill")
-        if not local_tools.empty:
-            local_tools["domain_filled"] = dom
-            domain_tools_rows.append(local_tools)
-        if not local_skills.empty:
-            local_skills["domain_filled"] = dom
-            domain_skills_rows.append(local_skills)
-    domain_tools_deep = pd.concat(domain_tools_rows, ignore_index=True) if domain_tools_rows else pd.DataFrame(columns=["tool", "count", "share_%", "domain_filled"])
-    domain_skills_deep = pd.concat(domain_skills_rows, ignore_index=True) if domain_skills_rows else pd.DataFrame(columns=["skill", "count", "share_%", "domain_filled"])
 
     # Region = Not specified deep dive.
     region_ns = users_enriched[users_enriched["region_norm"].fillna("Not specified").astype(str).str.lower().eq("not specified")].copy()
@@ -1130,10 +1244,16 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     geo_mapping_audit = (
         users_enriched.groupby(["region_filled", "region_norm"]).size().reset_index(name="count").rename(columns={"region_filled": "raw_region"}).sort_values("count", ascending=False)
     )
+    geo_mapping_top50 = geo_mapping_audit.head(50).copy()
 
     region_mappings = build_mapping_table(users_enriched["region_filled"], users_enriched["region_norm"], "region")
     company_mappings = build_mapping_table(users_enriched["company_filled"], users_enriched["company_norm"], "company")
     industry_mappings = build_mapping_table(users_enriched["industry_filled"], users_enriched["industry_norm"], "industry")
+
+    top_domains_full = domain_distribution_plot[["domain_filled", "count"]].head(10).copy()
+    top_regions_full = region_distribution_plot[["region_display", "region_norm", "count"]].head(15).copy()
+    top_companies_full = company_distribution_plot[["company_display", "company_norm", "count"]].head(15).copy()
+    top_seniority_full = seniority_distribution_plot[["seniority_filled", "count"]].head(10).copy()
 
     dataset_profile = pd.DataFrame(
         {
@@ -1168,19 +1288,23 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "mismatch_samples": mismatch_samples,
         "missingness": missingness,
         "not_specified_diagnostics": not_specified_diagnostics,
-        "weekly_signups": weekly_signups,
         "domain_distribution": domain_distribution,
         "domain_distribution_plot": domain_distribution_plot,
+        "top_domains_full": top_domains_full,
         "role_family_distribution": role_family_distribution,
         "seniority_distribution": seniority_distribution,
+        "seniority_distribution_plot": seniority_distribution_plot,
+        "top_seniority_full": top_seniority_full,
         "experience_bin_distribution": experience_distribution,
         "leadership_distribution": leadership_distribution,
         "cv_generation_language_distribution": cv_generation_language_distribution,
         "region_distribution": region_distribution,
         "region_distribution_plot": region_distribution_plot,
+        "top_regions_full": top_regions_full,
         "country_distribution": country_distribution,
         "company_distribution": company_distribution,
         "company_distribution_plot": company_distribution_plot,
+        "top_companies_full": top_companies_full,
         "industry_distribution": industry_distribution,
         "industry_distribution_subset": industry_subset,
         "english_level_distribution": english_level_distribution,
@@ -1198,12 +1322,9 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "company_mappings": company_mappings,
         "industry_mappings": industry_mappings,
         "geo_mapping_audit": geo_mapping_audit,
+        "geo_mapping_top50": geo_mapping_top50,
         "strata_top20": strata_top20,
         "not_specified_deep_dive_summary": not_specified_deep_dive_summary,
-        "not_specified_deep_dive_domain_titles": domain_titles,
-        "not_specified_deep_dive_domain_selected_position": domain_selected_position,
-        "not_specified_deep_dive_domain_tools": domain_tools_deep,
-        "not_specified_deep_dive_domain_skills": domain_skills_deep,
         "not_specified_deep_dive_region_not_specified_breakdown": region_ns_breakdown,
         "not_specified_deep_dive_region_not_specified_domain": region_ns_domain,
         "not_specified_deep_dive_region_not_specified_seniority": region_ns_seniority,
@@ -1217,15 +1338,6 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         save_table(table, tables_dir / f"{name}.csv")
 
     # Figures.
-    plot_line(
-        weekly_signups,
-        x_col="created_week",
-        y_col="new_users",
-        out_path=figures_dir / "01_registrations_weekly.png",
-        title="Registrations by week",
-        xlabel="Week",
-        ylabel="Users",
-    )
     plot_barh(
         domain_distribution_plot,
         "domain_filled",
@@ -1233,6 +1345,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         figures_dir / "02_top_domains.png",
         "Top domains (excluding Other/Not specified)",
         top_n=10,
+        max_label_len=42,
+        wrap_width=27,
     )
     plot_barh(
         region_distribution_plot.rename(columns={"region_display": "region"}),
@@ -1241,6 +1355,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         figures_dir / "03_top_regions.png",
         "Top regions (excluding Other/Not specified)",
         top_n=15,
+        max_label_len=44,
+        wrap_width=28,
     )
     plot_barh(
         company_distribution_plot.rename(columns={"company_display": "company"}),
@@ -1249,47 +1365,80 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         figures_dir / "04_top_companies.png",
         "Top companies (excluding Other/Not specified)",
         top_n=15,
+        max_label_len=44,
+        wrap_width=28,
     )
     if not industry_subset.empty:
-        plot_barh(industry_subset.rename(columns={"industry_display": "industry"}), "industry", "count", figures_dir / "05_top_industries_subset.png", "Top industries (subset with non-empty industry)", top_n=15)
+        plot_barh(
+            industry_subset.rename(columns={"industry_display": "industry"}),
+            "industry",
+            "count",
+            figures_dir / "05_top_industries_subset.png",
+            "Top industries (subset with non-empty industry)",
+            top_n=15,
+            max_label_len=44,
+            wrap_width=28,
+        )
 
-    plot_heatmap_share(
-        domain_region_share,
-        figures_dir / "06_heatmap_domain_region_share.png",
-        "Domain x Region (row-normalized share)",
-        "Region",
-        "Domain",
+    if not domain_region_share.empty:
+        plot_heatmap_share(
+            domain_region_share,
+            figures_dir / "06_heatmap_domain_region_share.png",
+            "Domain x Region (row-normalized share, excluding Other/Not specified)",
+            "Region",
+            "Domain",
+        )
+
+    if not region_domain_counts.empty:
+        plot_stacked_100(
+            region_domain_counts,
+            figures_dir / "07_stacked_region_domain_top10.png",
+            "Region composition by domains (100% stacked, excluding Other/Not specified)",
+            "Region",
+        )
+
+    if not seniority_company_counts.empty:
+        plot_stacked_100(
+            seniority_company_counts,
+            figures_dir / "08_stacked_seniority_company_top15.png",
+            "Seniority x Company (100% stacked, excluding Other/Not specified)",
+            "Company",
+        )
+
+    if not domain_company_counts.empty:
+        plot_stacked_100(
+            domain_company_counts,
+            figures_dir / "09_stacked_domain_company_top15.png",
+            "Domain x Company (100% stacked, excluding Other/Not specified)",
+            "Company",
+        )
+
+    plot_barh(
+        tools_top.rename(columns={"token_display": "tool"}),
+        "tool",
+        "count",
+        figures_dir / "10_top_tools.png",
+        "Top tools / stack",
+        top_n=20,
+        max_label_len=40,
+        wrap_width=26,
     )
-
-    plot_stacked_100(
-        region_domain_counts,
-        figures_dir / "07_stacked_region_domain_top10.png",
-        "Region composition by domains (100% stacked)",
-        "Region",
+    plot_barh(
+        skills_top.rename(columns={"token_display": "skill"}),
+        "skill",
+        "count",
+        figures_dir / "11_top_skills.png",
+        "Top skills",
+        top_n=20,
+        max_label_len=40,
+        wrap_width=26,
     )
-
-    plot_stacked_100(
-        seniority_company_counts,
-        figures_dir / "08_stacked_seniority_company_top15.png",
-        "Seniority x Company (100% stacked)",
-        "Company",
-    )
-
-    plot_stacked_100(
-        domain_company_counts,
-        figures_dir / "09_stacked_domain_company_top15.png",
-        "Domain x Company (100% stacked)",
-        "Company",
-    )
-
-    plot_barh(tools_top.rename(columns={"token_display": "tool"}), "tool", "count", figures_dir / "10_top_tools.png", "Top tools / stack", top_n=20)
-    plot_barh(skills_top.rename(columns={"token_display": "skill"}), "skill", "count", figures_dir / "11_top_skills.png", "Top skills", top_n=20)
 
     if not domain_tools_matrix.empty:
         plot_heatmap_share(
             domain_tools_matrix,
             figures_dir / "12_heatmap_domain_tools_share.png",
-            "Domain x Tools (row-normalized share)",
+            "Domain x Tools (row-normalized share, excluding Other/Not specified)",
             "Tool",
             "Domain",
         )
@@ -1309,41 +1458,151 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             figures_dir / "15_strata_top20.png",
             "Top-20 strata: domain x seniority x region",
             top_n=20,
+            max_label_len=58,
+            wrap_width=35,
         )
 
-    if not domain_titles.empty:
-        deep_titles_plot = domain_titles.copy()
-        deep_titles_plot["domain_title"] = deep_titles_plot.apply(
-            lambda r: f"{r['domain_filled']} | {r['current_job_title_filled']}", axis=1
-        )
-        plot_barh(
-            deep_titles_plot.rename(columns={"domain_title": "label"}),
-            "label",
-            "count",
-            figures_dir / "16_deep_dive_domain_titles.png",
-            "Domain Other/Not specified: top current job titles",
-            top_n=20,
-        )
+    # Separate report for domain=Other.
+    other_subset = users_enriched[users_enriched["domain_filled"].astype(str).eq("Other")].copy()
+    all_jobs = pd.concat(
+        [
+            jobs_talent[["user_hash", "job_title", "company", "region"]].copy() if not jobs_talent.empty else pd.DataFrame(columns=["user_hash", "job_title", "company", "region"]),
+            jobs_latex[["user_hash", "job_title", "company", "region"]].copy() if not jobs_latex.empty else pd.DataFrame(columns=["user_hash", "job_title", "company", "region"]),
+        ],
+        ignore_index=True,
+    )
+    other_jobs = all_jobs[all_jobs["user_hash"].isin(set(other_subset["user_hash"]))].copy()
+    other_jobs["job_title"] = other_jobs["job_title"].fillna("").astype(str).str.strip()
+    other_jobs["company"] = other_jobs["company"].fillna("").astype(str).str.strip()
 
-    if not region_ns_domain.empty:
-        plot_barh(
-            region_ns_domain,
-            "domain_filled",
-            "count",
-            figures_dir / "17_deep_dive_region_not_specified_domain.png",
-            "Region Not specified: top domains",
-            top_n=20,
-        )
+    other_titles_all = top_counts(other_jobs["job_title"], 30, "job_title")
+    other_current_titles = top_counts(other_subset["current_job_title_filled"], 20, "current_job_title_filled")
+    other_companies_all = top_counts(other_jobs["company"], 30, "company")
+    other_tools_top = top_tokens_from_list(other_subset, "tools_list", 30, "tool")
+    other_skills_top = top_tokens_from_list(other_subset, "skills_list", 30, "skill")
+    other_regions_top = top_counts(other_subset["region_norm"], 20, "region_norm")
+    other_seniority_top = top_counts(other_subset["seniority_filled"], 20, "seniority_filled")
 
-    if not company_ns_job_titles.empty:
-        plot_barh(
-            company_ns_job_titles,
-            "current_job_title_filled",
-            "count",
-            figures_dir / "18_deep_dive_company_not_specified_titles.png",
-            "Company Not specified: top current job titles",
-            top_n=20,
+    all_title_tokens: List[str] = []
+    for val in other_jobs["job_title"].fillna("").astype(str):
+        chunks = re.split(r"[/,;|()\\-]+|\\s+", canonical_text(val))
+        for token in chunks:
+            tok = token.strip()
+            if len(tok) >= 3 and tok not in {"and", "for", "the", "with"}:
+                all_title_tokens.append(tok)
+    title_keywords = top_counts(pd.Series(all_title_tokens, dtype=object), 30, "title_keyword")
+
+    bucket_rows: List[str] = []
+    all_titles_by_user = other_jobs.groupby("user_hash")["job_title"].apply(lambda x: " ".join([clean_text(v) for v in x if clean_text(v)])).to_dict()
+    for _, row in other_subset.iterrows():
+        profile_text = " ".join(
+            [
+                clean_text(row.get("selectedPosition", "")),
+                clean_text(row.get("current_job_title_filled", "")),
+                clean_text(all_titles_by_user.get(row["user_hash"], "")),
+                " ".join(row.get("skills_list", [])[:25]) if isinstance(row.get("skills_list", []), list) else "",
+                " ".join(row.get("tools_list", [])[:25]) if isinstance(row.get("tools_list", []), list) else "",
+            ]
         )
+        bucket_rows.append(_other_bucket(profile_text))
+    other_bucket_dist = top_counts(pd.Series(bucket_rows, dtype=object), 20, "bucket")
+
+    other_total = len(other_subset)
+    cv_total = int(users_enriched["cvEnhancedResult_present"].sum())
+    other_cv_count = int(other_subset["cvEnhancedResult_present"].sum())
+    other_coverage = pd.DataFrame(
+        {
+            "metric": [
+                "other_users_total",
+                "share_all_users_%",
+                "other_users_with_cvEnhancedResult",
+                "share_among_cvEnhancedResult_users_%",
+                "jobs_latex_present_%",
+                "jobs_talent_present_%",
+                "skills_or_tools_present_%",
+                "region_specified_%",
+                "seniority_specified_%",
+            ],
+            "value": [
+                other_total,
+                round(other_total / len(users_enriched) * 100, 1) if len(users_enriched) else 0.0,
+                other_cv_count,
+                round(other_cv_count / cv_total * 100, 1) if cv_total else 0.0,
+                round((other_subset["expheader_count"].fillna(0) > 0).mean() * 100, 1) if other_total else 0.0,
+                round((other_subset["jobs_count_talentCard"] > 0).mean() * 100, 1) if other_total else 0.0,
+                round(((other_subset["skills_count"] > 0) | (other_subset["tools_count"] > 0)).mean() * 100, 1) if other_total else 0.0,
+                round((~other_subset["region_norm"].astype(str).str.lower().isin(GENERIC_EXCLUDE)).mean() * 100, 1) if other_total else 0.0,
+                round((~other_subset["seniority_filled"].astype(str).str.lower().isin(GENERIC_EXCLUDE)).mean() * 100, 1) if other_total else 0.0,
+            ],
+        }
+    )
+
+    others_tables = {
+        "coverage": other_coverage,
+        "titles_all_history": other_titles_all,
+        "current_titles": other_current_titles,
+        "companies_all_history": other_companies_all,
+        "tools_top": other_tools_top,
+        "skills_top": other_skills_top,
+        "regions_top": other_regions_top,
+        "seniority_top": other_seniority_top,
+        "title_keywords": title_keywords,
+        "bucket_distribution": other_bucket_dist,
+    }
+    for name, table in others_tables.items():
+        save_table(table, others_tables_dir / f"{name}.csv")
+
+    plot_barh(
+        other_titles_all,
+        "job_title",
+        "count",
+        others_figures_dir / "01_other_titles_history_top30.png",
+        "Other domain: top titles across all jobs history",
+        top_n=30,
+        max_label_len=46,
+        wrap_width=30,
+    )
+    plot_barh(
+        other_companies_all,
+        "company",
+        "count",
+        others_figures_dir / "02_other_companies_history_top30.png",
+        "Other domain: top companies across all jobs history",
+        top_n=30,
+        max_label_len=46,
+        wrap_width=30,
+    )
+    plot_barh(
+        other_tools_top,
+        "tool",
+        "count",
+        others_figures_dir / "03_other_tools_top30.png",
+        "Other domain: top tools",
+        top_n=30,
+        max_label_len=40,
+        wrap_width=28,
+    )
+    plot_barh(
+        other_bucket_dist,
+        "bucket",
+        "count",
+        others_figures_dir / "04_other_bucket_distribution.png",
+        "Other domain: rule-based bucket distribution",
+        top_n=20,
+        max_label_len=40,
+        wrap_width=28,
+    )
+
+    build_others_report(
+        base,
+        others_tables=others_tables,
+        others_stats={
+            "other_users": other_total,
+            "share_all_pct": round(other_total / len(users_enriched) * 100, 1) if len(users_enriched) else 0.0,
+            "other_with_cv_count": other_cv_count,
+            "share_among_cv_pct": round(other_cv_count / cv_total * 100, 1) if cv_total else 0.0,
+        },
+    )
 
     build_notebook(base / "notebooks" / "mis_users_resume_bot.ipynb")
     build_readme(base, tables)

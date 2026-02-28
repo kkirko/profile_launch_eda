@@ -1,16 +1,16 @@
 # REPORT_OTHERS: Domain Other Deep Dive
 
 ## 1) Size
-- Other users: **199**
-- Share of all users: **27.3%**
+- Other users: **198**
+- Share of all users: **27.4%**
 - Other users with `cvEnhancedResult`: **1**
 - Share among users with `cvEnhancedResult`: **0.2%**
 
 ## 2) Coverage
 | metric                               |   value |
 |:-------------------------------------|--------:|
-| other_users_total                    |   199   |
-| share_all_users_%                    |    27.3 |
+| other_users_total                    |   198   |
+| share_all_users_%                    |    27.4 |
 | other_users_with_cvEnhancedResult    |     1   |
 | share_among_cvEnhancedResult_users_% |     0.2 |
 | jobs_latex_present_%                 |     0.5 |
@@ -23,12 +23,11 @@
 | old_label_keywords                                      | new_domain                 |   count |
 |:--------------------------------------------------------|:---------------------------|--------:|
 | Other/Not specified -> Engineering keywords             | Engineering/IT             |       4 |
-| Other/Not specified -> Business/System Analyst keywords | Product/Project Management |       3 |
-| Other/Not specified -> Data/Analytics keywords          | Product/Project Management |       3 |
-| Other/Not specified -> generic remapping                | Finance/Legal/HR           |       3 |
-| Other/Not specified -> generic remapping                | Product/Project Management |       3 |
+| Other/Not specified -> Business/System Analyst keywords | Product/Project Management |       2 |
 | Other/Not specified -> Recruiter/TA/HR keywords         | Finance/Legal/HR           |       2 |
-| Other/Not specified -> Engineering keywords             | Product/Project Management |       1 |
+| Other/Not specified -> generic remapping                | Finance/Legal/HR           |       2 |
+| Other/Not specified -> generic remapping                | Product/Project Management |       2 |
+| Other/Not specified -> Data/Analytics keywords          | Product/Project Management |       1 |
 | Other/Not specified -> UX/UI/Design keywords            | Design/Creative            |       1 |
 | Other/Not specified -> generic remapping                | Marketing/Sales            |       1 |
 
@@ -43,7 +42,7 @@ Top-30 titles across all jobs history:
 Top-20 current titles:
 | current_job_title_filled        |   count |   share_% |
 |:--------------------------------|--------:|----------:|
-| Not specified                   |     198 |      99.5 |
+| Not specified                   |     197 |      99.5 |
 | Head of Real Estate Development |       1 |       0.5 |
 
 Top-30 companies across all jobs history:
@@ -94,19 +93,19 @@ Top skills:
 Top regions:
 | region_norm   |   count |   share_% |
 |:--------------|--------:|----------:|
-| Not specified |     198 |      99.5 |
+| Not specified |     197 |      99.5 |
 | Rome, Italy   |       1 |       0.5 |
 
 Seniority:
 | seniority_filled   |   count |   share_% |
 |:-------------------|--------:|----------:|
-| Not specified      |     198 |      99.5 |
+| Not specified      |     197 |      99.5 |
 | C-level            |       1 |       0.5 |
 
 ## 7) Rule-Based Buckets
 | bucket        |   count |   share_% |
 |:--------------|--------:|----------:|
-| Other-unknown |     198 |      99.5 |
+| Other-unknown |     197 |      99.5 |
 | SWE/IT        |       1 |       0.5 |
 
 ## 8) Figures

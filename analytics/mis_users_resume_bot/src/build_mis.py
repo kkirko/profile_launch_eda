@@ -5,6 +5,7 @@ import json
 import os
 import re
 import textwrap
+from datetime import date
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -37,7 +38,7 @@ from feature_builders import (
     parse_bool_series,
     summarize_user_jobs,
 )
-from latex_parser import clean_text, parse_cv_latex
+from latex_parser import clean_text, parse_cv_latex, parse_period
 
 
 sns.set_theme(style="whitegrid", context="talk")
@@ -147,6 +148,20 @@ def build_columns_inventory(df: pd.DataFrame) -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows)
+
+
+def build_created_date_counts(series: pd.Series) -> pd.DataFrame:
+    s = pd.Series(series).dropna()
+    if s.empty:
+        return pd.DataFrame(columns=["date", "count"])
+    out = (
+        s.value_counts()
+        .rename_axis("date")
+        .reset_index(name="count")
+        .sort_values(["date"], ascending=True)
+    )
+    out["date"] = out["date"].astype(str)
+    return out
 
 
 def distribution_with_display(df: pd.DataFrame, raw_col: str, norm_col: str, field_name: str) -> pd.DataFrame:
@@ -533,6 +548,418 @@ def months_between(later: pd.Timestamp, earlier: pd.Timestamp) -> float:
     return float(max(months, 0))
 
 
+def normalize_period_text(period_raw: object) -> str:
+    text = clean_text(period_raw)
+    if not text:
+        return ""
+    text = text.replace("\\n", " ")
+    text = text.replace("—", "-").replace("–", "-")
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def reparse_failed_periods(jobs_long_all: pd.DataFrame, as_of_date: pd.Timestamp) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    if jobs_long_all.empty:
+        stats = pd.DataFrame(
+            {
+                "metric": [
+                    "failed_period_rows_before",
+                    "rescued_period_rows",
+                    "failed_period_rows_after",
+                ],
+                "value": [0, 0, 0],
+            }
+        )
+        return jobs_long_all.copy(), stats
+
+    work = jobs_long_all.copy()
+    work["period_raw"] = work["period_raw"].fillna("").astype(str)
+    work["parse_ok"] = work["parse_ok"].fillna(False).astype(bool)
+    fail_mask = work["period_raw"].map(normalize_period_text).ne("") & ~work["parse_ok"]
+    before_failed = int(fail_mask.sum())
+    rescued = 0
+
+    for idx in work.index[fail_mask]:
+        raw = normalize_period_text(work.at[idx, "period_raw"])
+        variants = [
+            raw,
+            raw.replace("/", "."),
+            re.sub(r"\bс\s*(\d{1,2}[./]\d{4}|\d{4})", r"since \1", raw, flags=re.IGNORECASE),
+            re.sub(r"\bпо\s+настоящее\s+время\b", "present", raw, flags=re.IGNORECASE),
+        ]
+        seen = set()
+        parsed_ok = False
+        for candidate in variants:
+            cand = normalize_period_text(candidate)
+            if not cand or cand in seen:
+                continue
+            seen.add(cand)
+            period = parse_period(cand, as_of_date)
+            if not period.parse_ok:
+                continue
+            work.at[idx, "start_date"] = period.start_date
+            work.at[idx, "end_date"] = period.end_date
+            work.at[idx, "is_present"] = bool(period.is_present)
+            work.at[idx, "parse_ok"] = True
+            parsed_ok = True
+            rescued += 1
+            break
+        if not parsed_ok:
+            work.at[idx, "parse_ok"] = False
+
+    after_mask = work["period_raw"].map(normalize_period_text).ne("") & ~work["parse_ok"]
+    after_failed = int(after_mask.sum())
+    stats = pd.DataFrame(
+        {
+            "metric": [
+                "failed_period_rows_before",
+                "rescued_period_rows",
+                "failed_period_rows_after",
+            ],
+            "value": [before_failed, rescued, after_failed],
+        }
+    )
+    return work, stats
+
+
+def build_employment_outputs(
+    users_enriched: pd.DataFrame,
+    jobs_long_all: pd.DataFrame,
+    analysis_date: pd.Timestamp,
+) -> Dict[str, pd.DataFrame]:
+    jobs_work = jobs_long_all.copy()
+    if jobs_work.empty:
+        jobs_work = pd.DataFrame(
+            columns=[
+                "user_hash",
+                "source",
+                "company_norm",
+                "company_display_full",
+                "job_title",
+                "period_raw",
+                "start_date",
+                "end_date",
+                "is_present",
+                "parse_ok",
+            ]
+        )
+
+    jobs_work["source"] = jobs_work.get("source", "").fillna("").astype(str)
+    jobs_work["company_norm"] = jobs_work.get("company_norm", "").fillna("Not specified").astype(str)
+    jobs_work["company_display_full"] = jobs_work.get("company_display_full", "").fillna("Not specified").astype(str)
+    jobs_work["job_title"] = jobs_work.get("job_title", "").fillna("").astype(str)
+    jobs_work["period_raw"] = jobs_work.get("period_raw", "").fillna("").astype(str)
+    jobs_work["period_raw_clean"] = jobs_work["period_raw"].map(normalize_period_text)
+    jobs_work["parse_ok"] = jobs_work.get("parse_ok", False).fillna(False).astype(bool)
+    jobs_work["is_present"] = jobs_work.get("is_present", False).fillna(False).astype(bool)
+
+    status_rows: List[Dict[str, object]] = []
+    diag_rows: List[Dict[str, object]] = []
+    if not jobs_work.empty:
+        for user_hash, grp in jobs_work.groupby("user_hash"):
+            g = grp.copy()
+            period_non_empty = g["period_raw_clean"].ne("")
+
+            has_talent_jobs = bool(g["source"].eq("talentCard").any())
+            has_expheader_jobs = bool(g["source"].str.contains("expheader", case=False, regex=False).any())
+            jobs_total_count = int(len(g))
+            has_any_period_raw = bool(period_non_empty.any())
+            has_any_parse_ok = bool(g["parse_ok"].any())
+            has_any_is_present = bool(g["is_present"].any())
+            has_any_end_date = bool(g["end_date"].notna().any())
+            parse_failed_count = int(((~g["parse_ok"]) & period_non_empty).sum())
+
+            valid_end = g[g["end_date"].notna()].sort_values("end_date", ascending=False)
+            max_end_date = valid_end["end_date"].iloc[0] if not valid_end.empty else pd.NaT
+            max_end_source = clean_text(valid_end["source"].iloc[0]) if not valid_end.empty else ""
+
+            top_examples = (
+                " | ".join(
+                    [
+                        display_short(x, max_len=64)
+                        for x in g.loc[period_non_empty, "period_raw_clean"].value_counts().head(3).index.tolist()
+                    ]
+                )
+                if has_any_period_raw
+                else ""
+            )
+
+            employed = has_any_is_present
+            valid_closed = g[g["parse_ok"] & g["end_date"].notna()].copy()
+            status = "unknown"
+            last_end = pd.NaT
+            months_since_last_end = np.nan
+            last_company_norm = "Not specified"
+            last_company_display_full = "Not specified"
+            last_job_title = "Not specified"
+
+            if employed:
+                status = "employed"
+            elif not valid_closed.empty:
+                last_end = valid_closed["end_date"].max()
+                if pd.notna(last_end) and last_end < analysis_date:
+                    status = "not_employed"
+                    months_since_last_end = months_between(analysis_date, last_end)
+                else:
+                    status = "unknown"
+
+                last_row = valid_closed.sort_values(["end_date", "start_date"], ascending=[False, False]).iloc[0]
+                last_company_norm = clean_text(last_row.get("company_norm", "")) or "Not specified"
+                last_company_display_full = clean_text(last_row.get("company_display_full", "")) or "Not specified"
+                last_job_title = clean_text(last_row.get("job_title", "")) or "Not specified"
+
+            status_rows.append(
+                {
+                    "user_hash": user_hash,
+                    "employment_status": status,
+                    "last_end_date": last_end,
+                    "months_since_last_end": months_since_last_end,
+                    "last_company_norm": last_company_norm,
+                    "last_company_display_full": last_company_display_full,
+                    "last_company_display_short": display_short(last_company_display_full, max_len=60),
+                    "last_job_title": last_job_title,
+                    "last_job_title_short": display_short(last_job_title, max_len=60),
+                }
+            )
+
+            diag_rows.append(
+                {
+                    "user_hash": user_hash,
+                    "has_talent_jobs": has_talent_jobs,
+                    "has_expheader_jobs": has_expheader_jobs,
+                    "jobs_total_count": jobs_total_count,
+                    "has_any_period_raw": has_any_period_raw,
+                    "has_any_parse_ok": has_any_parse_ok,
+                    "has_any_is_present": has_any_is_present,
+                    "has_any_end_date": has_any_end_date,
+                    "max_end_date": max_end_date,
+                    "max_end_source": max_end_source,
+                    "parse_failed_count": parse_failed_count,
+                    "top_period_raw_examples_short": top_examples,
+                }
+            )
+
+    employment_user = users_enriched[["user_hash", "domain_filled", "region_norm", "seniority_filled", "has_latex"]].merge(
+        pd.DataFrame(status_rows), on="user_hash", how="left"
+    )
+    employment_diag = pd.DataFrame(diag_rows)
+    employment_user = employment_user.merge(employment_diag, on="user_hash", how="left")
+
+    employment_user["employment_status"] = employment_user["employment_status"].fillna("unknown")
+    employment_user["months_since_last_end"] = pd.to_numeric(employment_user["months_since_last_end"], errors="coerce")
+    employment_user["last_company_norm"] = employment_user["last_company_norm"].fillna("Not specified")
+    employment_user["last_company_display_full"] = employment_user["last_company_display_full"].fillna("Not specified")
+    employment_user["last_company_display_short"] = employment_user["last_company_display_short"].fillna("Not specified")
+    employment_user["last_job_title"] = employment_user["last_job_title"].fillna("Not specified")
+    employment_user["last_job_title_short"] = employment_user["last_job_title_short"].fillna("Not specified")
+    employment_user["has_talent_jobs"] = employment_user["has_talent_jobs"].fillna(False).astype(bool)
+    employment_user["has_expheader_jobs"] = employment_user["has_expheader_jobs"].fillna(False).astype(bool)
+    employment_user["jobs_total_count"] = employment_user["jobs_total_count"].fillna(0).astype(int)
+    employment_user["has_any_period_raw"] = employment_user["has_any_period_raw"].fillna(False).astype(bool)
+    employment_user["has_any_parse_ok"] = employment_user["has_any_parse_ok"].fillna(False).astype(bool)
+    employment_user["has_any_is_present"] = employment_user["has_any_is_present"].fillna(False).astype(bool)
+    employment_user["has_any_end_date"] = employment_user["has_any_end_date"].fillna(False).astype(bool)
+    employment_user["parse_failed_count"] = employment_user["parse_failed_count"].fillna(0).astype(int)
+    employment_user["max_end_source"] = employment_user["max_end_source"].fillna("").astype(str)
+    employment_user["top_period_raw_examples_short"] = employment_user["top_period_raw_examples_short"].fillna("").astype(str)
+
+    def reason_unknown(row: pd.Series) -> str:
+        if int(row.get("jobs_total_count", 0)) == 0:
+            return "no_jobs_any"
+        if int(row.get("jobs_total_count", 0)) > 0 and not bool(row.get("has_any_period_raw", False)):
+            return "jobs_exist_but_no_period"
+        if bool(row.get("has_any_period_raw", False)) and not bool(row.get("has_any_parse_ok", False)):
+            return "period_present_but_all_parse_failed"
+        if bool(row.get("has_any_parse_ok", False)) and not bool(row.get("has_any_end_date", False)) and not bool(row.get("has_any_is_present", False)):
+            return "parsed_start_only_no_end_no_present"
+        return "other"
+
+    employment_user["reason_unknown"] = employment_user.apply(reason_unknown, axis=1)
+
+    status_order = ["employed", "not_employed", "unknown"]
+    employment_status_summary = (
+        employment_user["employment_status"]
+        .value_counts()
+        .reindex(status_order, fill_value=0)
+        .rename_axis("employment_status")
+        .reset_index(name="count")
+    )
+    employment_status_summary["share_%"] = (employment_status_summary["count"] / max(len(employment_user), 1) * 100).round(1)
+
+    def cross_status(segment: pd.Series, segment_name: str, top_n: int | None = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        seg = segment.fillna("Not specified").astype(str)
+        if top_n is not None:
+            seg_top = seg[~seg.str.lower().isin(GENERIC_EXCLUDE)].value_counts().head(top_n).index.tolist()
+            seg = seg.where(seg.isin(seg_top), np.nan)
+        base = pd.DataFrame({"segment": seg, "employment_status": employment_user["employment_status"]}).dropna(subset=["segment"]).copy()
+        counts = pd.crosstab(base["segment"], base["employment_status"])
+        for st in status_order:
+            if st not in counts.columns:
+                counts[st] = 0
+        counts = counts[status_order]
+        shares = row_normalize_percent(counts)
+        rows: List[Dict[str, object]] = []
+        for idx in counts.index:
+            row_total = int(counts.loc[idx].sum())
+            for st in status_order:
+                rows.append(
+                    {
+                        segment_name: idx,
+                        f"{segment_name}_short": display_short(idx, max_len=60),
+                        "employment_status": st,
+                        "count": int(counts.loc[idx, st]),
+                        "row_share_%": round(float(shares.loc[idx, st]), 1),
+                        "row_total": row_total,
+                    }
+                )
+        return pd.DataFrame(rows), counts
+
+    employment_status_by_domain, domain_status_counts = cross_status(employment_user["domain_filled"], "domain_filled", top_n=10)
+    employment_status_by_region, region_status_counts = cross_status(employment_user["region_norm"], "region_norm", top_n=15)
+    employment_status_by_seniority, seniority_status_counts = cross_status(employment_user["seniority_filled"], "seniority_filled", top_n=None)
+
+    not_employed_users = employment_user[employment_user["employment_status"] == "not_employed"].copy()
+    not_employed_months_since_last_end = not_employed_users[
+        ["user_hash", "last_end_date", "months_since_last_end", "last_company_norm", "last_job_title"]
+    ].copy()
+
+    not_employed_last_companies = (
+        not_employed_users[~not_employed_users["last_company_norm"].astype(str).str.lower().isin(GENERIC_EXCLUDE)]
+        .groupby("last_company_norm")
+        .agg(
+            count=("user_hash", "count"),
+            company_display_full=("last_company_display_full", lambda x: x.value_counts().index[0] if len(x) else ""),
+        )
+        .reset_index()
+        .rename(columns={"last_company_norm": "company_norm"})
+        .sort_values("count", ascending=False)
+        .head(30)
+    )
+    if not not_employed_last_companies.empty:
+        not_employed_last_companies["share_%"] = (not_employed_last_companies["count"] / not_employed_last_companies["count"].sum() * 100).round(1)
+        not_employed_last_companies["company_display_short"] = not_employed_last_companies["company_display_full"].map(
+            lambda x: display_short(x, max_len=60)
+        )
+    else:
+        not_employed_last_companies = pd.DataFrame(columns=["company_norm", "count", "company_display_full", "company_display_short", "share_%"])
+
+    not_employed_last_titles = (
+        not_employed_users[not_employed_users["last_job_title"].astype(str).str.strip().ne("")]
+        .groupby("last_job_title")
+        .size()
+        .rename("count")
+        .reset_index()
+        .sort_values("count", ascending=False)
+        .head(30)
+    )
+    if not not_employed_last_titles.empty:
+        not_employed_last_titles["share_%"] = (not_employed_last_titles["count"] / not_employed_last_titles["count"].sum() * 100).round(1)
+        not_employed_last_titles["job_title_short"] = not_employed_last_titles["last_job_title"].map(lambda x: display_short(x, max_len=60))
+    else:
+        not_employed_last_titles = pd.DataFrame(columns=["last_job_title", "count", "share_%", "job_title_short"])
+
+    not_employed_history_jobs = jobs_work[jobs_work["user_hash"].isin(set(not_employed_users["user_hash"]))].copy()
+    not_employed_history_companies = (
+        not_employed_history_jobs[~not_employed_history_jobs["company_norm"].astype(str).str.lower().isin(GENERIC_EXCLUDE)]
+        .groupby("company_norm")
+        .agg(
+            count=("user_hash", "count"),
+            company_display_full=("company_display_full", lambda x: x.value_counts().index[0] if len(x) else ""),
+        )
+        .reset_index()
+        .sort_values("count", ascending=False)
+        .head(30)
+    )
+    if not not_employed_history_companies.empty:
+        not_employed_history_companies["share_%"] = (
+            not_employed_history_companies["count"] / not_employed_history_companies["count"].sum() * 100
+        ).round(1)
+        not_employed_history_companies["company_display_short"] = not_employed_history_companies["company_display_full"].map(
+            lambda x: display_short(x, max_len=60)
+        )
+    else:
+        not_employed_history_companies = pd.DataFrame(columns=["company_norm", "count", "company_display_full", "company_display_short", "share_%"])
+
+    not_employed_history_titles = top_counts(not_employed_history_jobs["job_title"], 30, "job_title")
+    if not not_employed_history_titles.empty:
+        not_employed_history_titles["job_title_short"] = not_employed_history_titles["job_title"].map(lambda x: display_short(x, max_len=60))
+
+    unknown_users = employment_user[employment_user["employment_status"] == "unknown"].copy()
+    unknown_users_out = unknown_users[
+        [
+            "user_hash",
+            "reason_unknown",
+            "has_latex",
+            "has_talent_jobs",
+            "has_expheader_jobs",
+            "jobs_total_count",
+            "top_period_raw_examples_short",
+        ]
+    ].copy()
+    unknown_users_out = unknown_users_out.sort_values(["reason_unknown", "jobs_total_count"], ascending=[True, False])
+
+    unknown_breakdown = (
+        unknown_users["reason_unknown"]
+        .value_counts()
+        .rename_axis("reason_unknown")
+        .reset_index(name="count")
+    )
+    unknown_breakdown["share_%"] = (unknown_breakdown["count"] / max(len(unknown_users), 1) * 100).round(1)
+
+    unknown_crosstab = (
+        unknown_users.groupby(["has_latex", "has_talent_jobs", "reason_unknown"])
+        .size()
+        .rename("count")
+        .reset_index()
+        .sort_values("count", ascending=False)
+    )
+
+    unknown_hashes = set(unknown_users["user_hash"])
+    unknown_failed_periods = jobs_work[
+        jobs_work["user_hash"].isin(unknown_hashes)
+        & jobs_work["period_raw_clean"].ne("")
+        & (~jobs_work["parse_ok"])
+    ].copy()
+    unknown_parse_failed_periods_top = (
+        unknown_failed_periods["period_raw_clean"]
+        .value_counts()
+        .rename_axis("period_raw_clean")
+        .reset_index(name="count")
+        .head(100)
+    )
+
+    unknown_comparison_base = pd.DataFrame(
+        {
+            "metric": ["unknown_count", "unknown_share_%"],
+            "value": [
+                int((employment_user["employment_status"] == "unknown").sum()),
+                round((employment_user["employment_status"] == "unknown").mean() * 100, 1),
+            ],
+        }
+    )
+
+    return {
+        "employment_user": employment_user,
+        "employment_status_summary": employment_status_summary,
+        "employment_status_by_domain": employment_status_by_domain,
+        "employment_status_by_region": employment_status_by_region,
+        "employment_status_by_seniority": employment_status_by_seniority,
+        "domain_status_counts": domain_status_counts,
+        "region_status_counts": region_status_counts,
+        "seniority_status_counts": seniority_status_counts,
+        "not_employed_months_since_last_end": not_employed_months_since_last_end,
+        "not_employed_top_last_companies": not_employed_last_companies,
+        "not_employed_top_last_titles": not_employed_last_titles,
+        "not_employed_history_top_companies": not_employed_history_companies,
+        "not_employed_history_top_titles": not_employed_history_titles,
+        "employment_unknown_users": unknown_users_out,
+        "employment_unknown_breakdown": unknown_breakdown,
+        "employment_unknown_crosstab_sources": unknown_crosstab,
+        "employment_unknown_parse_failed_periods_top": unknown_parse_failed_periods_top,
+        "employment_unknown_summary": unknown_comparison_base,
+    }
+
+
 def plot_bar(
     df: pd.DataFrame,
     label_col: str,
@@ -647,6 +1074,8 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     validation = tables["validation_summary"]
     diagnostics = tables["not_specified_diagnostics"]
     geo_audit = tables["geo_mapping_audit"]
+    created_counts_all = tables.get("createdAt_date_counts_all", pd.DataFrame())
+    created_counts_filtered = tables.get("createdAt_date_counts_filtered", pd.DataFrame())
     region_ns_breakdown = tables["not_specified_deep_dive_region_not_specified_breakdown"]
     company_ns_breakdown = tables["not_specified_deep_dive_company_not_specified_breakdown"]
     region_alt_cols = tables["not_specified_deep_dive_region_alt_columns"]
@@ -654,11 +1083,17 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     employment_domain = tables.get("employment_status_by_domain", pd.DataFrame())
     employment_region = tables.get("employment_status_by_region", pd.DataFrame())
     employment_seniority = tables.get("employment_status_by_seniority", pd.DataFrame())
+    unknown_breakdown = tables.get("employment_unknown_breakdown", pd.DataFrame())
+    unknown_crosstab = tables.get("employment_unknown_crosstab_sources", pd.DataFrame())
+    unknown_before_after = tables.get("employment_unknown_before_after", pd.DataFrame())
+    period_reparse_stats = tables.get("period_reparse_stats", pd.DataFrame())
     cv_language_coverage = tables.get("cv_language_coverage", pd.DataFrame())
     cv_language_dist = tables.get("cv_generation_language_distribution", pd.DataFrame())
 
     p = dict(zip(profile["metric"], profile["value"]))
     v = dict(zip(validation["metric"], validation["value"]))
+    cohort_year = int(float(p.get("cohort_target_year", 0))) if str(p.get("cohort_target_year", "")).strip() else 0
+    cohort_filter = str(p.get("createdAt_filter_utc", "")).strip()
 
     top_domains = tables["domain_distribution_plot"].head(3)
     top_regions = tables["region_distribution_plot"].head(3)
@@ -700,7 +1135,32 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         for _, row in employment_summary.iterrows():
             emp_share[str(row["employment_status"])] = float(row.get("share_%", 0.0))
 
+    unknown_count = int(employment_summary.loc[employment_summary["employment_status"] == "unknown", "count"].sum()) if not employment_summary.empty else 0
+    unknown_share = float(employment_summary.loc[employment_summary["employment_status"] == "unknown", "share_%"].sum()) if not employment_summary.empty else 0.0
+    unknown_top3 = unknown_breakdown.head(3).copy() if not unknown_breakdown.empty else pd.DataFrame(columns=["reason_unknown", "count", "share_%"])
+    unknown_without_latex_share = 0.0
+    unknown_jobs_no_period_share = 0.0
+    if not unknown_crosstab.empty:
+        unknown_total = max(int(unknown_crosstab["count"].sum()), 1)
+        no_latex = unknown_crosstab.loc[unknown_crosstab["has_latex"] == False, "count"].sum()  # noqa: E712
+        jobs_no_period = unknown_crosstab.loc[unknown_crosstab["reason_unknown"] == "jobs_exist_but_no_period", "count"].sum()
+        unknown_without_latex_share = round(float(no_latex) / unknown_total * 100, 1)
+        unknown_jobs_no_period_share = round(float(jobs_no_period) / unknown_total * 100, 1)
+
+    unknown_before_count = 0
+    unknown_before_share = 0.0
+    if not unknown_before_after.empty:
+        umap = dict(zip(unknown_before_after["metric"], unknown_before_after["value"]))
+        unknown_before_count = int(float(umap.get("unknown_before_parser_improvement_count", 0)))
+        unknown_before_share = float(umap.get("unknown_before_parser_improvement_share_%", 0.0))
+
+    period_rescued = 0
+    if not period_reparse_stats.empty:
+        pstats = dict(zip(period_reparse_stats["metric"], period_reparse_stats["value"]))
+        period_rescued = int(float(pstats.get("rescued_period_rows", 0)))
+
     observations = [
+        f"Срез MIS ограничен cohort-фильтром по `createdAt` (UTC): {cohort_filter}.",
         f"База содержит {int(float(p['users_total']))} профилей.",
         f"Покрытие `cvEnhancedResult`: {float(v['coverage_cvEnhancedResult_%']):.1f}%.",
         f"Покрытие `talentCard.jobs`: {float(v['coverage_talentCard_jobs_%']):.1f}%.",
@@ -715,12 +1175,17 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         f"CV language среди пользователей с cvEnhancedResult: {cv_lang_mix if cv_lang_mix else 'n/a'}; no_latex={no_latex_count} ({no_latex_share:.1f}%).",
         f"Топ tools: {', '.join(top_tools['token_display'].tolist())}.",
         f"Статус занятости: employed {emp_share.get('employed', 0.0):.1f}%, not_employed {emp_share.get('not_employed', 0.0):.1f}%, unknown {emp_share.get('unknown', 0.0):.1f}%.",
+        f"Unknown после улучшения парсинга периодов: {unknown_count} ({unknown_share:.1f}%), до улучшения: {unknown_before_count} ({unknown_before_share:.1f}%), rescued periods: {period_rescued}.",
     ]
 
     lines: List[str] = []
     lines.append("# MIS: Users Resume Bot (Candidate Analytics)")
     lines.append("")
     lines.append("## 1) Summary")
+    if cohort_year:
+        lines.append(f"- Cohort filter (createdAt UTC): **26-27 Feb {cohort_year}**")
+    elif cohort_filter:
+        lines.append(f"- Cohort filter (createdAt UTC): **{cohort_filter}**")
     lines.append(f"- Users total: **{int(float(p['users_total']))}**")
     lines.append(f"- Coverage `cvEnhancedResult`: **{float(v['coverage_cvEnhancedResult_%']):.1f}%**")
     lines.append(f"- Coverage `talentCard.jobs`: **{float(v['coverage_talentCard_jobs_%']):.1f}%**")
@@ -744,6 +1209,10 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     lines.append("")
     lines.append("Columns inventory (real CSV structure + non-null profile + length stats):")
     lines.append("- `outputs/tables/columns_inventory.csv`")
+    if not created_counts_all.empty:
+        lines.append("- `outputs/tables/createdAt_date_counts_all.csv`")
+    if not created_counts_filtered.empty:
+        lines.append("- `outputs/tables/createdAt_date_counts_filtered.csv`")
     lines.append("")
     lines.append("## 3) Domains & Geography")
     for rel, title in [
@@ -790,10 +1259,6 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
             lines.append("![Seniority mix](outputs/figures/13_donut_seniority_filled.png)")
         if donut_b:
             lines.append("![CV generation language mix](outputs/figures/14_donut_cv_generation_language.png)")
-    img_strata = _img_md(base_dir, "outputs/figures/15_strata_top20.png", "Top-20 strata")
-    if img_strata:
-        lines.append("")
-        lines.append(img_strata)
     lines.append("")
     lines.append("Ключевые таблицы стратификации:")
     lines.extend(
@@ -876,6 +1341,25 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
             "- `outputs/tables/not_employed_history_top_titles.csv`",
         ]
     )
+    lines.append("")
+    lines.append("### Unknown deep dive")
+    lines.append(
+        f"- unknown_count: **{unknown_count}** ({unknown_share:.1f}% of cohort); before parser improvements: **{unknown_before_count}** ({unknown_before_share:.1f}%)."
+    )
+    if not unknown_top3.empty:
+        lines.append("- Top unknown reasons:")
+        for _, row in unknown_top3.iterrows():
+            lines.append(f"  - `{row['reason_unknown']}`: {int(row['count'])} ({float(row['share_%']):.1f}%)")
+    lines.append(f"- Unknown users without LaTeX: **{unknown_without_latex_share:.1f}%**.")
+    lines.append(f"- Unknown users with jobs but no period: **{unknown_jobs_no_period_share:.1f}%**.")
+    lines.append(f"- Rescued failed period rows by parser upgrade: **{period_rescued}**.")
+    lines.append("Links:")
+    lines.append("- `outputs/tables/employment_unknown_breakdown.csv`")
+    lines.append("- `outputs/tables/employment_unknown_parse_failed_periods_top.csv`")
+    lines.append("- `outputs/tables/employment_unknown_users.csv`")
+    lines.append("- `outputs/tables/employment_unknown_crosstab_sources.csv`")
+    lines.append("- `outputs/tables/employment_unknown_before_after.csv`")
+    lines.append("- `outputs/tables/employment_unknown_reason_shift.csv`")
     lines.append("")
     lines.append("## 8) Not specified research")
     lines.append(diagnostics.to_markdown(index=False))
@@ -1047,6 +1531,31 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     for col in DATE_COLUMNS:
         if col in users.columns:
             users[col] = pd.to_datetime(users[col], errors="coerce", utc=True)
+
+    if "createdAt" not in users.columns:
+        raise ValueError("Missing required column: createdAt")
+    users["createdAt"] = pd.to_datetime(users["createdAt"], errors="coerce", utc=True)
+    users["created_date_utc"] = users["createdAt"].dt.date
+
+    created_counts_all = build_created_date_counts(users["created_date_utc"])
+    save_table(created_counts_all, tables_dir / "createdAt_date_counts_all.csv")
+
+    valid_created = users["createdAt"].dropna()
+    if valid_created.empty:
+        raise ValueError("createdAt has no parseable values; cannot build 26-27 Feb cohort.")
+    target_year = int(valid_created.dt.year.max())
+    target_dates = {date(target_year, 2, 26), date(target_year, 2, 27)}
+
+    users = users[users["created_date_utc"].isin(target_dates)].copy()
+    created_counts_filtered = build_created_date_counts(users["created_date_utc"])
+    save_table(created_counts_filtered, tables_dir / "createdAt_date_counts_filtered.csv")
+
+    filtered_dates = set(users["created_date_utc"].dropna().tolist())
+    if not filtered_dates.issubset(target_dates):
+        top_dates = created_counts_filtered.head(10).to_dict("records")
+        raise ValueError(
+            f"createdAt filter guard failed: expected only {sorted(target_dates)}, got {sorted(filtered_dates)}. Top dates: {top_dates}"
+        )
 
     users["onboardingCompleted"] = parse_bool_series(users.get("onboardingCompleted", pd.Series(index=users.index, dtype=object)), default_false=True)
     users["isBanned"] = parse_bool_series(users.get("isBanned", pd.Series(index=users.index, dtype=object)), default_false=True)
@@ -1652,165 +2161,70 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             ]
         )
 
-    status_rows: List[Dict[str, object]] = []
-    if not jobs_long_all.empty:
-        for user_hash, grp in jobs_long_all.groupby("user_hash"):
-            g = grp.copy()
-            employed = bool(g["is_present"].fillna(False).any())
-            valid_closed = g[g["parse_ok"] & g["end_date"].notna()].copy()
+    jobs_long_all_before = jobs_long_all.copy()
+    jobs_long_all, period_reparse_stats = reparse_failed_periods(jobs_long_all, analysis_date)
 
-            status = "unknown"
-            last_end = pd.NaT
-            months_since_last_end = np.nan
-            last_company_norm = "Not specified"
-            last_company_display_full = "Not specified"
-            last_job_title = "Not specified"
+    employment_before = build_employment_outputs(users_enriched, jobs_long_all_before, analysis_date)
+    employment_after = build_employment_outputs(users_enriched, jobs_long_all, analysis_date)
 
-            if employed:
-                status = "employed"
-            elif not valid_closed.empty:
-                last_end = valid_closed["end_date"].max()
-                if pd.notna(last_end) and last_end < analysis_date:
-                    status = "not_employed"
-                    months_since_last_end = months_between(analysis_date, last_end)
-                else:
-                    status = "unknown"
+    employment_user = employment_after["employment_user"]
+    employment_status_summary = employment_after["employment_status_summary"]
+    employment_status_by_domain = employment_after["employment_status_by_domain"]
+    employment_status_by_region = employment_after["employment_status_by_region"]
+    employment_status_by_seniority = employment_after["employment_status_by_seniority"]
+    domain_status_counts = employment_after["domain_status_counts"]
+    not_employed_months_since_last_end = employment_after["not_employed_months_since_last_end"]
+    not_employed_last_companies = employment_after["not_employed_top_last_companies"]
+    not_employed_last_titles = employment_after["not_employed_top_last_titles"]
+    not_employed_history_companies = employment_after["not_employed_history_top_companies"]
+    not_employed_history_titles = employment_after["not_employed_history_top_titles"]
+    employment_unknown_users = employment_after["employment_unknown_users"]
+    employment_unknown_breakdown = employment_after["employment_unknown_breakdown"]
+    employment_unknown_crosstab_sources = employment_after["employment_unknown_crosstab_sources"]
+    employment_unknown_parse_failed_periods_top = employment_after["employment_unknown_parse_failed_periods_top"]
 
-                last_row = valid_closed.sort_values(["end_date", "start_date"], ascending=[False, False]).iloc[0]
-                last_company_norm = clean_text(last_row.get("company_norm", "")) or "Not specified"
-                last_company_display_full = clean_text(last_row.get("company_display_full", "")) or "Not specified"
-                last_job_title = clean_text(last_row.get("job_title", "")) or "Not specified"
+    unknown_before_count = int((employment_before["employment_user"]["employment_status"] == "unknown").sum())
+    unknown_after_count = int((employment_after["employment_user"]["employment_status"] == "unknown").sum())
+    unknown_before_share = round((unknown_before_count / max(len(users_enriched), 1)) * 100, 1)
+    unknown_after_share = round((unknown_after_count / max(len(users_enriched), 1)) * 100, 1)
 
-            status_rows.append(
-                {
-                    "user_hash": user_hash,
-                    "employment_status": status,
-                    "last_end_date": last_end,
-                    "months_since_last_end": months_since_last_end,
-                    "last_company_norm": last_company_norm,
-                    "last_company_display_full": last_company_display_full,
-                    "last_company_display_short": display_short(last_company_display_full, max_len=60),
-                    "last_job_title": last_job_title,
-                    "last_job_title_short": display_short(last_job_title, max_len=60),
-                }
-            )
-
-    employment_user = users_enriched[["user_hash", "domain_filled", "region_norm", "seniority_filled"]].merge(
-        pd.DataFrame(status_rows), on="user_hash", how="left"
+    unknown_before_reasons = (
+        employment_before["employment_unknown_breakdown"][["reason_unknown", "count"]]
+        .rename(columns={"count": "count_before"})
+        if not employment_before["employment_unknown_breakdown"].empty
+        else pd.DataFrame(columns=["reason_unknown", "count_before"])
     )
-    employment_user["employment_status"] = employment_user["employment_status"].fillna("unknown")
-    employment_user["months_since_last_end"] = pd.to_numeric(employment_user["months_since_last_end"], errors="coerce")
-    employment_user["last_company_norm"] = employment_user["last_company_norm"].fillna("Not specified")
-    employment_user["last_company_display_full"] = employment_user["last_company_display_full"].fillna("Not specified")
-    employment_user["last_company_display_short"] = employment_user["last_company_display_short"].fillna("Not specified")
-    employment_user["last_job_title"] = employment_user["last_job_title"].fillna("Not specified")
-    employment_user["last_job_title_short"] = employment_user["last_job_title_short"].fillna("Not specified")
-
-    status_order = ["employed", "not_employed", "unknown"]
-    employment_status_summary = (
-        employment_user["employment_status"]
-        .value_counts()
-        .reindex(status_order, fill_value=0)
-        .rename_axis("employment_status")
-        .reset_index(name="count")
+    unknown_after_reasons = (
+        employment_unknown_breakdown[["reason_unknown", "count"]]
+        .rename(columns={"count": "count_after"})
+        if not employment_unknown_breakdown.empty
+        else pd.DataFrame(columns=["reason_unknown", "count_after"])
     )
-    employment_status_summary["share_%"] = (employment_status_summary["count"] / max(len(employment_user), 1) * 100).round(1)
+    employment_unknown_reason_shift = unknown_before_reasons.merge(unknown_after_reasons, on="reason_unknown", how="outer").fillna(0)
+    if not employment_unknown_reason_shift.empty:
+        employment_unknown_reason_shift["count_before"] = employment_unknown_reason_shift["count_before"].astype(int)
+        employment_unknown_reason_shift["count_after"] = employment_unknown_reason_shift["count_after"].astype(int)
+        employment_unknown_reason_shift["delta"] = employment_unknown_reason_shift["count_after"] - employment_unknown_reason_shift["count_before"]
+        employment_unknown_reason_shift = employment_unknown_reason_shift.sort_values(["delta", "count_after"], ascending=[True, False])
 
-    def cross_status(segment: pd.Series, segment_name: str, top_n: int | None = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        seg = segment.fillna("Not specified").astype(str)
-        if top_n is not None:
-            seg_top = seg[~seg.str.lower().isin(GENERIC_EXCLUDE)].value_counts().head(top_n).index.tolist()
-            seg = seg.where(seg.isin(seg_top), np.nan)
-        base = pd.DataFrame({"segment": seg, "employment_status": employment_user["employment_status"]}).dropna(subset=["segment"]).copy()
-        counts = pd.crosstab(base["segment"], base["employment_status"])
-        for st in status_order:
-            if st not in counts.columns:
-                counts[st] = 0
-        counts = counts[status_order]
-        shares = row_normalize_percent(counts)
-        rows: List[Dict[str, object]] = []
-        for idx in counts.index:
-            row_total = int(counts.loc[idx].sum())
-            for st in status_order:
-                rows.append(
-                    {
-                        segment_name: idx,
-                        f"{segment_name}_short": display_short(idx, max_len=60),
-                        "employment_status": st,
-                        "count": int(counts.loc[idx, st]),
-                        "row_share_%": round(float(shares.loc[idx, st]), 1),
-                        "row_total": row_total,
-                    }
-                )
-        return pd.DataFrame(rows), counts
-
-    employment_status_by_domain, domain_status_counts = cross_status(employment_user["domain_filled"], "domain_filled", top_n=10)
-    employment_status_by_region, region_status_counts = cross_status(employment_user["region_norm"], "region_norm", top_n=15)
-    employment_status_by_seniority, seniority_status_counts = cross_status(employment_user["seniority_filled"], "seniority_filled", top_n=None)
-
-    not_employed_users = employment_user[employment_user["employment_status"] == "not_employed"].copy()
-    not_employed_months_since_last_end = not_employed_users[
-        ["user_hash", "last_end_date", "months_since_last_end", "last_company_norm", "last_job_title"]
-    ].copy()
-
-    not_employed_last_companies = (
-        not_employed_users[~not_employed_users["last_company_norm"].astype(str).str.lower().isin(GENERIC_EXCLUDE)]
-        .groupby("last_company_norm")
-        .agg(
-            count=("user_hash", "count"),
-            company_display_full=("last_company_display_full", lambda x: x.value_counts().index[0] if len(x) else ""),
-        )
-        .reset_index()
-        .rename(columns={"last_company_norm": "company_norm"})
-        .sort_values("count", ascending=False)
-        .head(30)
+    employment_unknown_before_after = pd.DataFrame(
+        {
+            "metric": [
+                "unknown_before_parser_improvement_count",
+                "unknown_before_parser_improvement_share_%",
+                "unknown_after_parser_improvement_count",
+                "unknown_after_parser_improvement_share_%",
+                "unknown_delta_count",
+            ],
+            "value": [
+                unknown_before_count,
+                unknown_before_share,
+                unknown_after_count,
+                unknown_after_share,
+                unknown_after_count - unknown_before_count,
+            ],
+        }
     )
-    if not not_employed_last_companies.empty:
-        not_employed_last_companies["share_%"] = (not_employed_last_companies["count"] / not_employed_last_companies["count"].sum() * 100).round(1)
-        not_employed_last_companies["company_display_short"] = not_employed_last_companies["company_display_full"].map(lambda x: display_short(x, max_len=60))
-    else:
-        not_employed_last_companies = pd.DataFrame(columns=["company_norm", "count", "company_display_full", "company_display_short", "share_%"])
-
-    not_employed_last_titles = (
-        not_employed_users[not_employed_users["last_job_title"].astype(str).str.strip().ne("")]
-        .groupby("last_job_title")
-        .size()
-        .rename("count")
-        .reset_index()
-        .sort_values("count", ascending=False)
-        .head(30)
-    )
-    if not not_employed_last_titles.empty:
-        not_employed_last_titles["share_%"] = (not_employed_last_titles["count"] / not_employed_last_titles["count"].sum() * 100).round(1)
-        not_employed_last_titles["job_title_short"] = not_employed_last_titles["last_job_title"].map(lambda x: display_short(x, max_len=60))
-    else:
-        not_employed_last_titles = pd.DataFrame(columns=["last_job_title", "count", "share_%", "job_title_short"])
-
-    not_employed_history_jobs = jobs_long_all[jobs_long_all["user_hash"].isin(set(not_employed_users["user_hash"]))].copy()
-    not_employed_history_companies = (
-        not_employed_history_jobs[~not_employed_history_jobs["company_norm"].astype(str).str.lower().isin(GENERIC_EXCLUDE)]
-        .groupby("company_norm")
-        .agg(
-            count=("user_hash", "count"),
-            company_display_full=("company_display_full", lambda x: x.value_counts().index[0] if len(x) else ""),
-        )
-        .reset_index()
-        .sort_values("count", ascending=False)
-        .head(30)
-    )
-    if not not_employed_history_companies.empty:
-        not_employed_history_companies["share_%"] = (
-            not_employed_history_companies["count"] / not_employed_history_companies["count"].sum() * 100
-        ).round(1)
-        not_employed_history_companies["company_display_short"] = not_employed_history_companies["company_display_full"].map(
-            lambda x: display_short(x, max_len=60)
-        )
-    else:
-        not_employed_history_companies = pd.DataFrame(columns=["company_norm", "count", "company_display_full", "company_display_short", "share_%"])
-
-    not_employed_history_titles = top_counts(not_employed_history_jobs["job_title"], 30, "job_title")
-    if not not_employed_history_titles.empty:
-        not_employed_history_titles["job_title_short"] = not_employed_history_titles["job_title"].map(lambda x: display_short(x, max_len=60))
 
     geo_mapping_audit = (
         users_enriched.groupby(["region_filled", "region_norm"]).size().reset_index(name="count").rename(columns={"region_filled": "raw_region"}).sort_values("count", ascending=False)
@@ -1831,6 +2245,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             "metric": [
                 "users_total",
                 "columns_total",
+                "cohort_target_year",
+                "createdAt_filter_utc",
                 "createdAt_min",
                 "createdAt_max",
                 "coverage_cvEnhancedResult_%",
@@ -1841,6 +2257,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             "value": [
                 total_users,
                 users.shape[1],
+                target_year,
+                f"{target_year}-02-26 to {target_year}-02-27",
                 str(users["createdAt"].min()) if "createdAt" in users.columns else "",
                 str(users["createdAt"].max()) if "createdAt" in users.columns else "",
                 cover_cv_enhanced,
@@ -1852,6 +2270,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     )
 
     tables: Dict[str, pd.DataFrame] = {
+        "createdAt_date_counts_all": created_counts_all,
+        "createdAt_date_counts_filtered": created_counts_filtered,
         "columns_inventory": columns_inventory,
         "dataset_profile": dataset_profile,
         "validation_summary": validation_summary,
@@ -1907,6 +2327,13 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "not_employed_top_last_titles": not_employed_last_titles,
         "not_employed_history_top_companies": not_employed_history_companies,
         "not_employed_history_top_titles": not_employed_history_titles,
+        "employment_unknown_users": employment_unknown_users,
+        "employment_unknown_breakdown": employment_unknown_breakdown,
+        "employment_unknown_crosstab_sources": employment_unknown_crosstab_sources,
+        "employment_unknown_parse_failed_periods_top": employment_unknown_parse_failed_periods_top,
+        "employment_unknown_before_after": employment_unknown_before_after,
+        "employment_unknown_reason_shift": employment_unknown_reason_shift,
+        "period_reparse_stats": period_reparse_stats,
         "strata_top20": strata_top20,
         "not_specified_deep_dive_summary": not_specified_deep_dive_summary,
         "not_specified_deep_dive_region_not_specified_breakdown": region_ns_breakdown,
@@ -2035,18 +2462,6 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         save_table(seniority_donut, tables_dir / "seniority_donut_distribution.csv")
     if not cv_lang_donut.empty:
         save_table(cv_lang_donut, tables_dir / "cv_generation_language_donut_distribution.csv")
-
-    if not strata_top20.empty:
-        plot_barh(
-            strata_top20.rename(columns={"strata": "strata_label"}),
-            "strata_label",
-            "count",
-            figures_dir / "15_strata_top20.png",
-            "Top-20 strata: domain x seniority x region",
-            top_n=20,
-            max_label_len=36,
-            wrap_width=24,
-        )
 
     plot_bar(
         employment_status_summary,

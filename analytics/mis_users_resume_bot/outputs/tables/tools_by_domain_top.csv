@@ -1,14 +1,14 @@
 domain,tool,count
 Product/Project Management,Jira,89
 Product/Project Management,Confluence,80
-Product/Project Management,Sql,52
+Product/Project Management,Sql,49
 Product/Project Management,Miro,46
-Product/Project Management,Figma,29
+Product/Project Management,Figma,28
 Finance/Legal/HR,Jira,34
 Finance/Legal/HR,Confluence,20
 Finance/Legal/HR,Power Bi,13
-Finance/Legal/HR,Miro,11
 Finance/Legal/HR,Notion,11
+Finance/Legal/HR,Miro,11
 Engineering/IT,Docker,24
 Engineering/IT,Git,21
 Engineering/IT,Postgresql,17

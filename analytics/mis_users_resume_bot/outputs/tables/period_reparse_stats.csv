@@ -1,0 +1,4 @@
+metric,value
+failed_period_rows_before,71
+rescued_period_rows,0
+failed_period_rows_after,71

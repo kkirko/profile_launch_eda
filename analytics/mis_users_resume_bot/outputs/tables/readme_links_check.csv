@@ -10,7 +10,6 @@ outputs/figures/09_stacked_domain_company_top15.png,True
 outputs/figures/10_top_tools.png,True
 outputs/figures/11_top_skills.png,True
 outputs/figures/12_heatmap_domain_tools_share.png,True
-outputs/figures/15_strata_top20.png,True
 outputs/figures/16_employment_status_overall.png,True
 outputs/figures/17_employment_status_by_domain.png,True
 outputs/figures/18_months_since_last_end_hist.png,True

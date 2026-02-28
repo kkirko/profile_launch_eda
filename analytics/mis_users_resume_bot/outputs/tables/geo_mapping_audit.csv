@@ -1,7 +1,7 @@
 raw_region,region_norm,count
-Not specified,Not specified,241
+Not specified,Not specified,239
 Москва,Moscow,86
-"Dubai, UAE",Dubai,17
+"Dubai, UAE",Dubai,16
 Санкт-Петербург,Saint Petersburg,14
 "Warsaw, Poland",Warsaw,11
 "Moscow, Russia",Moscow,10
@@ -11,77 +11,77 @@ Russia,Russia,8
 "Minsk, Belarus",Minsk,8
 "Минск, Беларусь",Minsk,7
 Алматы,Almaty,6
-Ташкент,Tashkent,5
 "Belgrade, Serbia",Serbia,5
+"Yerevan, Armenia",Yerevan,5
 Россия,Russia,5
 "Tbilisi, Georgia",Tbilisi,5
-"Yerevan, Armenia",Yerevan,5
-"Almaty, Kazakhstan",Almaty,4
 Kazakhstan,Kazakhstan,4
 Минск,Minsk,4
-"London, UK",United Kingdom,3
-Uzbekistan,Uzbekistan,3
+"Almaty, Kazakhstan",Almaty,4
 "Москва, Россия",Moscow,3
-Germany,Germany,3
+"London, UK",United Kingdom,3
+Ташкент,Tashkent,3
 "Berlin, Germany",Germany,3
 Томск,Томск,3
 "Dubai, United Arab Emirates",Dubai,3
-UAE,UAE,2
+Germany,Germany,3
 "Remote / San Jose, CA","Remote, San Jose, Ca",2
+UAE,UAE,2
+"Россия, Санкт-Петербург",Saint Petersburg,2
 "Helsinki, Finland",Finland,2
 "Алматы, Казахстан",Almaty,2
-"Vienna, Austria",Austria,2
+"Riga, Latvia",Latvia,2
 Астана,Астана,2
 "Novi Sad, Serbia",Serbia,2
 "Amsterdam, Netherlands",Netherlands,2
 Minsk,Minsk,2
 "Abu Dhabi, UAE",Abu Dhabi,2
-"Россия, Санкт-Петербург",Saint Petersburg,2
+"Vienna, Austria",Austria,2
 "Vilnius, Lithuania",Vilnius,2
-"Riga, Latvia",Latvia,2
-Dubai,Dubai,2
-"Boston, MA","Boston, Ma",2
-Саранск,Саранск,2
-"Санкт-Петербург, Россия",Saint Petersburg,2
+"St. Petersburg, Russia",Saint Petersburg,2
 Cyprus,Cyprus,2
+"Tashkent, Uzbekistan",Tashkent,2
+Саранск,Саранск,2
+"Stuttgart, Germany",Germany,2
+"Boston, MA","Boston, Ma",2
+Dubai,Dubai,2
+"Санкт-Петербург, Россия",Saint Petersburg,2
 "Budva, Montenegro",Montenegro,2
 Турция,Turkey,2
-"St. Petersburg, Russia",Saint Petersburg,2
-"Stuttgart, Germany",Germany,2
-"Tashkent, Uzbekistan",Tashkent,2
-"Гражданство: Россия \,",Russia,1
-Беларусь,Belarus,1
-"Tuscany, Italy","Tuscany, Italy",1
-Дальний Восток,Дальнии Восток,1
-United Kingdom,United Kingdom,1
 Бахрейн,Бахреин,1
+Беларусь,Belarus,1
 United Arab Emirates,UAE,1
-Union --- AI SaaS,Union --- Ai Saas,1
-UK,United Kingdom,1
-"Волгоград, Россия (готов к релокации)",Russia,1
 USA/РФ/Кипр/РБ,USA,1
-Гродно,Гродно,1
-UK / Europe (Remote \& On-site),United Kingdom,1
-"Гражданство: Россия, Болгария",Russia,1
+United Kingdom,United Kingdom,1
+"Tuscany, Italy","Tuscany, Italy",1
+Union --- AI SaaS,Union --- Ai Saas,1
+"Varna, Bulgaria",Bulgaria,1
 Владивосток,Владивосток,1
+"Волгоград, Россия (готов к релокации)",Russia,1
+"Гражданство: Россия \,",Russia,1
+"Гражданство: Россия, Болгария",Russia,1
+Гродно,Гродно,1
+UK,United Kingdom,1
+Дальний Восток,Дальнии Восток,1
+UK / Europe (Remote \& On-site),United Kingdom,1
 work permit: Russia,Russia,1
 "İzmir, Türkiye","Izmir, Turkiye",1
 www.avbinvest.com,Www.Avbinvest.Com,1
-"Vancouver, Canada",Canada,1
 "Европа, Азия, Россия",Russia,1
 "Vilnius, Lithuania (remote)",Vilnius,1
 Warsaw (Hybrid); Astana (Remote),Warsaw,1
 "UAE, Singapore",UAE,1
-"Yekaterinburg, Sverdlovsk Oblast, Russia",Russia,1
 "Valencia, Spain",Spain,1
+"Yekaterinburg, Sverdlovsk Oblast, Russia",Russia,1
 "Yerevan, Armenia \",Yerevan,1
 "Yerevan, Armenia \,",Yerevan,1
 "Zurich, Switzerland","Zurich, Switzerland",1
 "\, готов к переезду: Санкт-Петербург \,",Saint Petersburg,1
+Uzbekistan,Uzbekistan,1
 "\, удалённо \,",Remote,1
 shate-m.by,Shate-M.By,1
 startx.team,Startx.Team,1
-"Varna, Bulgaria",Bulgaria,1
+"Vancouver, Canada",Canada,1
 "UAE, Saudi Arabia, Europe, CIS, Russia",UAE,1
 (аудит и управление R\&D-проектами в стратегических отраслях),(Аудит И Управление R&D-Проектами В Стратегических Отраслях),1
 Екатеринбург,Екатеринбург,1

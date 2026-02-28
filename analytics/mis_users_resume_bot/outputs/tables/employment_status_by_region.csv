@@ -5,9 +5,9 @@ Almaty,Almaty,unknown,0,0.0,12
 Belarus,Belarus,employed,7,87.5,8
 Belarus,Belarus,not_employed,1,12.5,8
 Belarus,Belarus,unknown,0,0.0,8
-Dubai,Dubai,employed,22,91.7,24
-Dubai,Dubai,not_employed,2,8.3,24
-Dubai,Dubai,unknown,0,0.0,24
+Dubai,Dubai,employed,22,95.7,23
+Dubai,Dubai,not_employed,1,4.3,23
+Dubai,Dubai,unknown,0,0.0,23
 Germany,Germany,employed,10,76.9,13
 Germany,Germany,not_employed,2,15.4,13
 Germany,Germany,unknown,1,7.7,13
@@ -32,15 +32,15 @@ Saint Petersburg,Saint Petersburg,unknown,0,0.0,23
 Serbia,Serbia,employed,3,33.3,9
 Serbia,Serbia,not_employed,6,66.7,9
 Serbia,Serbia,unknown,0,0.0,9
-Tashkent,Tashkent,employed,6,66.7,9
-Tashkent,Tashkent,not_employed,3,33.3,9
-Tashkent,Tashkent,unknown,0,0.0,9
+Spain,Spain,employed,6,85.7,7
+Spain,Spain,not_employed,1,14.3,7
+Spain,Spain,unknown,0,0.0,7
 USA,USA,employed,6,75.0,8
 USA,USA,not_employed,1,12.5,8
 USA,USA,unknown,1,12.5,8
-United Kingdom,United Kingdom,employed,4,57.1,7
-United Kingdom,United Kingdom,not_employed,3,42.9,7
-United Kingdom,United Kingdom,unknown,0,0.0,7
 Warsaw,Warsaw,employed,9,75.0,12
 Warsaw,Warsaw,not_employed,3,25.0,12
 Warsaw,Warsaw,unknown,0,0.0,12
+Yerevan,Yerevan,employed,7,100.0,7
+Yerevan,Yerevan,not_employed,0,0.0,7
+Yerevan,Yerevan,unknown,0,0.0,7

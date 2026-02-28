@@ -1,37 +1,37 @@
 region_norm,count,region_display_full,region_display_short,region_display
-Not specified,241,Not specified,Not specified,Not specified
+Not specified,239,Not specified,Not specified,Not specified
 Moscow,124,Москва,Москва,Москва
 Russia,27,Russia,Russia,Russia
 Minsk,26,"Minsk, Belarus","Minsk, Belarus","Minsk, Belarus"
-Dubai,24,"Dubai, UAE","Dubai, UAE","Dubai, UAE"
 Saint Petersburg,23,Санкт-Петербург,Санкт-Петербург,Санкт-Петербург
+Dubai,23,"Dubai, UAE","Dubai, UAE","Dubai, UAE"
 Germany,13,"Berlin, Germany","Berlin, Germany","Berlin, Germany"
 Almaty,12,Алматы,Алматы,Алматы
 Warsaw,12,"Warsaw, Poland","Warsaw, Poland","Warsaw, Poland"
 Remote,11,Remote,Remote,Remote
-Tashkent,9,Ташкент,Ташкент,Ташкент
 Serbia,9,"Belgrade, Serbia","Belgrade, Serbia","Belgrade, Serbia"
-Belarus,8,Belarus,Belarus,Belarus
 Kazakhstan,8,Kazakhstan,Kazakhstan,Kazakhstan
+Belarus,8,Belarus,Belarus,Belarus
 USA,8,"California, USA (Remote)","California, USA (Remote)","California, USA (Remote)"
-United Kingdom,7,"London, UK","London, UK","London, UK"
+Tashkent,7,Ташкент,Ташкент,Ташкент
 Yerevan,7,"Yerevan, Armenia","Yerevan, Armenia","Yerevan, Armenia"
+United Kingdom,7,"London, UK","London, UK","London, UK"
 Spain,7,"Barcelona, Spain","Barcelona, Spain","Barcelona, Spain"
-Tbilisi,6,"Tbilisi, Georgia","Tbilisi, Georgia","Tbilisi, Georgia"
 UAE,6,UAE,UAE,UAE
-Uzbekistan,5,Uzbekistan,Uzbekistan,Uzbekistan
+Tbilisi,6,"Tbilisi, Georgia","Tbilisi, Georgia","Tbilisi, Georgia"
 Poland,5,"Bia{2}ystok, Poland","Bia{2}ystok, Poland","Bia{2}ystok, Poland"
 Israel,4,"Hybrid, Israel (Raanana)","Hybrid, Israel (Raanana)","Hybrid, Israel (Raanana)"
 Montenegro,4,"Budva, Montenegro","Budva, Montenegro","Budva, Montenegro"
 Cyprus,4,Cyprus,Cyprus,Cyprus
-Turkey,3,Турция,Турция,Турция
 Armenia,3,Armenia,Armenia,Armenia
+Uzbekistan,3,"Boysun Gas Processing Plant, Uzbekistan","Boysun Gas Processing Plant, Uzbekistan","Boysun Gas Processing Plant, Uzbekistan"
+Vilnius,3,"Vilnius, Lithuania","Vilnius, Lithuania","Vilnius, Lithuania"
+Turkey,3,Турция,Турция,Турция
+Томск,3,Томск,Томск,Томск
 Samara,3,Самара,Самара,Самара
 Thailand,3,"Bangkok, Thailand","Bangkok, Thailand","Bangkok, Thailand"
 Netherlands,3,"Amsterdam, Netherlands","Amsterdam, Netherlands","Amsterdam, Netherlands"
 Abu Dhabi,3,"Abu Dhabi, UAE","Abu Dhabi, UAE","Abu Dhabi, UAE"
-Vilnius,3,"Vilnius, Lithuania","Vilnius, Lithuania","Vilnius, Lithuania"
-Томск,3,Томск,Томск,Томск
 "Remote, San Jose, Ca",2,"Remote / San Jose, CA","Remote / San Jose, CA","Remote / San Jose, CA"
 Астана,2,Астана,Астана,Астана
 Latvia,2,"Riga, Latvia","Riga, Latvia","Riga, Latvia"

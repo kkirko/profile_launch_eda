@@ -1,9 +1,9 @@
 industry_raw,industry_norm,count
-Not specified,Not specified,614
+Not specified,Not specified,611
 IT,IT/Software,24
 Other,Other,24
-FinTech,Banking/FinTech,18
-Banking,Banking/FinTech,7
+FinTech,Banking/FinTech,15
+Banking,Banking/FinTech,6
 Healthcare,Healthcare,6
 E-commerce,E-commerce/Retail,5
 Retail,E-commerce/Retail,4

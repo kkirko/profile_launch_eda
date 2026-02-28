@@ -1,5 +1,5 @@
 company_raw,company_norm,count
-Not specified,Not specified,203
+Not specified,Not specified,202
 BostonGene,bostongene,3
 Coherent Solutions,coherent solutions,3
 Delta Distribution LLC,delta distribution,3
@@ -9,7 +9,6 @@ Lyft,LYFT,3
 S-HUB Startup Accelerator,s hub startup accelerator,3
 Wargaming,wargaming,3
 Сбер,Сбер,3
-AVO Services and Technology,avo services and technology,2
 Bank CenterCredit,bank centercredit,2
 Bar Association ``Right Side'',bar association right side,2
 Data Analytics Experience \& Projects,data analytics experience and projects,2
@@ -44,8 +43,6 @@ AI Designer / Creative Producer (IQOS global initiatives),ai designer creative p
 ALVAREZ \& MARSAL Middle East,alvarez and marsal middle east,1
 APLANA IT,aplana it,1
 ATG,ATG,1
-AVO Bank (Uzbekistan),avo bank uzbekistan,1
-AVO SERVICES AND TECHNOLOGY,avo services and technology,1
 AWATERA,awatera,1
 A\&K American Educational Consulting (американский EdTech startup),a and k american educational consulting американскии edtech startup,1
 Aaron Metals,aaron metals,1
@@ -73,7 +70,6 @@ Atos Poland Global Services,atos poland global services,1
 Auriga,auriga,1
 Avanade (JV Accenture/Microsoft),avanade jv accenture microsoft,1
 Avito,Avito,1
-Avo Bank (avo.uz),avo bank avo uz,1
 Avodeal LLC (US-based),avodeal us based,1
 BP Mobile,bp mobile,1
 Backbase,backbase,1
@@ -210,7 +206,6 @@ Mars Pet Nutrition Russia,mars pet nutrition russia,1
 McDonald's,mcdonald s,1
 MedGroupLT,medgrouplt,1
 Migron,migron,1
-Million Miles Method,million miles method,1
 Miro (Collaboration platform),miro collaboration platform,1
 Moots AI,moots ai,1
 NCR Voyix,ncr voyix,1

@@ -97,6 +97,8 @@ EDUCATION_SECTION_TITLES = {
 PRESENT_PATTERNS = [
     r"\bpresent\b",
     r"\bcurrent\b",
+    r"\bnow\b",
+    r"по\s*настоящее\s*время",
     r"по\s*н\.?в\.?",
     r"по\s*настоя",
     r"н\.?в\.?",
@@ -117,6 +119,57 @@ CONTACT_TOKENS = {
 }
 
 ENGLISH_HINTS = ["english", "англий", "англ"]
+
+MONTH_NAME_MAP = {
+    "jan": 1,
+    "january": 1,
+    "янв": 1,
+    "январ": 1,
+    "feb": 2,
+    "february": 2,
+    "фев": 2,
+    "феврал": 2,
+    "mar": 3,
+    "march": 3,
+    "мар": 3,
+    "март": 3,
+    "apr": 4,
+    "april": 4,
+    "апр": 4,
+    "апрел": 4,
+    "may": 5,
+    "май": 5,
+    "jun": 6,
+    "june": 6,
+    "июн": 6,
+    "июнь": 6,
+    "jul": 7,
+    "july": 7,
+    "июл": 7,
+    "июль": 7,
+    "aug": 8,
+    "august": 8,
+    "авг": 8,
+    "август": 8,
+    "sep": 9,
+    "sept": 9,
+    "september": 9,
+    "сен": 9,
+    "сент": 9,
+    "сентябр": 9,
+    "oct": 10,
+    "october": 10,
+    "окт": 10,
+    "октябр": 10,
+    "nov": 11,
+    "november": 11,
+    "ноя": 11,
+    "ноябр": 11,
+    "dec": 12,
+    "december": 12,
+    "дек": 12,
+    "декабр": 12,
+}
 
 
 def clean_text(value: object) -> str:
@@ -333,6 +386,23 @@ def _parse_month_year(token: str) -> pd.Timestamp | pd.NaT:
     return pd.Timestamp(year=int(match.group(2)), month=int(match.group(1)), day=1)
 
 
+def _parse_month_name_year(token: str) -> pd.Timestamp | pd.NaT:
+    t = canonical_token(token).replace(".", " ")
+    t = normalize_spaces(t)
+    match = re.match(r"^(?P<month>[a-zа-я]+)\s+(?P<year>19\d{2}|20\d{2})$", t)
+    if not match:
+        return pd.NaT
+    month_raw = match.group("month")
+    month = None
+    for key, val in MONTH_NAME_MAP.items():
+        if month_raw.startswith(key):
+            month = val
+            break
+    if month is None:
+        return pd.NaT
+    return pd.Timestamp(year=int(match.group("year")), month=int(month), day=1)
+
+
 def _parse_year(token: str, end_of_year: bool) -> pd.Timestamp | pd.NaT:
     t = normalize_spaces(token)
     if not re.match(r"^(19\d{2}|20\d{2})$", t):
@@ -345,14 +415,44 @@ def parse_period(period_raw: object, as_of_date: pd.Timestamp) -> PeriodParseRes
     if not raw:
         return PeriodParseResult(pd.NaT, pd.NaT, False, False, "empty")
 
-    text = raw.lower().replace("—", "-").replace("–", "-")
+    text = raw.lower().replace("—", "-").replace("–", "-").replace("−", "-")
+    text = text.replace("\\n", " ")
     text = re.sub(r"\s*-{2,}\s*", " - ", text)
+    text = re.sub(r"\s*(?:to|до|по)\s*", " - ", text)
+    text = re.sub(r"по\s+настоящее\s+время", "present", text)
+    text = re.sub(r"по\s*н\.?\s*в\.?", "present", text)
+    text = re.sub(r"\bн\.?\s*в\.?\b", "present", text)
+    text = re.sub(r"\bcurrent role\b", "present", text)
     text = normalize_spaces(text)
+    text = re.sub(r"^(?:c|с|since|from)\s+", "", text)
 
     is_present = any(re.search(pattern, text) for pattern in PRESENT_PATTERNS)
     parts = [part.strip() for part in re.split(r"\s+-\s+", text) if part.strip()]
 
+    def _parse_start(token: str) -> pd.Timestamp | pd.NaT:
+        start = _parse_month_year(token)
+        if pd.isna(start):
+            start = _parse_month_name_year(token)
+        if pd.isna(start):
+            start = _parse_year(token, end_of_year=False)
+        return start
+
+    def _parse_end(token: str) -> pd.Timestamp | pd.NaT:
+        end = _parse_month_year(token)
+        if pd.isna(end):
+            end = _parse_month_name_year(token)
+        if pd.isna(end):
+            end = _parse_year(token, end_of_year=True)
+        return end
+
     if len(parts) < 2:
+        if is_present:
+            left = re.sub(r"\bpresent\b|\bcurrent\b|\bnow\b", "", text)
+            left = normalize_spaces(left.strip("- "))
+            start = _parse_start(left)
+            if pd.notna(start):
+                end = pd.Timestamp(year=as_of_date.year, month=as_of_date.month, day=1)
+                return PeriodParseResult(start, end, True, True, "since_to_present")
         years = re.findall(r"(19\d{2}|20\d{2})", text)
         if len(years) == 2:
             start = _parse_year(years[0], end_of_year=False)
@@ -365,13 +465,8 @@ def parse_period(period_raw: object, as_of_date: pd.Timestamp) -> PeriodParseRes
         return PeriodParseResult(pd.NaT, pd.NaT, is_present, False, "failed")
 
     left, right = parts[0], parts[1]
-    start = _parse_month_year(left)
-    end = _parse_month_year(right)
-
-    if pd.isna(start):
-        start = _parse_year(left, end_of_year=False)
-    if pd.isna(end):
-        end = _parse_year(right, end_of_year=True)
+    start = _parse_start(left)
+    end = _parse_end(right)
 
     if is_present:
         end = pd.Timestamp(year=as_of_date.year, month=as_of_date.month, day=1)

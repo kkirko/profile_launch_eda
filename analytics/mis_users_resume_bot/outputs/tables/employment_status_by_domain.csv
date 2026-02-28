@@ -8,9 +8,9 @@ Design/Creative,Design/Creative,unknown,1,2.5,40
 Engineering/IT,Engineering/IT,employed,39,63.9,61
 Engineering/IT,Engineering/IT,not_employed,20,32.8,61
 Engineering/IT,Engineering/IT,unknown,2,3.3,61
-Finance/Legal/HR,Finance/Legal/HR,employed,97,69.8,139
-Finance/Legal/HR,Finance/Legal/HR,not_employed,39,28.1,139
-Finance/Legal/HR,Finance/Legal/HR,unknown,3,2.2,139
+Finance/Legal/HR,Finance/Legal/HR,employed,96,69.6,138
+Finance/Legal/HR,Finance/Legal/HR,not_employed,39,28.3,138
+Finance/Legal/HR,Finance/Legal/HR,unknown,3,2.2,138
 Healthcare/Education,Healthcare/Education,employed,2,66.7,3
 Healthcare/Education,Healthcare/Education,not_employed,1,33.3,3
 Healthcare/Education,Healthcare/Education,unknown,0,0.0,3
@@ -20,6 +20,6 @@ Marketing/Sales,Marketing/Sales,unknown,1,5.6,18
 Operations/Administration,Operations/Administration,employed,9,60.0,15
 Operations/Administration,Operations/Administration,not_employed,6,40.0,15
 Operations/Administration,Operations/Administration,unknown,0,0.0,15
-Product/Project Management,Product/Project Management,employed,162,67.2,241
-Product/Project Management,Product/Project Management,not_employed,71,29.5,241
-Product/Project Management,Product/Project Management,unknown,8,3.3,241
+Product/Project Management,Product/Project Management,employed,158,66.9,236
+Product/Project Management,Product/Project Management,not_employed,70,29.7,236
+Product/Project Management,Product/Project Management,unknown,8,3.4,236

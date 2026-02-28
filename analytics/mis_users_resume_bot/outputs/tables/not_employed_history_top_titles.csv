@@ -1,31 +1,31 @@
 job_title,count,share_%,job_title_short
 Project Manager,47,19.8,Project Manager
 Менеджер проектов,12,5.1,Менеджер проектов
-QA Engineer,11,4.6,QA Engineer
 Business Analyst,11,4.6,Business Analyst
+QA Engineer,11,4.6,QA Engineer
 Android Developer,9,3.8,Android Developer
-Генеральный директор,8,3.4,Генеральный директор
 Коммерческий директор (CCO),8,3.4,Коммерческий директор (CCO)
 Руководитель отдела продаж,8,3.4,Руководитель отдела продаж
 Senior Backend Developer (Laravel),8,3.4,Senior Backend Developer (Laravel)
+Генеральный директор,8,3.4,Генеральный директор
 Software Engineer,8,3.4,Software Engineer
 Аналитик данных,8,3.4,Аналитик данных
 Java Developer,7,3.0,Java Developer
-Финансовый директор,6,2.5,Финансовый директор
-Frontend-разработчик,6,2.5,Frontend-разработчик
-Senior Instructional Designer,6,2.5,Senior Instructional Designer
 IT Project Manager,6,2.5,IT Project Manager
-CTO,6,2.5,CTO
 Верификатор / валидатор данных,6,2.5,Верификатор / валидатор данных
+Frontend-разработчик,6,2.5,Frontend-разработчик
+Финансовый директор,6,2.5,Финансовый директор
+CTO,6,2.5,CTO
+Senior Instructional Designer,6,2.5,Senior Instructional Designer
 Full Stack Developer,5,2.1,Full Stack Developer
 Директор филиала,5,2.1,Директор филиала
-Senior Project Manager,5,2.1,Senior Project Manager
-Key Account Manager,5,2.1,Key Account Manager
 Developer,5,2.1,Developer
-Коммерческий директор,5,2.1,Коммерческий директор
 Consultant,5,2.1,Consultant
+Коммерческий директор,5,2.1,Коммерческий директор
 Senior Consultant,5,2.1,Senior Consultant
-Frontend Developer,4,1.7,Frontend Developer
+Key Account Manager,5,2.1,Key Account Manager
+Senior Project Manager,5,2.1,Senior Project Manager
+Middle Backend Developer (Laravel),4,1.7,Middle Backend Developer (Laravel)
+Software Engineer / Data Engineer,4,1.7,Software Engineer / Data Engineer
 Full Stack Developer (Backend-leaning),4,1.7,Full Stack Developer (Backend-leaning)
-Операционный директор (COO),4,1.7,Операционный директор (COO)
-Project Engineer,4,1.7,Project Engineer
+Frontend Developer,4,1.7,Frontend Developer

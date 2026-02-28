@@ -38,7 +38,7 @@ from feature_builders import (
     parse_bool_series,
     summarize_user_jobs,
 )
-from latex_parser import clean_text, parse_cv_latex, parse_period
+from latex_parser import clean_text, has_latex_cv, parse_cv_latex, parse_period
 
 
 sns.set_theme(style="whitegrid", context="talk")
@@ -111,23 +111,6 @@ def infer_lang_from_text(value: object) -> str:
     if any(token in low for token in ["навыки", "опыт", "образование", "языки"]):
         return "ru"
     return "en"
-
-
-def has_latex_cv_text(value: object) -> bool:
-    text = clean_text(value)
-    if not text:
-        return False
-    raw = text.replace("\\r\\n", "\n").replace("\\n", "\n")
-    low = raw.lower()
-    if "```latex" in low:
-        return True
-    latex_markers = [
-        r"\\documentclass",
-        r"\\section\*",
-        r"\\begin\{document\}",
-        r"\\expheader",
-    ]
-    return any(re.search(pat, raw, flags=re.IGNORECASE) for pat in latex_markers)
 
 
 def limit_categories(series: pd.Series, max_n: int, other_label: str = "Other") -> pd.Series:
@@ -1581,7 +1564,6 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         old_png.unlink()
 
     users_raw = pd.read_csv(input_path, low_memory=False)
-    columns_inventory = build_columns_inventory(users_raw)
 
     users = normalize_empty_strings(users_raw)
 
@@ -1616,7 +1598,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
 
     if "cvEnhancedResult" not in users.columns:
         raise ValueError("Missing required column: cvEnhancedResult")
-    users["has_latex_cv"] = users["cvEnhancedResult"].map(has_latex_cv_text)
+    users["has_latex_cv"] = users["cvEnhancedResult"].map(has_latex_cv)
     total_users_pre_latex = int(len(users))
     has_latex_count = int(users["has_latex_cv"].sum())
     has_latex_share = round((has_latex_count / total_users_pre_latex * 100), 1) if total_users_pre_latex else 0.0
@@ -1640,6 +1622,10 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         raise ValueError("LaTeX filter assert failed: filtered dataset contains non-LaTeX rows.")
     if not np.isclose(users["has_latex_cv"].mean(), 1.0):
         raise ValueError("LaTeX filter assert failed: has_latex share is not 100% after filtering.")
+    if not users["cvEnhancedResult"].notna().all():
+        raise ValueError("LaTeX filter assert failed: cvEnhancedResult contains nulls after filtering.")
+
+    columns_inventory = build_columns_inventory(users)
 
     users["onboardingCompleted"] = parse_bool_series(users.get("onboardingCompleted", pd.Series(index=users.index, dtype=object)), default_false=True)
     users["isBanned"] = parse_bool_series(users.get("isBanned", pd.Series(index=users.index, dtype=object)), default_false=True)
@@ -1923,6 +1909,10 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     cv_generation_language_distribution["share_%"] = (
         cv_generation_language_distribution["count"] / max(len(users_enriched), 1) * 100
     ).round(1)
+    if int(cv_generation_language_distribution["count"].sum()) != int(total_users):
+        raise ValueError(
+            f"Language distribution assert failed: sum={int(cv_generation_language_distribution['count'].sum())}, users_total={int(total_users)}"
+        )
 
     cv_language_coverage = pd.DataFrame(
         {
@@ -2261,6 +2251,10 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     employment_unknown_breakdown = employment_after["employment_unknown_breakdown"]
     employment_unknown_crosstab_sources = employment_after["employment_unknown_crosstab_sources"]
     employment_unknown_parse_failed_periods_top = employment_after["employment_unknown_parse_failed_periods_top"]
+    if int(employment_status_summary["count"].sum()) != int(len(users_enriched)):
+        raise ValueError(
+            f"Employment status assert failed: sum={int(employment_status_summary['count'].sum())}, users_total={int(len(users_enriched))}"
+        )
 
     unknown_before_count = int((employment_before["employment_user"]["employment_status"] == "unknown").sum())
     unknown_after_count = int((employment_after["employment_user"]["employment_status"] == "unknown").sum())

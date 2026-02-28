@@ -212,6 +212,25 @@ def unique_keep_order(items: List[str]) -> List[str]:
     return out
 
 
+def has_latex_cv(text: object) -> bool:
+    raw = clean_text(text)
+    if not raw:
+        return False
+
+    normalized = raw.replace("\\r\\n", "\n").replace("\\n", "\n")
+    fenced_block = re.search(r"```latex\s*.*?```", normalized, flags=re.IGNORECASE | re.DOTALL)
+    if fenced_block:
+        return True
+
+    latex_markers = [
+        r"\\documentclass",
+        r"\\section\*",
+        r"\\begin\{document\}",
+        r"\\ExpHeader",
+    ]
+    return any(re.search(marker, normalized, flags=re.IGNORECASE) for marker in latex_markers)
+
+
 def extract_latex_block(cv_enhanced_result: object) -> str:
     raw = clean_text(cv_enhanced_result)
     if not raw:

@@ -1,10 +1,10 @@
 metric,value
-other_users_total,198.0
-share_all_users_%,27.4
+other_users_total,1.0
+share_all_users_%,0.2
 other_users_with_cvEnhancedResult,1.0
 share_among_cvEnhancedResult_users_%,0.2
-jobs_latex_present_%,0.5
-jobs_talent_present_%,0.5
-skills_or_tools_present_%,0.5
-region_specified_%,0.5
-seniority_specified_%,0.5
+jobs_latex_present_%,100.0
+jobs_talent_present_%,100.0
+skills_or_tools_present_%,100.0
+region_specified_%,100.0
+seniority_specified_%,100.0

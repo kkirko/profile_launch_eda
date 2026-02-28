@@ -1,9 +1,9 @@
 field,missing_%,filled_%
-talentCard.overall_tools,96.5,3.5
-cvEnhancedResult,27.9,72.1
-talentCard.specialist_category,27.9,72.1
-talentCard.overall_skills,27.9,72.1
-cvGenerationLanguage,27.4,72.6
+talentCard.overall_tools,95.2,4.8
 createdAt,0.0,100.0
 updatedAt,0.0,100.0
+cvEnhancedResult,0.0,100.0
+talentCard.specialist_category,0.0,100.0
+talentCard.overall_skills,0.0,100.0
+cvGenerationLanguage,0.0,100.0
 isBanned,0.0,100.0

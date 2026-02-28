@@ -1,7 +1,3 @@
-has_latex,raw_cvGenerationLanguage,cv_language_filled,language_source,count
-True,en,en,inferred_from_latex,274
-True,ru,ru,inferred_from_latex,244
-False,,no_latex,no_latex,198
-False,ru,no_latex,no_latex,3
-True,en,ru,inferred_from_latex,3
-False,en,no_latex,no_latex,1
+cv_language_filled,language_source,count
+en,inferred_from_latex,274
+ru,inferred_from_latex,247

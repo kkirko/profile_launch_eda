@@ -11,9 +11,9 @@ Lead,Lead,unknown,0,0.0,36
 Middle,Middle,employed,23,71.9,32
 Middle,Middle,not_employed,8,25.0,32
 Middle,Middle,unknown,1,3.1,32
-Not specified,Not specified,employed,63,21.6,292
-Not specified,Not specified,not_employed,24,8.2,292
-Not specified,Not specified,unknown,205,70.2,292
+Not specified,Not specified,employed,63,70.0,90
+Not specified,Not specified,not_employed,24,26.7,90
+Not specified,Not specified,unknown,3,3.3,90
 Senior,Senior,employed,148,68.8,215
 Senior,Senior,not_employed,63,29.3,215
 Senior,Senior,unknown,4,1.9,215

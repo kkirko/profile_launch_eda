@@ -1,0 +1,9 @@
+example_type,example,count,share_%
+period_raw_parse_failed,Даты не указаны,15,48.4
+period_raw_parse_failed,--,7,22.6
+period_raw_parse_failed,Dates not provided,6,19.4
+period_raw_parse_failed,Период не указан,2,6.5
+period_raw_parse_failed,До 2007,1,3.2
+latex_pattern,has_expheader + has_experience_section + has_item_entries + has_year_tokens,6,60.0
+latex_pattern,has_expheader + has_experience_section + has_item_entries,3,30.0
+latex_pattern,has_expheader + has_experience_section + has_item_entries + has_year_tokens + has_present_tokens,1,10.0

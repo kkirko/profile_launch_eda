@@ -1,5 +1,5 @@
 field,total_missing_count,share_missing_%,share_filled_by_fallback,source_breakdown
-domain,0,0.0,98.5,inferred:98.5%; talentCard:1.5%
-region,239,33.1,20.7,latex_expheader:46.2%; not_specified:33.1%; latex_header:14.0%; talentCard:6.8%
-company,202,27.9,0.6,latex_expheader:71.5%; not_specified:27.9%; talentCard:0.6%
-seniority,292,40.4,30.8,not_specified:40.4%; talentCard:28.8%; inferred_job_title:16.7%; inferred_header_role:14.1%
+domain,0,0.0,97.9,inferred:97.9%; talentCard:2.1%
+region,37,7.1,28.8,latex_expheader:64.1%; latex_header:19.4%; talentCard:9.4%; not_specified:7.1%
+company,0,0.0,0.8,latex_expheader:99.2%; talentCard:0.8%
+seniority,90,17.3,42.8,talentCard:39.9%; inferred_job_title:23.2%; inferred_header_role:19.6%; not_specified:17.3%

@@ -1,11 +1,11 @@
 metric,value
-users_total,723
-columns_total,153
+users_total,521
+columns_total,154
 cohort_target_year,2026
 createdAt_filter_utc,2026-02-26 to 2026-02-27
 createdAt_min,2026-02-26 13:00:54.419000+00:00
-createdAt_max,2026-02-27 17:48:16.113000+00:00
-coverage_cvEnhancedResult_%,72.1
-coverage_talentCard_jobs_%,72.1
-coverage_overall_skills_%,72.1
-coverage_specialist_category_%,72.1
+createdAt_max,2026-02-27 16:10:59.796000+00:00
+coverage_cvEnhancedResult_%,100.0
+coverage_talentCard_jobs_%,100.0
+coverage_overall_skills_%,100.0
+coverage_specialist_category_%,100.0

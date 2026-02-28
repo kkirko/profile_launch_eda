@@ -113,6 +113,23 @@ def infer_lang_from_text(value: object) -> str:
     return "en"
 
 
+def has_latex_cv_text(value: object) -> bool:
+    text = clean_text(value)
+    if not text:
+        return False
+    raw = text.replace("\\r\\n", "\n").replace("\\n", "\n")
+    low = raw.lower()
+    if "```latex" in low:
+        return True
+    latex_markers = [
+        r"\\documentclass",
+        r"\\section\*",
+        r"\\begin\{document\}",
+        r"\\expheader",
+    ]
+    return any(re.search(pat, raw, flags=re.IGNORECASE) for pat in latex_markers)
+
+
 def limit_categories(series: pd.Series, max_n: int, other_label: str = "Other") -> pd.Series:
     values = series.fillna("Not specified").astype(str)
     top = values.value_counts().head(max_n - 1 if values.nunique() > max_n else max_n).index
@@ -928,6 +945,54 @@ def build_employment_outputs(
         .head(100)
     )
 
+    unknown_examples_rows: List[Dict[str, object]] = []
+    if not unknown_parse_failed_periods_top.empty:
+        denom = max(int(unknown_parse_failed_periods_top["count"].sum()), 1)
+        for _, row in unknown_parse_failed_periods_top.head(20).iterrows():
+            unknown_examples_rows.append(
+                {
+                    "example_type": "period_raw_parse_failed",
+                    "example": display_short(row["period_raw_clean"], max_len=72),
+                    "count": int(row["count"]),
+                    "share_%": round(float(row["count"]) / denom * 100, 1),
+                }
+            )
+
+    unknown_hashes = set(unknown_users["user_hash"])
+    unknown_latex = users_enriched[users_enriched["user_hash"].isin(unknown_hashes)][["user_hash", "cvEnhancedResult"]].copy()
+    pattern_counts: Dict[str, int] = {}
+    for raw in unknown_latex["cvEnhancedResult"].fillna("").astype(str):
+        txt = raw.replace("\\r\\n", "\n").replace("\\n", "\n")
+        flags: List[str] = []
+        if re.search(r"\\ExpHeader", txt, flags=re.IGNORECASE):
+            flags.append("has_expheader")
+        if re.search(r"\\section\*\{[^}]*?(experience|опыт)", txt, flags=re.IGNORECASE):
+            flags.append("has_experience_section")
+        if re.search(r"\\item", txt):
+            flags.append("has_item_entries")
+        if re.search(r"(19|20)\d{2}", txt):
+            flags.append("has_year_tokens")
+        if re.search(r"present|current|по\s*н\.?в\.?|по\s*настоящее\s*время", txt, flags=re.IGNORECASE):
+            flags.append("has_present_tokens")
+        if not flags:
+            flags.append("no_known_work_pattern")
+        key = " + ".join(flags[:5])
+        pattern_counts[key] = pattern_counts.get(key, 0) + 1
+
+    if pattern_counts:
+        total_patterns = max(sum(pattern_counts.values()), 1)
+        for pattern, cnt in sorted(pattern_counts.items(), key=lambda kv: kv[1], reverse=True)[:20]:
+            unknown_examples_rows.append(
+                {
+                    "example_type": "latex_pattern",
+                    "example": pattern,
+                    "count": int(cnt),
+                    "share_%": round(cnt / total_patterns * 100, 1),
+                }
+            )
+
+    employment_unknown_examples = pd.DataFrame(unknown_examples_rows)
+
     unknown_comparison_base = pd.DataFrame(
         {
             "metric": ["unknown_count", "unknown_share_%"],
@@ -956,6 +1021,7 @@ def build_employment_outputs(
         "employment_unknown_breakdown": unknown_breakdown,
         "employment_unknown_crosstab_sources": unknown_crosstab,
         "employment_unknown_parse_failed_periods_top": unknown_parse_failed_periods_top,
+        "employment_unknown_examples": employment_unknown_examples,
         "employment_unknown_summary": unknown_comparison_base,
     }
 
@@ -1116,13 +1182,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         else 0.0
     )
     alt_geo_used = int(region_alt_cols["selected_in_fallback"].fillna(False).sum()) if "selected_in_fallback" in region_alt_cols.columns else 0
-    no_latex_count = 0
-    no_latex_share = 0.0
     cv_lang_mix = ""
-    if not cv_language_coverage.empty:
-        cov = dict(zip(cv_language_coverage["metric"], cv_language_coverage["value"]))
-        no_latex_count = int(float(cov.get("no_latex_count", 0)))
-        no_latex_share = float(cov.get("no_latex_share_%", 0.0))
     if not cv_language_dist.empty:
         parts = []
         total_lang = cv_language_dist["count"].sum()
@@ -1138,13 +1198,10 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     unknown_count = int(employment_summary.loc[employment_summary["employment_status"] == "unknown", "count"].sum()) if not employment_summary.empty else 0
     unknown_share = float(employment_summary.loc[employment_summary["employment_status"] == "unknown", "share_%"].sum()) if not employment_summary.empty else 0.0
     unknown_top3 = unknown_breakdown.head(3).copy() if not unknown_breakdown.empty else pd.DataFrame(columns=["reason_unknown", "count", "share_%"])
-    unknown_without_latex_share = 0.0
     unknown_jobs_no_period_share = 0.0
     if not unknown_crosstab.empty:
         unknown_total = max(int(unknown_crosstab["count"].sum()), 1)
-        no_latex = unknown_crosstab.loc[unknown_crosstab["has_latex"] == False, "count"].sum()  # noqa: E712
         jobs_no_period = unknown_crosstab.loc[unknown_crosstab["reason_unknown"] == "jobs_exist_but_no_period", "count"].sum()
-        unknown_without_latex_share = round(float(no_latex) / unknown_total * 100, 1)
         unknown_jobs_no_period_share = round(float(jobs_no_period) / unknown_total * 100, 1)
 
     unknown_before_count = 0
@@ -1172,7 +1229,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         f"Industry анализируется только на subset с заполненным industry: {industry_cov:.1f}% пользователей.",
         f"`region=Not specified` остается у {region_ns_share:.1f}% базы; `company=Not specified` — у {company_ns_share:.1f}%.",
         f"В fallback цепочку региона добавлено альтернативных geo-колонок: {alt_geo_used}.",
-        f"CV language среди пользователей с cvEnhancedResult: {cv_lang_mix if cv_lang_mix else 'n/a'}; no_latex={no_latex_count} ({no_latex_share:.1f}%).",
+        f"CV language distribution: {cv_lang_mix if cv_lang_mix else 'n/a'}.",
         f"Топ tools: {', '.join(top_tools['token_display'].tolist())}.",
         f"Статус занятости: employed {emp_share.get('employed', 0.0):.1f}%, not_employed {emp_share.get('not_employed', 0.0):.1f}%, unknown {emp_share.get('unknown', 0.0):.1f}%.",
         f"Unknown после улучшения парсинга периодов: {unknown_count} ({unknown_share:.1f}%), до улучшения: {unknown_before_count} ({unknown_before_share:.1f}%), rescued periods: {period_rescued}.",
@@ -1186,6 +1243,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         lines.append(f"- Cohort filter (createdAt UTC): **26-27 Feb {cohort_year}**")
     elif cohort_filter:
         lines.append(f"- Cohort filter (createdAt UTC): **{cohort_filter}**")
+    lines.append(f"- Sample: **только пользователи с LaTeX CV (`cvEnhancedResult` contains `latex`); N = {int(float(p['users_total']))}**")
     lines.append(f"- Users total: **{int(float(p['users_total']))}**")
     lines.append(f"- Coverage `cvEnhancedResult`: **{float(v['coverage_cvEnhancedResult_%']):.1f}%**")
     lines.append(f"- Coverage `talentCard.jobs`: **{float(v['coverage_talentCard_jobs_%']):.1f}%**")
@@ -1213,6 +1271,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         lines.append("- `outputs/tables/createdAt_date_counts_all.csv`")
     if not created_counts_filtered.empty:
         lines.append("- `outputs/tables/createdAt_date_counts_filtered.csv`")
+    lines.append("- `outputs/tables/latex_coverage_before_filter.csv`")
     lines.append("")
     lines.append("## 3) Domains & Geography")
     for rel, title in [
@@ -1247,9 +1306,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
             lines.append(img)
     lines.append("")
     lines.append("## 6) Стратификация выборки")
-    lines.append("CV language (among users with cvEnhancedResult): `ru/en`; `no_latex` учитывается только как покрытие.")
-    if no_latex_count:
-        lines.append(f"- no_latex_count: **{no_latex_count}** ({no_latex_share:.1f}% базы)")
+    lines.append("CV language: `ru/en`.")
     donut_a = (base_dir / "outputs/figures/13_donut_seniority_filled.png").exists()
     donut_b = (base_dir / "outputs/figures/14_donut_cv_generation_language.png").exists()
     if donut_a and donut_b:
@@ -1350,12 +1407,12 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         lines.append("- Top unknown reasons:")
         for _, row in unknown_top3.iterrows():
             lines.append(f"  - `{row['reason_unknown']}`: {int(row['count'])} ({float(row['share_%']):.1f}%)")
-    lines.append(f"- Unknown users without LaTeX: **{unknown_without_latex_share:.1f}%**.")
     lines.append(f"- Unknown users with jobs but no period: **{unknown_jobs_no_period_share:.1f}%**.")
     lines.append(f"- Rescued failed period rows by parser upgrade: **{period_rescued}**.")
     lines.append("Links:")
     lines.append("- `outputs/tables/employment_unknown_breakdown.csv`")
     lines.append("- `outputs/tables/employment_unknown_parse_failed_periods_top.csv`")
+    lines.append("- `outputs/tables/employment_unknown_examples.csv`")
     lines.append("- `outputs/tables/employment_unknown_users.csv`")
     lines.append("- `outputs/tables/employment_unknown_crosstab_sources.csv`")
     lines.append("- `outputs/tables/employment_unknown_before_after.csv`")
@@ -1557,11 +1614,38 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             f"createdAt filter guard failed: expected only {sorted(target_dates)}, got {sorted(filtered_dates)}. Top dates: {top_dates}"
         )
 
+    if "cvEnhancedResult" not in users.columns:
+        raise ValueError("Missing required column: cvEnhancedResult")
+    users["has_latex_cv"] = users["cvEnhancedResult"].map(has_latex_cv_text)
+    total_users_pre_latex = int(len(users))
+    has_latex_count = int(users["has_latex_cv"].sum())
+    has_latex_share = round((has_latex_count / total_users_pre_latex * 100), 1) if total_users_pre_latex else 0.0
+    users = users[users["has_latex_cv"]].copy()
+
+    latex_coverage_before_filter = pd.DataFrame(
+        [
+            {
+                "total_users": total_users_pre_latex,
+                "has_latex_count": has_latex_count,
+                "has_latex_share": has_latex_share,
+                "filtered_users": int(len(users)),
+            }
+        ]
+    )
+    save_table(latex_coverage_before_filter, tables_dir / "latex_coverage_before_filter.csv")
+
+    if len(users) == 0:
+        raise ValueError("LaTeX filter produced empty cohort.")
+    if int(users["has_latex_cv"].sum()) != len(users):
+        raise ValueError("LaTeX filter assert failed: filtered dataset contains non-LaTeX rows.")
+    if not np.isclose(users["has_latex_cv"].mean(), 1.0):
+        raise ValueError("LaTeX filter assert failed: has_latex share is not 100% after filtering.")
+
     users["onboardingCompleted"] = parse_bool_series(users.get("onboardingCompleted", pd.Series(index=users.index, dtype=object)), default_false=True)
     users["isBanned"] = parse_bool_series(users.get("isBanned", pd.Series(index=users.index, dtype=object)), default_false=True)
 
     users["user_hash"] = users["userId"].map(hash_user_id)
-    users["cvEnhancedResult_present"] = users.get("cvEnhancedResult", "").fillna("").astype(str).str.strip().ne("")
+    users["cvEnhancedResult_present"] = users["has_latex_cv"].astype(bool)
 
     as_of = users["updatedAt"].dropna().max() if "updatedAt" in users.columns else pd.NaT
     if pd.isna(as_of):
@@ -1822,41 +1906,36 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     experience_distribution = users_enriched["experience_bin"].fillna("Unknown").astype(str).value_counts().rename_axis("experience_bin").reset_index(name="count")
     leadership_distribution = users_enriched["leadership_level"].fillna("Low").astype(str).value_counts().rename_axis("leadership_level").reset_index(name="count")
 
-    users_enriched["cv_language_filled"] = np.where(
-        users_enriched["has_latex"],
-        users_enriched.get("cvEnhancedResult", "").map(infer_lang_from_text),
-        "no_latex",
-    )
-    users_enriched["language_source"] = np.where(users_enriched["has_latex"], "inferred_from_latex", "no_latex")
-    users_enriched["raw_cvGenerationLanguage"] = (
-        users_enriched.get("cvGenerationLanguage", pd.Series(index=users_enriched.index, dtype=object))
-        .fillna("")
-        .astype(str)
-        .str.strip()
+    users_enriched["cv_language_filled"] = users_enriched.get("cvEnhancedResult", "").map(infer_lang_from_text)
+    users_enriched["language_source"] = "inferred_from_latex"
+    users_enriched["cv_language_filled"] = users_enriched["cv_language_filled"].where(
+        users_enriched["cv_language_filled"].isin(["ru", "en"]), "en"
     )
 
     cv_generation_language_distribution = (
-        users_enriched[users_enriched["has_latex"]]
-        .groupby("cv_language_filled")
+        users_enriched.groupby("cv_language_filled")
         .size()
         .rename("count")
         .reset_index()
         .rename(columns={"cv_language_filled": "cvGenerationLanguage"})
         .sort_values("count", ascending=False)
     )
+    cv_generation_language_distribution["share_%"] = (
+        cv_generation_language_distribution["count"] / max(len(users_enriched), 1) * 100
+    ).round(1)
+
     cv_language_coverage = pd.DataFrame(
         {
-            "metric": ["has_latex_count", "no_latex_count", "has_latex_share_%", "no_latex_share_%"],
+            "metric": ["users_total", "latex_users", "latex_share_%"],
             "value": [
-                int(users_enriched["has_latex"].sum()),
-                int((~users_enriched["has_latex"]).sum()),
-                round(users_enriched["has_latex"].mean() * 100, 1),
-                round((~users_enriched["has_latex"]).mean() * 100, 1),
+                int(len(users_enriched)),
+                int(len(users_enriched)),
+                100.0,
             ],
         }
     )
     language_audit = (
-        users_enriched.groupby(["has_latex", "raw_cvGenerationLanguage", "cv_language_filled", "language_source"])
+        users_enriched.groupby(["cv_language_filled", "language_source"])
         .size()
         .rename("count")
         .reset_index()
@@ -2272,6 +2351,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     tables: Dict[str, pd.DataFrame] = {
         "createdAt_date_counts_all": created_counts_all,
         "createdAt_date_counts_filtered": created_counts_filtered,
+        "latex_coverage_before_filter": latex_coverage_before_filter,
         "columns_inventory": columns_inventory,
         "dataset_profile": dataset_profile,
         "validation_summary": validation_summary,
@@ -2331,6 +2411,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "employment_unknown_breakdown": employment_unknown_breakdown,
         "employment_unknown_crosstab_sources": employment_unknown_crosstab_sources,
         "employment_unknown_parse_failed_periods_top": employment_unknown_parse_failed_periods_top,
+        "employment_unknown_examples": employment_after["employment_unknown_examples"],
         "employment_unknown_before_after": employment_unknown_before_after,
         "employment_unknown_reason_shift": employment_unknown_reason_shift,
         "period_reparse_stats": period_reparse_stats,
@@ -2455,7 +2536,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         )
 
     seniority_donut = plot_donut(users_enriched["seniority_filled"], figures_dir / "13_donut_seniority_filled.png", "Seniority mix")
-    cv_lang_series = users_enriched.loc[users_enriched["has_latex"], "cv_language_filled"].astype(str)
+    cv_lang_series = users_enriched["cv_language_filled"].astype(str)
     cv_lang_series = cv_lang_series[cv_lang_series.isin(["ru", "en"])]
     cv_lang_donut = plot_donut(cv_lang_series, figures_dir / "14_donut_cv_generation_language.png", "CV language (among users with cvEnhancedResult)")
     if not seniority_donut.empty:

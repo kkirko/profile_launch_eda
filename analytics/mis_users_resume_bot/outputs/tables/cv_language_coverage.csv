@@ -1,5 +1,4 @@
 metric,value
-has_latex_count,521.0
-no_latex_count,202.0
-has_latex_share_%,72.1
-no_latex_share_%,27.9
+users_total,521.0
+latex_users,521.0
+latex_share_%,100.0

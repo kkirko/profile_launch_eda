@@ -5,21 +5,21 @@ Data/ML/Analytics,Data/ML/Analytics,unknown,0,0.0,14
 Design/Creative,Design/Creative,employed,31,77.5,40
 Design/Creative,Design/Creative,not_employed,8,20.0,40
 Design/Creative,Design/Creative,unknown,1,2.5,40
-Engineering/IT,Engineering/IT,employed,39,63.9,61
-Engineering/IT,Engineering/IT,not_employed,20,32.8,61
-Engineering/IT,Engineering/IT,unknown,2,3.3,61
-Finance/Legal/HR,Finance/Legal/HR,employed,96,69.6,138
-Finance/Legal/HR,Finance/Legal/HR,not_employed,39,28.3,138
-Finance/Legal/HR,Finance/Legal/HR,unknown,3,2.2,138
+Engineering/IT,Engineering/IT,employed,39,66.1,59
+Engineering/IT,Engineering/IT,not_employed,20,33.9,59
+Engineering/IT,Engineering/IT,unknown,0,0.0,59
+Finance/Legal/HR,Finance/Legal/HR,employed,96,70.1,137
+Finance/Legal/HR,Finance/Legal/HR,not_employed,39,28.5,137
+Finance/Legal/HR,Finance/Legal/HR,unknown,2,1.5,137
 Healthcare/Education,Healthcare/Education,employed,2,66.7,3
 Healthcare/Education,Healthcare/Education,not_employed,1,33.3,3
 Healthcare/Education,Healthcare/Education,unknown,0,0.0,3
-Marketing/Sales,Marketing/Sales,employed,8,44.4,18
-Marketing/Sales,Marketing/Sales,not_employed,9,50.0,18
-Marketing/Sales,Marketing/Sales,unknown,1,5.6,18
+Marketing/Sales,Marketing/Sales,employed,8,47.1,17
+Marketing/Sales,Marketing/Sales,not_employed,9,52.9,17
+Marketing/Sales,Marketing/Sales,unknown,0,0.0,17
 Operations/Administration,Operations/Administration,employed,9,60.0,15
 Operations/Administration,Operations/Administration,not_employed,6,40.0,15
 Operations/Administration,Operations/Administration,unknown,0,0.0,15
-Product/Project Management,Product/Project Management,employed,158,66.9,236
-Product/Project Management,Product/Project Management,not_employed,70,29.7,236
-Product/Project Management,Product/Project Management,unknown,8,3.4,236
+Product/Project Management,Product/Project Management,employed,158,67.2,235
+Product/Project Management,Product/Project Management,not_employed,70,29.8,235
+Product/Project Management,Product/Project Management,unknown,7,3.0,235

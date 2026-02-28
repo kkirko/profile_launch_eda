@@ -88,14 +88,210 @@ CITY_TO_COUNTRY: Dict[str, str] = {
     "Novosibirsk": "Russia",
 }
 
+DOMAIN_SYNONYMS: Dict[str, set[str]] = {
+    "Product/Project Management": {
+        "product project",
+        "product/project",
+        "product management",
+        "project management",
+        "program management",
+        "product/project management",
+        "product project management",
+    },
+    "Engineering/IT": {
+        "engineering",
+        "engineering software",
+        "engineering/it",
+        "engineering/software",
+        "software",
+        "software engineering",
+        "it",
+    },
+    "Design/Creative": {
+        "design",
+        "design creative",
+        "design/creative",
+        "ux ui",
+        "ux/ui",
+    },
+    "Operations/Administration": {
+        "operations",
+        "operations admin",
+        "operations/administration",
+        "operations/admin",
+        "administration",
+        "ops",
+    },
+    "Finance/Legal/HR": {
+        "finance legal hr",
+        "finance/legal/hr",
+        "finance",
+        "legal",
+        "hr",
+        "human resources",
+    },
+    "Marketing/Sales": {
+        "marketing sales",
+        "marketing/sales",
+        "marketing",
+        "sales",
+    },
+    "Data/ML/Analytics": {
+        "data",
+        "data analytics",
+        "data/ml/analytics",
+        "analytics",
+        "bi",
+    },
+    "Healthcare/Education": {
+        "healthcare education",
+        "healthcare/education",
+        "healthcare",
+        "education",
+    },
+}
+
 ROLE_FAMILY_RULES = [
-    ("Data/ML/Analytics", [r"\bdata\b", r"analyst", r"analytics", r"bi", r"machine learning", r"ai", r"аналит"]),
-    ("Product/Project", [r"product", r"project", r"program", r"delivery", r"scrum", r"продукт", r"проект"]),
-    ("Engineering/Software", [r"engineer", r"developer", r"backend", r"frontend", r"fullstack", r"devops", r"разработ", r"инженер"]),
-    ("Design", [r"design", r"designer", r"ux", r"ui", r"дизайн"]),
-    ("Marketing/Sales", [r"marketing", r"sales", r"growth", r"crm", r"маркет", r"продаж"]),
-    ("Finance/Legal/HR", [r"finance", r"account", r"audit", r"legal", r"hr", r"recruit", r"финанс", r"юрист", r"кадр"]),
-    ("Operations/Admin", [r"operations", r"admin", r"supply", r"logistic", r"операцион", r"админ", r"логист"]),
+    (
+        "Finance/Legal/HR",
+        [
+            r"finance",
+            r"account",
+            r"audit",
+            r"legal",
+            r"\bhr\b",
+            r"human resources",
+            r"recruit",
+            r"talent acquisition",
+            r"sourcer",
+            r"talent partner",
+            r"hrbp",
+            r"рекрутер",
+            r"подбор",
+            r"сорсинг",
+            r"кадров",
+            r"финанс",
+            r"юрист",
+        ],
+    ),
+    (
+        "Design/Creative",
+        [
+            r"\bux\b",
+            r"\bui\b",
+            r"ux researcher",
+            r"ux research",
+            r"ux designer",
+            r"product designer",
+            r"interaction designer",
+            r"дизайнер интерфейс",
+            r"ux[- ]?исследов",
+            r"design",
+            r"designer",
+            r"дизайн",
+            r"creative",
+        ],
+    ),
+    (
+        "Product/Project Management",
+        [
+            r"product",
+            r"project",
+            r"program",
+            r"delivery",
+            r"scrum",
+            r"agile",
+            r"business analyst",
+            r"бизнес[- ]?аналит",
+            r"system analyst",
+            r"системн\w* аналит",
+            r"requirements?",
+            r"требован",
+            r"\bbpmn\b",
+            r"\buml\b",
+            r"use case",
+            r"продукт",
+            r"проект",
+        ],
+    ),
+    (
+        "Data/ML/Analytics",
+        [
+            r"\bdata\b",
+            r"analytics",
+            r"data analyst",
+            r"bi analyst",
+            r"\bbi\b",
+            r"machine learning",
+            r"\bml\b",
+            r"\bai\b",
+            r"аналитик данных",
+            r"аналитика данных",
+            r"data science",
+            r"дата[- ]?сайнс",
+        ],
+    ),
+    (
+        "Engineering/IT",
+        [
+            r"engineer",
+            r"developer",
+            r"backend",
+            r"frontend",
+            r"fullstack",
+            r"devops",
+            r"sre",
+            r"software",
+            r"qa",
+            r"test",
+            r"разработ",
+            r"инженер",
+            r"тестиров",
+            r"программист",
+            r"архитектор",
+        ],
+    ),
+    (
+        "Marketing/Sales",
+        [
+            r"marketing",
+            r"sales",
+            r"growth",
+            r"crm",
+            r"brand",
+            r"маркет",
+            r"продаж",
+        ],
+    ),
+    (
+        "Operations/Administration",
+        [
+            r"operations?",
+            r"administration",
+            r"admin",
+            r"supply",
+            r"logistic",
+            r"operational",
+            r"операцион",
+            r"админ",
+            r"логист",
+        ],
+    ),
+    (
+        "Healthcare/Education",
+        [
+            r"health",
+            r"medical",
+            r"clinic",
+            r"мед",
+            r"education",
+            r"teacher",
+            r"tutor",
+            r"образован",
+            r"research",
+            r"науч",
+        ],
+    ),
 ]
 
 SENIORITY_MAP = [
@@ -255,6 +451,12 @@ COMPANY_SYNONYMS: Dict[str, set[str]] = {
     "IT_One": {
         "it one",
         "it_one",
+    },
+    "Metro Cash&Carry": {
+        "metro cash and carry",
+        "метро cash and carry",
+        "metro cash carry",
+        "metro cash&carry",
     },
 }
 
@@ -661,6 +863,34 @@ def normalize_industry(industry: object) -> str:
     return raw
 
 
+def normalize_domain(raw: object) -> str:
+    text = canonical_text(raw)
+    if not text:
+        return "Not specified"
+
+    text = re.sub(r"[/|•]+", " ", text)
+    text = re.sub(r"[\-_,;:]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    if text in {"not specified", "unknown", "n a", "na", "none"}:
+        return "Not specified"
+    if text in {"other", "другое"}:
+        return "Other"
+
+    for canonical, variants in DOMAIN_SYNONYMS.items():
+        for variant in variants:
+            v = canonical_text(variant)
+            if text == v:
+                return canonical
+
+    # Fallback by semantic rules.
+    for canonical, patterns in ROLE_FAMILY_RULES:
+        if any(re.search(p, text) for p in patterns):
+            return canonical
+
+    return "Other"
+
+
 def guess_country(region_norm: object) -> str:
     text = canonical_text(region_norm)
     if not text:
@@ -702,6 +932,9 @@ def infer_role_family(selected_position: object, job_title: object, specialist_c
     for label, patterns in ROLE_FAMILY_RULES:
         if any(re.search(p, text) for p in patterns):
             return label
+    specialist_domain = normalize_domain(specialist_category)
+    if specialist_domain not in {"Other", "Not specified"}:
+        return specialist_domain
     return "Other"
 
 

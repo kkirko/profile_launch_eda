@@ -1,0 +1,7 @@
+has_latex,raw_cvGenerationLanguage,cv_language_filled,language_source,count
+True,en,en,inferred_from_latex,278
+True,ru,ru,inferred_from_latex,246
+False,,no_latex,no_latex,199
+False,ru,no_latex,no_latex,3
+True,en,ru,inferred_from_latex,3
+False,en,no_latex,no_latex,1

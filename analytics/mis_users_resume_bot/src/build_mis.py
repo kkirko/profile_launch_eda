@@ -29,6 +29,7 @@ from feature_builders import (
     leadership_level,
     merge_skills_tools,
     normalize_company,
+    normalize_domain,
     normalize_empty_strings,
     normalize_industry,
     normalize_region,
@@ -97,6 +98,18 @@ def is_meaningful_barplot(df: pd.DataFrame, label_col: str, value_col: str) -> b
 
 def non_empty(value: object) -> bool:
     return clean_text(value) != ""
+
+
+def infer_lang_from_text(value: object) -> str:
+    text = clean_text(value)
+    if not text:
+        return "en"
+    low = text.lower()
+    if re.search(r"[А-Яа-яЁё]", text):
+        return "ru"
+    if any(token in low for token in ["навыки", "опыт", "образование", "языки"]):
+        return "ru"
+    return "en"
 
 
 def limit_categories(series: pd.Series, max_n: int, other_label: str = "Other") -> pd.Series:
@@ -284,7 +297,7 @@ def plot_donut(series: pd.Series, out_path: Path, title: str) -> pd.DataFrame:
         other = data.iloc[5:].sum()
         data = pd.concat([top, pd.Series({"Other": other})])
 
-    if len(data) < 3:
+    if len(data) < 2:
         return pd.DataFrame(columns=["category", "count", "share_%"])
 
     fig, ax = plt.subplots(figsize=(4.0, 4.0))
@@ -641,6 +654,8 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     employment_domain = tables.get("employment_status_by_domain", pd.DataFrame())
     employment_region = tables.get("employment_status_by_region", pd.DataFrame())
     employment_seniority = tables.get("employment_status_by_seniority", pd.DataFrame())
+    cv_language_coverage = tables.get("cv_language_coverage", pd.DataFrame())
+    cv_language_dist = tables.get("cv_generation_language_distribution", pd.DataFrame())
 
     p = dict(zip(profile["metric"], profile["value"]))
     v = dict(zip(validation["metric"], validation["value"]))
@@ -666,6 +681,20 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         else 0.0
     )
     alt_geo_used = int(region_alt_cols["selected_in_fallback"].fillna(False).sum()) if "selected_in_fallback" in region_alt_cols.columns else 0
+    no_latex_count = 0
+    no_latex_share = 0.0
+    cv_lang_mix = ""
+    if not cv_language_coverage.empty:
+        cov = dict(zip(cv_language_coverage["metric"], cv_language_coverage["value"]))
+        no_latex_count = int(float(cov.get("no_latex_count", 0)))
+        no_latex_share = float(cov.get("no_latex_share_%", 0.0))
+    if not cv_language_dist.empty:
+        parts = []
+        total_lang = cv_language_dist["count"].sum()
+        for _, r in cv_language_dist.iterrows():
+            share = pct(int(r["count"]), int(total_lang))
+            parts.append(f"{r['cvGenerationLanguage']}: {share:.1f}%")
+        cv_lang_mix = ", ".join(parts)
     emp_share = {}
     if not employment_summary.empty:
         for _, row in employment_summary.iterrows():
@@ -683,6 +712,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         f"Industry анализируется только на subset с заполненным industry: {industry_cov:.1f}% пользователей.",
         f"`region=Not specified` остается у {region_ns_share:.1f}% базы; `company=Not specified` — у {company_ns_share:.1f}%.",
         f"В fallback цепочку региона добавлено альтернативных geo-колонок: {alt_geo_used}.",
+        f"CV language среди пользователей с cvEnhancedResult: {cv_lang_mix if cv_lang_mix else 'n/a'}; no_latex={no_latex_count} ({no_latex_share:.1f}%).",
         f"Топ tools: {', '.join(top_tools['token_display'].tolist())}.",
         f"Статус занятости: employed {emp_share.get('employed', 0.0):.1f}%, not_employed {emp_share.get('not_employed', 0.0):.1f}%, unknown {emp_share.get('unknown', 0.0):.1f}%.",
     ]
@@ -748,6 +778,9 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
             lines.append(img)
     lines.append("")
     lines.append("## 6) Стратификация выборки")
+    lines.append("CV language (among users with cvEnhancedResult): `ru/en`; `no_latex` учитывается только как покрытие.")
+    if no_latex_count:
+        lines.append(f"- no_latex_count: **{no_latex_count}** ({no_latex_share:.1f}% базы)")
     donut_a = (base_dir / "outputs/figures/13_donut_seniority_filled.png").exists()
     donut_b = (base_dir / "outputs/figures/14_donut_cv_generation_language.png").exists()
     if donut_a and donut_b:
@@ -772,6 +805,8 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
             "- `outputs/tables/experience_bin_distribution.csv`",
             "- `outputs/tables/leadership_distribution.csv`",
             "- `outputs/tables/cv_generation_language_distribution.csv`",
+            "- `outputs/tables/cv_language_coverage.csv`",
+            "- `outputs/tables/language_audit.csv`",
         ]
     )
     lines.append("")
@@ -931,7 +966,10 @@ def build_others_report(base_dir: Path, others_tables: Dict[str, pd.DataFrame], 
     lines.append("## 2) Coverage")
     lines.append(md("coverage", ["metric", "value"], 20))
     lines.append("")
-    lines.append("## 3) Who Are These Candidates")
+    lines.append("## 3) Moved out of Other by remapping")
+    lines.append(md("moved_out_of_other_by_remapping", ["old_label_keywords", "new_domain", "count"], 50))
+    lines.append("")
+    lines.append("## 4) Who Are These Candidates")
     lines.append("Top-30 titles across all jobs history:")
     lines.append(md("titles_all_history", ["job_title", "count", "share_%"], 30))
     lines.append("")
@@ -944,24 +982,24 @@ def build_others_report(base_dir: Path, others_tables: Dict[str, pd.DataFrame], 
     lines.append("Most frequent title keywords:")
     lines.append(md("title_keywords", ["title_keyword", "count", "share_%"], 30))
     lines.append("")
-    lines.append("## 4) Skills & Stack")
+    lines.append("## 5) Skills & Stack")
     lines.append("Top tools:")
     lines.append(md("tools_top", ["tool", "count", "share_%"], 30))
     lines.append("")
     lines.append("Top skills:")
     lines.append(md("skills_top", ["skill", "count", "share_%"], 30))
     lines.append("")
-    lines.append("## 5) Geography & Seniority")
+    lines.append("## 6) Geography & Seniority")
     lines.append("Top regions:")
     lines.append(md("regions_top", ["region_norm", "count", "share_%"], 20))
     lines.append("")
     lines.append("Seniority:")
     lines.append(md("seniority_top", ["seniority_filled", "count", "share_%"], 20))
     lines.append("")
-    lines.append("## 6) Rule-Based Buckets")
+    lines.append("## 7) Rule-Based Buckets")
     lines.append(md("bucket_distribution", ["bucket", "count", "share_%"], 20))
     lines.append("")
-    lines.append("## 7) Figures")
+    lines.append("## 8) Figures")
     for rel, title in [
         ("outputs/others/figures/01_other_titles_history_top30.png", "Top titles across all jobs"),
         ("outputs/others/figures/02_other_companies_history_top30.png", "Top companies across all jobs"),
@@ -972,7 +1010,7 @@ def build_others_report(base_dir: Path, others_tables: Dict[str, pd.DataFrame], 
         if img:
             lines.append(img)
     lines.append("")
-    lines.append("## 8) Appendix")
+    lines.append("## 9) Appendix")
     lines.append("- Tables: `outputs/others/tables/*.csv`")
     lines.append("- Figures: `outputs/others/figures/*.png`")
     lines.append("")
@@ -1030,6 +1068,27 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
 
     users_enriched["jobs_count_talentCard"] = users_enriched["jobs_count_talentCard"].fillna(0).astype(int)
     users_enriched["jobs_count_latex"] = users_enriched["jobs_count_latex"].fillna(0).astype(int)
+    users_enriched["has_latex"] = users_enriched["cvEnhancedResult_present"].fillna(False).astype(bool)
+
+    # User-level title corpus from all jobs (talentCard + LaTeX).
+    title_parts: List[pd.DataFrame] = []
+    if not jobs_talent.empty:
+        title_parts.append(jobs_talent[["user_hash", "job_title"]].copy())
+    if not jobs_latex.empty:
+        title_parts.append(jobs_latex[["user_hash", "job_title"]].copy())
+    if title_parts:
+        titles_all = pd.concat(title_parts, ignore_index=True)
+        titles_all["job_title"] = titles_all["job_title"].fillna("").astype(str).str.strip()
+        titles_all = titles_all[titles_all["job_title"].ne("")]
+        all_titles_by_user = (
+            titles_all.groupby("user_hash")["job_title"]
+            .apply(lambda x: " | ".join(pd.Series(x).drop_duplicates().astype(str).tolist()[:25]))
+            .reset_index(name="all_titles_text")
+        )
+        users_enriched = users_enriched.merge(all_titles_by_user, on="user_hash", how="left")
+    else:
+        users_enriched["all_titles_text"] = ""
+    users_enriched["all_titles_text"] = users_enriched["all_titles_text"].fillna("")
 
     alt_geo_inventory = discover_alt_geo_columns(users)
     selected_alt_geo_cols: List[str] = []
@@ -1096,25 +1155,36 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     users_enriched["seniority_source"] = seniority_rows.map(lambda x: x[1])
 
     def infer_domain(row: pd.Series) -> Tuple[str, str]:
-        domain = clean_text(row.get("talentCard.specialist_category", ""))
-        if domain:
-            return domain, "talentCard"
+        domain_talent = normalize_domain(row.get("talentCard.specialist_category", ""))
 
         infer_text = " ".join(
             [
                 clean_text(row.get("selectedPosition", "")),
                 clean_text(row.get("current_job_title_filled", "")),
+                clean_text(row.get("all_titles_text", "")),
                 clean_text(row.get("header_role_latex", "")),
             ]
         )
         if clean_text(infer_text):
-            inferred = infer_role_family(row.get("selectedPosition", ""), infer_text, "")
-            return ("Other" if inferred == "Other" else inferred), "inferred"
+            inferred = normalize_domain(
+                infer_role_family(row.get("selectedPosition", ""), infer_text, row.get("header_role_latex", ""))
+            )
+            if inferred not in {"Other", "Not specified"}:
+                return inferred, "inferred"
+            if domain_talent not in {"Other", "Not specified"}:
+                return domain_talent, "talentCard"
+            if inferred == "Other" or domain_talent == "Other":
+                return "Other", "inferred"
+            return "Not specified", "not_specified"
 
+        if domain_talent not in {"Other", "Not specified"}:
+            return domain_talent, "talentCard"
+        if domain_talent == "Other":
+            return "Other", "talentCard"
         return "Not specified", "not_specified"
 
     domain_rows = users_enriched.apply(infer_domain, axis=1)
-    users_enriched["domain_filled"] = domain_rows.map(lambda x: x[0])
+    users_enriched["domain_filled"] = domain_rows.map(lambda x: normalize_domain(x[0]))
     users_enriched["domain_source"] = domain_rows.map(lambda x: x[1])
 
     users_enriched["industry_filled"] = users_enriched["current_industry_talentCard"].fillna("").astype(str).str.strip()
@@ -1127,7 +1197,13 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     users_enriched["country_guess"] = users_enriched["region_norm"].map(guess_country)
 
     users_enriched["role_family"] = users_enriched.apply(
-        lambda r: infer_role_family(r.get("selectedPosition", ""), r.get("current_job_title_filled", ""), r.get("header_role_latex", "")),
+        lambda r: normalize_domain(
+            infer_role_family(
+                r.get("selectedPosition", ""),
+                " ".join([clean_text(r.get("current_job_title_filled", "")), clean_text(r.get("all_titles_text", ""))]),
+                r.get("header_role_latex", ""),
+            )
+        ),
         axis=1,
     )
     users_enriched["experience_bin"] = users_enriched["total_experience_years"].map(experience_bin)
@@ -1237,13 +1313,45 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     experience_distribution = users_enriched["experience_bin"].fillna("Unknown").astype(str).value_counts().rename_axis("experience_bin").reset_index(name="count")
     leadership_distribution = users_enriched["leadership_level"].fillna("Low").astype(str).value_counts().rename_axis("leadership_level").reset_index(name="count")
 
-    cv_generation_language_distribution = (
+    users_enriched["cv_language_filled"] = np.where(
+        users_enriched["has_latex"],
+        users_enriched.get("cvEnhancedResult", "").map(infer_lang_from_text),
+        "no_latex",
+    )
+    users_enriched["language_source"] = np.where(users_enriched["has_latex"], "inferred_from_latex", "no_latex")
+    users_enriched["raw_cvGenerationLanguage"] = (
         users_enriched.get("cvGenerationLanguage", pd.Series(index=users_enriched.index, dtype=object))
-        .fillna("Not specified")
+        .fillna("")
         .astype(str)
-        .value_counts()
-        .rename_axis("cvGenerationLanguage")
-        .reset_index(name="count")
+        .str.strip()
+    )
+
+    cv_generation_language_distribution = (
+        users_enriched[users_enriched["has_latex"]]
+        .groupby("cv_language_filled")
+        .size()
+        .rename("count")
+        .reset_index()
+        .rename(columns={"cv_language_filled": "cvGenerationLanguage"})
+        .sort_values("count", ascending=False)
+    )
+    cv_language_coverage = pd.DataFrame(
+        {
+            "metric": ["has_latex_count", "no_latex_count", "has_latex_share_%", "no_latex_share_%"],
+            "value": [
+                int(users_enriched["has_latex"].sum()),
+                int((~users_enriched["has_latex"]).sum()),
+                round(users_enriched["has_latex"].mean() * 100, 1),
+                round((~users_enriched["has_latex"]).mean() * 100, 1),
+            ],
+        }
+    )
+    language_audit = (
+        users_enriched.groupby(["has_latex", "raw_cvGenerationLanguage", "cv_language_filled", "language_source"])
+        .size()
+        .rename("count")
+        .reset_index()
+        .sort_values("count", ascending=False)
     )
 
     region_distribution = distribution_with_display(users_enriched, "region_filled", "region_norm", "region")
@@ -1761,6 +1869,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "experience_bin_distribution": experience_distribution,
         "leadership_distribution": leadership_distribution,
         "cv_generation_language_distribution": cv_generation_language_distribution,
+        "cv_language_coverage": cv_language_coverage,
+        "language_audit": language_audit,
         "region_distribution": region_distribution,
         "region_distribution_plot": region_distribution_plot,
         "top_regions_full": top_regions_full,
@@ -1918,7 +2028,9 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         )
 
     seniority_donut = plot_donut(users_enriched["seniority_filled"], figures_dir / "13_donut_seniority_filled.png", "Seniority mix")
-    cv_lang_donut = plot_donut(users_enriched.get("cvGenerationLanguage", pd.Series(index=users_enriched.index, dtype=object)), figures_dir / "14_donut_cv_generation_language.png", "CV generation language mix")
+    cv_lang_series = users_enriched.loc[users_enriched["has_latex"], "cv_language_filled"].astype(str)
+    cv_lang_series = cv_lang_series[cv_lang_series.isin(["ru", "en"])]
+    cv_lang_donut = plot_donut(cv_lang_series, figures_dir / "14_donut_cv_generation_language.png", "CV language (among users with cvEnhancedResult)")
     if not seniority_donut.empty:
         save_table(seniority_donut, tables_dir / "seniority_donut_distribution.csv")
     if not cv_lang_donut.empty:
@@ -1995,6 +2107,47 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         max_label_len=34,
         wrap_width=22,
     )
+
+    # Remapping effect: moved out of Other/Not specified.
+    users_enriched["domain_raw_norm"] = users_enriched.get("talentCard.specialist_category", "").map(normalize_domain)
+
+    def moved_out_reason(row: pd.Series) -> str:
+        text = canonical_text(
+            " ".join(
+                [
+                    clean_text(row.get("selectedPosition", "")),
+                    clean_text(row.get("all_titles_text", "")),
+                    clean_text(row.get("header_role_latex", "")),
+                    clean_text(row.get("current_job_title_filled", "")),
+                ]
+            )
+        )
+        if re.search(r"recruit|talent acquisition|sourcer|talent partner|hrbp|рекрутер|подбор|сорсинг|кадр", text):
+            return "Other/Not specified -> Recruiter/TA/HR keywords"
+        if re.search(r"business analyst|бизнес[- ]?аналит|system analyst|системн\\w* аналит|requirements?|требован|bpmn|uml|use case", text):
+            return "Other/Not specified -> Business/System Analyst keywords"
+        if re.search(r"\\bux\\b|\\bui\\b|product designer|interaction designer|ux researcher|ux research|дизайнер интерфейс|ux[- ]?исследов", text):
+            return "Other/Not specified -> UX/UI/Design keywords"
+        if re.search(r"engineer|developer|devops|qa|test|разработ|инженер|тестиров", text):
+            return "Other/Not specified -> Engineering keywords"
+        if re.search(r"data|analytics|analyst|bi|machine learning|\\bml\\b|\\bai\\b|аналитик данных", text):
+            return "Other/Not specified -> Data/Analytics keywords"
+        return "Other/Not specified -> generic remapping"
+
+    moved_mask = users_enriched["domain_raw_norm"].isin(["Other", "Not specified"]) & ~users_enriched["domain_filled"].isin(["Other", "Not specified"])
+    moved_out_of_other = users_enriched.loc[moved_mask, ["domain_filled"]].copy()
+    if not moved_out_of_other.empty:
+        moved_out_of_other["old_label_keywords"] = users_enriched.loc[moved_mask].apply(moved_out_reason, axis=1)
+        moved_out_of_other = (
+            moved_out_of_other.groupby(["old_label_keywords", "domain_filled"])
+            .size()
+            .rename("count")
+            .reset_index()
+            .rename(columns={"domain_filled": "new_domain"})
+            .sort_values("count", ascending=False)
+        )
+    else:
+        moved_out_of_other = pd.DataFrame(columns=["old_label_keywords", "new_domain", "count"])
 
     # Separate report for domain=Other.
     other_subset = users_enriched[users_enriched["domain_filled"].astype(str).eq("Other")].copy()
@@ -2073,6 +2226,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
 
     others_tables = {
         "coverage": other_coverage,
+        "moved_out_of_other_by_remapping": moved_out_of_other,
         "titles_all_history": other_titles_all,
         "current_titles": other_current_titles,
         "companies_all_history": other_companies_all,

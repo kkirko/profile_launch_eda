@@ -1,21 +1,21 @@
 domain_filled,seniority_filled,region_norm,count,strata
 Other,Not specified,Not specified,198,Other | Not specified | Not specified
-Product/Project Management,Senior,Moscow,30,Product/Project Management | Senior | Moscow
-Product/Project Management,C-level,Moscow,13,Product/Project Management | C-level | Moscow
-Finance/Legal/HR,C-level,Moscow,12,Finance/Legal/HR | C-level | Moscow
-Engineering/IT,Senior,Moscow,10,Engineering/IT | Senior | Moscow
-Marketing/Sales,C-level,Moscow,8,Marketing/Sales | C-level | Moscow
-Product/Project Management,Not specified,Not specified,6,Product/Project Management | Not specified | Not specified
-Product/Project Management,Not specified,Moscow,6,Product/Project Management | Not specified | Moscow
+Product/Project Management,Senior,Moscow,28,Product/Project Management | Senior | Moscow
+Product/Project Management,C-level,Moscow,19,Product/Project Management | C-level | Moscow
+Finance/Legal/HR,C-level,Moscow,18,Finance/Legal/HR | C-level | Moscow
+Finance/Legal/HR,Senior,Moscow,13,Finance/Legal/HR | Senior | Moscow
+Product/Project Management,Not specified,Moscow,7,Product/Project Management | Not specified | Moscow
+Product/Project Management,Not specified,Not specified,7,Product/Project Management | Not specified | Not specified
 Product/Project Management,Senior,Russia,6,Product/Project Management | Senior | Russia
-Operations/Administration,C-level,Moscow,6,Operations/Administration | C-level | Moscow
-Engineering/IT,Senior,Not specified,6,Engineering/IT | Senior | Not specified
-Product/Project Management,Senior,Not specified,5,Product/Project Management | Senior | Not specified
-Finance/Legal/HR,Senior,Moscow,5,Finance/Legal/HR | Senior | Moscow
-Engineering/IT,C-level,Russia,4,Engineering/IT | C-level | Russia
-Engineering/IT,Senior,Minsk,4,Engineering/IT | Senior | Minsk
-Product/Project Management,C-level,Not specified,4,Product/Project Management | C-level | Not specified
-Product/Project Management,Senior,Serbia,4,Product/Project Management | Senior | Serbia
+Product/Project Management,C-level,Not specified,5,Product/Project Management | C-level | Not specified
+Product/Project Management,Senior,Serbia,5,Product/Project Management | Senior | Serbia
+Finance/Legal/HR,Senior,Not specified,5,Finance/Legal/HR | Senior | Not specified
+Product/Project Management,Senior,Minsk,5,Product/Project Management | Senior | Minsk
+Product/Project Management,C-level,Russia,5,Product/Project Management | C-level | Russia
+Engineering/IT,Senior,Moscow,4,Engineering/IT | Senior | Moscow
+Product/Project Management,Lead,Moscow,4,Product/Project Management | Lead | Moscow
+Product/Project Management,Senior,Not specified,4,Product/Project Management | Senior | Not specified
 Product/Project Management,C-level,Dubai,4,Product/Project Management | C-level | Dubai
-Operations/Administration,Senior,Moscow,4,Operations/Administration | Senior | Moscow
-Engineering/IT,Senior,Serbia,4,Engineering/IT | Senior | Serbia
+Product/Project Management,Senior,Warsaw,4,Product/Project Management | Senior | Warsaw
+Product/Project Management,Senior,Tashkent,3,Product/Project Management | Senior | Tashkent
+Product/Project Management,Not specified,Saint Petersburg,3,Product/Project Management | Not specified | Saint Petersburg

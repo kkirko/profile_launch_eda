@@ -10,9 +10,9 @@
 Top-3 domains (excluding Other/Not specified):
 | domain                     |   count |
 |:---------------------------|--------:|
-| Product/Project Management |     193 |
-| Engineering/IT             |     124 |
-| Finance/Legal/HR           |      66 |
+| Product/Project Management |     241 |
+| Finance/Legal/HR           |     139 |
+| Engineering/IT             |      61 |
 
 Top-3 regions (excluding Other/Not specified):
 | region         |   count |
@@ -40,6 +40,7 @@ Top-3 companies (excluding Other/Not specified):
 - Industry анализируется только на subset с заполненным industry: 15.9% пользователей.
 - `region=Not specified` остается у 33.0% базы; `company=Not specified` — у 28.2%.
 - В fallback цепочку региона добавлено альтернативных geo-колонок: 0.
+- CV language среди пользователей с cvEnhancedResult: en: 52.8%, ru: 47.2%; no_latex=203 (27.8%).
 - Топ tools: Jira, Confluence, Sql, Miro, Figma.
 - Статус занятости: employed 49.5%, not_employed 21.4%, unknown 29.2%.
 
@@ -87,6 +88,8 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 ![Domain x Tools heatmap (row share)](outputs/figures/12_heatmap_domain_tools_share.png)
 
 ## 6) Стратификация выборки
+CV language (among users with cvEnhancedResult): `ru/en`; `no_latex` учитывается только как покрытие.
+- no_latex_count: **203** (27.8% базы)
 <p><img src="outputs/figures/13_donut_seniority_filled.png" width="49%"><img src="outputs/figures/14_donut_cv_generation_language.png" width="49%"></p>
 
 ![Top-20 strata](outputs/figures/15_strata_top20.png)
@@ -99,6 +102,8 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 - `outputs/tables/experience_bin_distribution.csv`
 - `outputs/tables/leadership_distribution.csv`
 - `outputs/tables/cv_generation_language_distribution.csv`
+- `outputs/tables/cv_language_coverage.csv`
+- `outputs/tables/language_audit.csv`
 
 ## 7) Employment status (working vs not working)
 | employment_status   |   count |   share_% |
@@ -108,8 +113,8 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 | unknown             |     213 |      29.2 |
 
 Ключевые наблюдения:
-- Домен с максимальной долей employed: `Design/Creative` (82.4%).
-- Домен с максимальной долей not_employed: `Operations/Administration` (36.8%).
+- Домен с максимальной долей employed: `Data/ML/Analytics` (85.7%).
+- Домен с максимальной долей not_employed: `Marketing/Sales` (50.0%).
 - Регион с максимальной долей not_employed: `Serbia` (66.7%).
 - Сеньорность с максимальной долей not_employed: `C-level` (35.6%).
 
@@ -134,7 +139,7 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 ## 8) Not specified research
 | field     |   total_missing_count |   share_missing_% |   share_filled_by_fallback | source_breakdown                                                                            |
 |:----------|----------------------:|------------------:|---------------------------:|:--------------------------------------------------------------------------------------------|
-| domain    |                     0 |               0   |                       28.6 | talentCard:71.4%; inferred:28.6%                                                            |
+| domain    |                     0 |               0   |                       98.5 | inferred:98.5%; talentCard:1.5%                                                             |
 | region    |                   241 |              33   |                       20.7 | latex_expheader:46.3%; not_specified:33.0%; latex_header:14.0%; talentCard:6.7%             |
 | company   |                   203 |              27.8 |                        0.5 | latex_expheader:71.6%; not_specified:27.8%; talentCard:0.5%                                 |
 | seniority |                   293 |              40.1 |                       30.7 | not_specified:40.1%; talentCard:29.2%; inferred_job_title:16.6%; inferred_header_role:14.1% |

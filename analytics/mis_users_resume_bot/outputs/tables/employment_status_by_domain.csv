@@ -1,31 +1,25 @@
 domain_filled,domain_filled_short,employment_status,count,row_share_%,row_total
-Data/ML/Analytics,Data/ML/Analytics,employed,4,80.0,5
-Data/ML/Analytics,Data/ML/Analytics,not_employed,1,20.0,5
-Data/ML/Analytics,Data/ML/Analytics,unknown,0,0.0,5
-Design/Creative,Design/Creative,employed,14,82.4,17
-Design/Creative,Design/Creative,not_employed,2,11.8,17
-Design/Creative,Design/Creative,unknown,1,5.9,17
-Engineering/IT,Engineering/IT,employed,87,70.2,124
-Engineering/IT,Engineering/IT,not_employed,36,29.0,124
-Engineering/IT,Engineering/IT,unknown,1,0.8,124
-Engineering/Software,Engineering/Software,employed,0,0.0,2
-Engineering/Software,Engineering/Software,not_employed,0,0.0,2
-Engineering/Software,Engineering/Software,unknown,2,100.0,2
-Finance/Legal/HR,Finance/Legal/HR,employed,47,71.2,66
-Finance/Legal/HR,Finance/Legal/HR,not_employed,17,25.8,66
-Finance/Legal/HR,Finance/Legal/HR,unknown,2,3.0,66
-Healthcare/Education,Healthcare/Education,employed,4,66.7,6
-Healthcare/Education,Healthcare/Education,not_employed,2,33.3,6
-Healthcare/Education,Healthcare/Education,unknown,0,0.0,6
-Marketing/Sales,Marketing/Sales,employed,28,57.1,49
-Marketing/Sales,Marketing/Sales,not_employed,18,36.7,49
-Marketing/Sales,Marketing/Sales,unknown,3,6.1,49
-Operations/Administration,Operations/Administration,employed,36,63.2,57
-Operations/Administration,Operations/Administration,not_employed,21,36.8,57
-Operations/Administration,Operations/Administration,unknown,0,0.0,57
-Product/Project,Product/Project,employed,1,50.0,2
-Product/Project,Product/Project,not_employed,0,0.0,2
-Product/Project,Product/Project,unknown,1,50.0,2
-Product/Project Management,Product/Project Management,employed,132,68.4,193
-Product/Project Management,Product/Project Management,not_employed,56,29.0,193
-Product/Project Management,Product/Project Management,unknown,5,2.6,193
+Data/ML/Analytics,Data/ML/Analytics,employed,12,85.7,14
+Data/ML/Analytics,Data/ML/Analytics,not_employed,2,14.3,14
+Data/ML/Analytics,Data/ML/Analytics,unknown,0,0.0,14
+Design/Creative,Design/Creative,employed,31,77.5,40
+Design/Creative,Design/Creative,not_employed,8,20.0,40
+Design/Creative,Design/Creative,unknown,1,2.5,40
+Engineering/IT,Engineering/IT,employed,39,63.9,61
+Engineering/IT,Engineering/IT,not_employed,20,32.8,61
+Engineering/IT,Engineering/IT,unknown,2,3.3,61
+Finance/Legal/HR,Finance/Legal/HR,employed,97,69.8,139
+Finance/Legal/HR,Finance/Legal/HR,not_employed,39,28.1,139
+Finance/Legal/HR,Finance/Legal/HR,unknown,3,2.2,139
+Healthcare/Education,Healthcare/Education,employed,2,66.7,3
+Healthcare/Education,Healthcare/Education,not_employed,1,33.3,3
+Healthcare/Education,Healthcare/Education,unknown,0,0.0,3
+Marketing/Sales,Marketing/Sales,employed,8,44.4,18
+Marketing/Sales,Marketing/Sales,not_employed,9,50.0,18
+Marketing/Sales,Marketing/Sales,unknown,1,5.6,18
+Operations/Administration,Operations/Administration,employed,9,60.0,15
+Operations/Administration,Operations/Administration,not_employed,6,40.0,15
+Operations/Administration,Operations/Administration,unknown,0,0.0,15
+Product/Project Management,Product/Project Management,employed,162,67.2,241
+Product/Project Management,Product/Project Management,not_employed,71,29.5,241
+Product/Project Management,Product/Project Management,unknown,8,3.3,241

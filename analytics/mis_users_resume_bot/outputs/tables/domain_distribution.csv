@@ -1,12 +1,12 @@
-domain_filled,count
-Other,209
-Product/Project Management,193
-Engineering/IT,124
-Finance/Legal/HR,66
-Operations/Administration,57
-Marketing/Sales,49
-Design/Creative,17
-Healthcare/Education,6
-Data/ML/Analytics,5
-Product/Project,2
-Engineering/Software,2
+domain_filled,count,domain_display_full,domain_display_short,domain_display
+Other,209,Other,Other,Other
+Product/Project Management,193,Product/Project Management,Product/Project Management,Product/Project Management
+Engineering/IT,124,Engineering/IT,Engineering/IT,Engineering/IT
+Finance/Legal/HR,66,Finance/Legal/HR,Finance/Legal/HR,Finance/Legal/HR
+Operations/Administration,57,Operations/Administration,Operations/Administration,Operations/Administration
+Marketing/Sales,49,Marketing/Sales,Marketing/Sales,Marketing/Sales
+Design/Creative,17,Design/Creative,Design/Creative,Design/Creative
+Healthcare/Education,6,Healthcare/Education,Healthcare/Education,Healthcare/Education
+Data/ML/Analytics,5,Data/ML/Analytics,Data/ML/Analytics,Data/ML/Analytics
+Product/Project,2,Product/Project,Product/Project,Product/Project
+Engineering/Software,2,Engineering/Software,Engineering/Software,Engineering/Software

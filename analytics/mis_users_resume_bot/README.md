@@ -8,25 +8,25 @@
 - Coverage `talentCard.specialist_category`: **71.4%**
 
 Top-3 domains (excluding Other/Not specified):
-| domain_filled              |   count |
+| domain                     |   count |
 |:---------------------------|--------:|
 | Product/Project Management |     193 |
 | Engineering/IT             |     124 |
 | Finance/Legal/HR           |      66 |
 
 Top-3 regions (excluding Other/Not specified):
-| region_display   |   count |
-|:-----------------|--------:|
-| Москва           |     124 |
-| Russia           |      27 |
-| Minsk, Belarus   |      26 |
+| region         |   count |
+|:---------------|--------:|
+| Москва         |     124 |
+| Russia         |      27 |
+| Minsk, Belarus |      26 |
 
 Top-3 companies (excluding Other/Not specified):
-| company_display        |   count |
-|:-----------------------|--------:|
-| Сбер                   |       4 |
-| BostonGene             |       3 |
-| Delta Distribution LLC |       3 |
+| company            |   count |
+|:-------------------|--------:|
+| Сбер               |       7 |
+| EPAM Systems       |       4 |
+| Coherent Solutions |       3 |
 
 ### Key observations
 - База содержит 730 профилей.
@@ -38,9 +38,10 @@ Top-3 companies (excluding Other/Not specified):
 - LaTeX skills section найдена у 72.2% пользователей.
 - Гео-мэппинг схлопнул варианты Russia/Россия/РФ: 27 записей перешли в канон `Russia`.
 - Industry анализируется только на subset с заполненным industry: 15.9% пользователей.
-- `region=Not specified` остается у 33.0% базы; `company=Not specified` — у 27.8%.
+- `region=Not specified` остается у 33.0% базы; `company=Not specified` — у 28.2%.
 - В fallback цепочку региона добавлено альтернативных geo-колонок: 0.
 - Топ tools: Jira, Confluence, Sql, Miro, Figma.
+- Статус занятости: employed 49.5%, not_employed 21.4%, unknown 29.2%.
 
 ## 2) Coverage / Parsing validation
 | metric                               |   value |
@@ -61,9 +62,9 @@ Top-3 companies (excluding Other/Not specified):
 | share_users_with_languages_section_% |    57.7 |
 | users_with_education_section         |    39   |
 | share_users_with_education_section_% |     5.3 |
-| company_comparable_users             |   521   |
+| company_comparable_users             |   518   |
 | current_company_matches              |   493   |
-| current_company_match_rate_%         |    94.6 |
+| current_company_match_rate_%         |    95.2 |
 
 Columns inventory (real CSV structure + non-null profile + length stats):
 - `outputs/tables/columns_inventory.csv`
@@ -99,7 +100,38 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 - `outputs/tables/leadership_distribution.csv`
 - `outputs/tables/cv_generation_language_distribution.csv`
 
-## 7) Not specified research
+## 7) Employment status (working vs not working)
+| employment_status   |   count |   share_% |
+|:--------------------|--------:|----------:|
+| employed            |     361 |      49.5 |
+| not_employed        |     156 |      21.4 |
+| unknown             |     213 |      29.2 |
+
+Ключевые наблюдения:
+- Домен с максимальной долей employed: `Design/Creative` (82.4%).
+- Домен с максимальной долей not_employed: `Operations/Administration` (36.8%).
+- Регион с максимальной долей not_employed: `Serbia` (66.7%).
+- Сеньорность с максимальной долей not_employed: `C-level` (35.6%).
+
+![Employment status overall](outputs/figures/16_employment_status_overall.png)
+![Employment status by domain (100% stacked)](outputs/figures/17_employment_status_by_domain.png)
+![Months since last end-date (not employed)](outputs/figures/18_months_since_last_end_hist.png)
+![Not employed: top last companies](outputs/figures/19_not_employed_top_last_companies.png)
+![Not employed: top last titles](outputs/figures/20_not_employed_top_last_titles.png)
+![Not employed: historical top companies](outputs/figures/21_not_employed_history_top_companies.png)
+
+Таблицы employment status:
+- `outputs/tables/employment_status_summary.csv`
+- `outputs/tables/employment_status_by_domain.csv`
+- `outputs/tables/employment_status_by_region.csv`
+- `outputs/tables/employment_status_by_seniority.csv`
+- `outputs/tables/not_employed_top_last_companies.csv`
+- `outputs/tables/not_employed_top_last_titles.csv`
+- `outputs/tables/not_employed_months_since_last_end.csv`
+- `outputs/tables/not_employed_history_top_companies.csv`
+- `outputs/tables/not_employed_history_top_titles.csv`
+
+## 8) Not specified research
 | field     |   total_missing_count |   share_missing_% |   share_filled_by_fallback | source_breakdown                                                                            |
 |:----------|----------------------:|------------------:|---------------------------:|:--------------------------------------------------------------------------------------------|
 | domain    |                     0 |               0   |                       28.6 | talentCard:71.4%; inferred:28.6%                                                            |
@@ -123,10 +155,10 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 - `outputs/tables/not_specified_deep_dive_company_not_specified_job_titles.csv`
 - `outputs/tables/not_specified_deep_dive_company_not_specified_region.csv`
 
-## 8) Domain Other
+## 9) Domain Other
 Исследование домена `Other` вынесено в отдельный отчёт: `REPORT_OTHERS.md`.
 
-## 9) Appendix
+## 10) Appendix
 Артефакты:
 - Figures: `outputs/figures/*.png`
 - Tables: `outputs/tables/*.csv`
@@ -134,6 +166,7 @@ Columns inventory (real CSV structure + non-null profile + length stats):
 - Notebook: `notebooks/mis_users_resume_bot.ipynb`
 - Geo mapping audit: `outputs/tables/geo_mapping_audit.csv`
 - Geo mapping top-50: `outputs/tables/geo_mapping_top50.csv`
+- Company mapping collisions: `outputs/tables/company_mapping_collisions.csv`
 
 How to reproduce:
 ```bash

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import unicodedata
 from collections import Counter
 from itertools import combinations
 from typing import Dict, Iterable, List, Tuple
@@ -134,6 +135,195 @@ INDUSTRY_MAP = {
     "министер": "Public Sector",
 }
 
+COMPANY_SYNONYMS: Dict[str, set[str]] = {
+    "Сбер": {
+        "сбер",
+        "сбербанк",
+        "sber",
+        "sberbank",
+        "sberbank of russia",
+        "russian sberbank",
+        "пао сбербанк",
+        "pao sberbank",
+        "pjsc sberbank",
+        "sberbank corporate banking corporate solutions center",
+    },
+    "ВТБ": {
+        "втб",
+        "банк втб",
+        "vtb",
+        "vtb bank",
+        "pao vtb",
+        "pjsc vtb",
+        "пао втб",
+    },
+    "Газпромбанк": {
+        "газпромбанк",
+        "gazprombank",
+        "оао газпромбанк",
+        "gazprombank oao",
+    },
+    "Яндекс": {
+        "яндекс",
+        "yandex",
+        "ооо яндекс",
+        "yandex llc",
+    },
+    "EPAM": {
+        "epam",
+        "epam systems",
+        "epam system",
+        "эпам",
+    },
+    "Газпром нефть": {
+        "gazprom neft",
+        "газпром нефть",
+        "пao газпром нефть",
+    },
+    "ДОМ.РФ": {
+        "дом рф",
+        "dom rf",
+        "domrf",
+        "домрф",
+    },
+    "ИК СИБИНТЕК": {
+        "ик сибинтек",
+        "сибинтек",
+        "ik sibintek",
+    },
+    "Лаборатория Касперского": {
+        "лаборатория касперского",
+        "kaspersky",
+        "kaspersky lab",
+    },
+    "Avito": {
+        "avito",
+        "авито",
+    },
+    "Komus": {
+        "komus",
+        "комус",
+    },
+    "Газпром": {
+        "gazprom",
+        "газпром",
+    },
+    "NLMK": {
+        "nlmk",
+        "нлмк",
+    },
+    "МТС Банк": {
+        "mts bank",
+        "мтс банк",
+    },
+    "Ozon Bank": {
+        "ozon bank",
+        "озон банк",
+    },
+    "Промсвязьбанк": {
+        "promsvyazbank",
+        "промсвязьбанк",
+    },
+    "SberKorus": {
+        "sberkorus",
+        "сберкорус",
+    },
+    "Альфа-Банк": {
+        "alfa bank",
+        "альфа банк",
+    },
+    "Мираторг": {
+        "miratorg",
+        "мираторг",
+    },
+    "ADANI": {
+        "adani",
+        "адани",
+    },
+    "Lenta": {
+        "lenta",
+        "лента",
+    },
+    "Severstal": {
+        "severstal",
+        "северсталь",
+    },
+    "Technoserv": {
+        "technoserv",
+        "техносерв",
+    },
+    "IT_One": {
+        "it one",
+        "it_one",
+    },
+}
+
+COMPANY_NOISE_TOKENS = {
+    "ooo",
+    "ооо",
+    "ao",
+    "ао",
+    "oao",
+    "оао",
+    "pao",
+    "пао",
+    "zao",
+    "зао",
+    "ip",
+    "ип",
+    "llc",
+    "inc",
+    "ltd",
+    "corp",
+    "jsc",
+    "pjsc",
+    "gmbh",
+    "co",
+    "group",
+    "holding",
+    "company",
+}
+
+COMPANY_NOT_SPECIFIED = {"not specified", "unknown", "n/a", "na", "none"}
+
+CYR_TO_LAT = {
+    "а": "a",
+    "б": "b",
+    "в": "v",
+    "г": "g",
+    "д": "d",
+    "е": "e",
+    "ё": "e",
+    "ж": "zh",
+    "з": "z",
+    "и": "i",
+    "й": "i",
+    "к": "k",
+    "л": "l",
+    "м": "m",
+    "н": "n",
+    "о": "o",
+    "п": "p",
+    "р": "r",
+    "с": "s",
+    "т": "t",
+    "у": "u",
+    "ф": "f",
+    "х": "h",
+    "ц": "ts",
+    "ч": "ch",
+    "ш": "sh",
+    "щ": "sch",
+    "ъ": "",
+    "ы": "y",
+    "ь": "",
+    "э": "e",
+    "ю": "yu",
+    "я": "ya",
+}
+
+_COMPANY_SYNONYM_LOOKUP: Dict[str, str] = {}
+
 
 def canonical_text(value: object) -> str:
     text = clean_text(value)
@@ -143,6 +333,7 @@ def canonical_text(value: object) -> str:
     text = text.replace("``", '"').replace("''", '"')
     text = text.replace("\\", " ")
     text = text.replace("ё", "е").lower().strip()
+    text = "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch))
     text = re.sub(r"\s+", " ", text)
     return text
 
@@ -182,6 +373,73 @@ def _match_synonym(token: str, mapping: Dict[str, set[str]]) -> str:
             if f" {v} " in padded:
                 return canonical
     return ""
+
+
+def _clean_company_text(value: object) -> str:
+    text = canonical_text(value)
+    if not text:
+        return ""
+    text = re.sub(r"&+", " and ", text)
+    text = re.sub(r"[|/•]+", " ", text)
+    text = re.sub(r"[,\.;:!\?\"'`«»“”„_]+", " ", text)
+    text = re.sub(r"[\(\)\[\]\{\}]", " ", text)
+    text = re.sub(r"[—–-]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def company_clean_key(value: object) -> str:
+    text = _clean_company_text(value)
+    if not text:
+        return ""
+
+    tokens = []
+    for token in text.split():
+        t = token.strip()
+        if not t:
+            continue
+        if t in COMPANY_NOISE_TOKENS:
+            continue
+        if len(t) == 1 and not t.isdigit():
+            continue
+        tokens.append(t)
+
+    key = " ".join(tokens).strip()
+    return key
+
+
+def transliterate_to_latin(value: object) -> str:
+    text = canonical_text(value)
+    if not text:
+        return ""
+    out_chars = [CYR_TO_LAT.get(ch, ch) for ch in text]
+    out = "".join(out_chars)
+    out = re.sub(r"[^a-z0-9\s]", " ", out)
+    out = re.sub(r"\s+", " ", out).strip()
+    return out
+
+
+def company_key_translit(value: object) -> str:
+    key = company_clean_key(value)
+    if not key:
+        return ""
+    return transliterate_to_latin(key)
+
+
+def _company_synonym_lookup() -> Dict[str, str]:
+    global _COMPANY_SYNONYM_LOOKUP
+    if _COMPANY_SYNONYM_LOOKUP:
+        return _COMPANY_SYNONYM_LOOKUP
+
+    lookup: Dict[str, str] = {}
+    for canonical, variants in COMPANY_SYNONYMS.items():
+        for variant in set(variants) | {canonical}:
+            key = company_clean_key(variant)
+            if key:
+                lookup[key] = canonical
+                lookup[transliterate_to_latin(key)] = canonical
+    _COMPANY_SYNONYM_LOOKUP = lookup
+    return _COMPANY_SYNONYM_LOOKUP
 
 
 def hash_user_id(value: object) -> str:
@@ -359,15 +617,37 @@ def normalize_company(company: object) -> str:
     raw = clean_text(company)
     if not raw:
         return "Not specified"
-    c = canonical_text(raw)
-    if c in {"not specified", "other"}:
-        return "Not specified" if c == "not specified" else "Other"
-    c = c.replace('"', " ")
-    c = re.sub(r"\b(ooo|ооо|ao|ао|oao|оао|zao|зао|llc|inc|ltd|corp)\b", "", c)
-    c = re.sub(r"\s+", " ", c).strip(" -")
-    if not c:
+
+    key = company_clean_key(raw)
+    if not key or key in COMPANY_NOT_SPECIFIED:
         return "Not specified"
-    return c.title()
+    if key == "other":
+        return "Other"
+
+    lookup = _company_synonym_lookup()
+    key_lat = transliterate_to_latin(key)
+    if key in lookup:
+        return lookup[key]
+    if key_lat in lookup:
+        return lookup[key_lat]
+
+    # Handles patterns like "sberbank --- ...", "пао сбербанк ..."
+    if key.startswith("sberbank") or key.startswith("сбербанк") or key == "sber":
+        return "Сбер"
+
+    tokens = key.split()
+    if len(tokens) == 1 and len(tokens[0]) <= 5:
+        return tokens[0].upper()
+
+    display = _clean_company_text(raw)
+    display_tokens = [tok for tok in display.split() if tok not in COMPANY_NOISE_TOKENS]
+    display = " ".join(display_tokens).strip()
+    if not display:
+        display = key
+    display_tokens = display.split()
+    if len(display_tokens) == 1 and len(display_tokens[0]) <= 5:
+        return display_tokens[0].upper()
+    return display
 
 
 def normalize_industry(industry: object) -> str:

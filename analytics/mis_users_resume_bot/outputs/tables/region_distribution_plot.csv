@@ -1,119 +1,120 @@
-region_norm,count,region_display
-Moscow,124,Москва
-Russia,27,Russia
-Minsk,26,"Minsk, Belarus"
-Dubai,24,"Dubai, UAE"
-Saint Petersburg,23,Санкт-Петербург
-Germany,13,"Berlin, Germany"
-Warsaw,12,"Warsaw, Poland"
-Remote,12,Remote
-Almaty,12,Алматы
-Tashkent,9,Ташкент
-Serbia,9,"Belgrade, Serbia"
-USA,8,"California, USA (Remote)"
-Belarus,8,Belarus
-Kazakhstan,8,Kazakhstan
-Yerevan,7,"Yerevan, Armenia"
-Spain,7,"Barcelona, Spain"
-United Kingdom,7,"London, UK"
-Tbilisi,6,"Tbilisi, Georgia"
-UAE,6,UAE
-Uzbekistan,5,Uzbekistan
-Poland,5,"Bia{2}ystok, Poland"
-Israel,4,"Hybrid, Israel (Raanana)"
-Cyprus,4,Cyprus
-Montenegro,4,"Budva, Montenegro"
-Netherlands,3,"Amsterdam, Netherlands"
-Abu Dhabi,3,"Abu Dhabi, UAE"
-Samara,3,Самара
-Armenia,3,Armenia
-Vilnius,3,"Vilnius, Lithuania"
-Turkey,3,Турция
-Thailand,3,"Bangkok, Thailand"
-Томск,3,Томск
-"Remote, San Jose, Ca",2,"Remote / San Jose, CA"
-Астана,2,Астана
-Latvia,2,"Riga, Latvia"
-Саранск,2,Саранск
-Кишинев,2,Кишинев
-Finland,2,"Helsinki, Finland"
-"Boston, Ma",2,"Boston, MA"
-Bulgaria,2,"Sofia, Bulgaria"
-Austria,2,"Vienna, Austria"
-"Удаленно, Англия",1,"Удаленно, Англия"
-Ульяновск,1,Ульяновск
-"Управление Активами, Фондами И Коммерческой Недвижимостью",1,"Управление активами, фондами и коммерческой недвижимостью"
-"Tel Aviv, Hamerkaz",1,"Tel Aviv, Hamerkaz"
-"Темиртау, Караганда",1,"Темиртау, Караганда"
-Телефон: Не Указан,1,Телефон: не указан
-Телефон,1,Телефон
-"Tuscany, Italy",1,"Tuscany, Italy"
-Стамбул,1,Стамбул
-Сириус,1,Сириус
-Ukraine,1,"Odesa, Ukraine"
-Union --- Ai Saas,1,Union --- AI SaaS
-Екатеринбург,1,Екатеринбург
-Дальний Восток,1,Дальний Восток
-Международная Компания По Сертификации Товаров И Услуг,1,международная компания по сертификации товаров и услуг
-Гродно,1,Гродно
-Г. Тюмень,1,г. Тюмень
-Владивосток,1,Владивосток
-Бахрейн,1,Бахрейн
-"Краснодар, Сочи, Удаленно Готовность К Командировкам И Переезду: Да",1,Краснодар / Сочи / удаленно \ готовность к командировкам и переезду: да
-"Лиссабон, Португалия",1,"Лиссабон, Португалия"
-Международная Корпоративная Сеть,1,Международная корпоративная сеть
-Разработка Собственного По В Области Иб (350 Человек),1,Разработка собственного ПО в области ИБ (350 человек)
-"Zurich, Switzerland",1,"Zurich, Switzerland"
-Нижний Новгород,1,"Нижний Новгород \,"
-Омск,1,Омск
-Www.Avbinvest.Com,1,www.avbinvest.com
-Покров,1,Покров
-Производственно-Инжиниринговая Компания,1,Производственно-инжиниринговая компания
-Startx.Team,1,startx.team
-(Аудит И Управление R&D-Проектами В Стратегических Отраслях),1,(аудит и управление R\&D-проектами в стратегических отраслях)
-Slovenia,1,Slovenia
-Fully Remote,1,Fully remote
-"Kuala Lumpur, Malaysia",1,"Kuala Lumpur, Malaysia"
-Ksa,1,KSA
-Kraków,1,Kraków
-Kehl,1,Kehl
-"İZmir, Türkiye",1,"İzmir, Türkiye"
-Italy,1,Italy
-Hq,1,HQ
-Girteka Logistics Group,1,Girteka logistics group
-Georgia,1,"Batumi, Georgia"
-"France, Luxembourg",1,France / Luxembourg
-Shate-M.By,1,shate-m.by
-Eu (Remote),1,EU (remote)
-English --- B2 German --- A2,1,English --- B2 \ \ German --- A2
-"Cee, Dach, Nordics",1,"CEE, DACH, Nordics"
-"Cascais, Portugal",1,"Cascais, Portugal"
-Canada,1,"Vancouver, Canada"
-"Buenos Aires, Argentina",1,"Buenos Aires, Argentina"
-"Bishkek, The Kyrgyz Republic",1,"Bishkek, the Kyrgyz Republic"
-Berlin,1,Berlin
-"Beijing, China",1,"Beijing, China"
-Kyiv,1,Kyiv / Madrid (remote)
-"Lausanne, Switzerland",1,"Lausanne, Switzerland"
-Lisbon,1,Lisbon
-Lithuania,1,Литва/РБ
-"San Mateo, Ca",1,"San Mateo, CA"
-"S ~Ao Paulo, Brazil",1,"S\~ao Paulo, Brazil"
-"Ryde, Nsw 2112",1,"Ryde, NSW 2112"
-"Rome, Italy",1,"Rome, Italy"
-"Remote, International",1,Remote / International
-"(Торговля Электрооборудованием, Автоматизация Инженерных Систем, Умный Дом, Офис, Оборот 4+ Млрд)",1,"(торговля электрооборудованием, автоматизация инженерных систем, умный дом/офис; оборот 4+ млрд)"
-R&D Branch,1,R\&D branch
-"Puteaux, France",1,"Puteaux, France"
-Project: Pjsc Vtb Bank,1,Project: PJSC VTB Bank
-Product Company (25 Employees),1,Product Company (25 employees)
-Portugal,1,Portugal
-"Perth, Australia",1,"Perth, Australia"
-Online Casino Team Backed By A Large Entertainment Holding,1,Online casino team backed by a large entertainment holding
-Novosibirsk,1,Новосибирск
-Norway,1,Norway
-"New York, Ny",1,"New York, NY"
-Madrid (Hybrid),1,Madrid (Hybrid)
-"London, Se16",1,"London, SE16"
-Location,1,"Location \,"
-"Холдинг Т1, Гк Иннотех",1,"Холдинг Т1, ГК Иннотех"
+region_norm,count,region_display_full,region_display_short,region_display
+Moscow,124,Москва,Москва,Москва
+Russia,27,Russia,Russia,Russia
+Minsk,26,"Minsk, Belarus","Minsk, Belarus","Minsk, Belarus"
+Dubai,24,"Dubai, UAE","Dubai, UAE","Dubai, UAE"
+Saint Petersburg,23,Санкт-Петербург,Санкт-Петербург,Санкт-Петербург
+Germany,13,"Berlin, Germany","Berlin, Germany","Berlin, Germany"
+Almaty,12,Алматы,Алматы,Алматы
+Warsaw,12,"Warsaw, Poland","Warsaw, Poland","Warsaw, Poland"
+Remote,11,Remote,Remote,Remote
+Tashkent,9,Ташкент,Ташкент,Ташкент
+Serbia,9,"Belgrade, Serbia","Belgrade, Serbia","Belgrade, Serbia"
+Belarus,8,Belarus,Belarus,Belarus
+Kazakhstan,8,Kazakhstan,Kazakhstan,Kazakhstan
+USA,8,"California, USA (Remote)","California, USA (Remote)","California, USA (Remote)"
+United Kingdom,7,"London, UK","London, UK","London, UK"
+Yerevan,7,"Yerevan, Armenia","Yerevan, Armenia","Yerevan, Armenia"
+Spain,7,"Barcelona, Spain","Barcelona, Spain","Barcelona, Spain"
+UAE,6,UAE,UAE,UAE
+Tbilisi,6,"Tbilisi, Georgia","Tbilisi, Georgia","Tbilisi, Georgia"
+Poland,5,"Bia{2}ystok, Poland","Bia{2}ystok, Poland","Bia{2}ystok, Poland"
+Uzbekistan,5,Uzbekistan,Uzbekistan,Uzbekistan
+Israel,4,"Hybrid, Israel (Raanana)","Hybrid, Israel (Raanana)","Hybrid, Israel (Raanana)"
+Montenegro,4,"Budva, Montenegro","Budva, Montenegro","Budva, Montenegro"
+Cyprus,4,Cyprus,Cyprus,Cyprus
+Thailand,3,"Bangkok, Thailand","Bangkok, Thailand","Bangkok, Thailand"
+Turkey,3,Турция,Турция,Турция
+Armenia,3,Armenia,Armenia,Armenia
+Samara,3,Самара,Самара,Самара
+Netherlands,3,"Amsterdam, Netherlands","Amsterdam, Netherlands","Amsterdam, Netherlands"
+Abu Dhabi,3,"Abu Dhabi, UAE","Abu Dhabi, UAE","Abu Dhabi, UAE"
+Vilnius,3,"Vilnius, Lithuania","Vilnius, Lithuania","Vilnius, Lithuania"
+Томск,3,Томск,Томск,Томск
+Bulgaria,2,"Sofia, Bulgaria","Sofia, Bulgaria","Sofia, Bulgaria"
+"Boston, Ma",2,"Boston, MA","Boston, MA","Boston, MA"
+Austria,2,"Vienna, Austria","Vienna, Austria","Vienna, Austria"
+Саранск,2,Саранск,Саранск,Саранск
+Finland,2,"Helsinki, Finland","Helsinki, Finland","Helsinki, Finland"
+Кишинев,2,Кишинев,Кишинев,Кишинев
+Астана,2,Астана,Астана,Астана
+"Remote, San Jose, Ca",2,"Remote / San Jose, CA","Remote / San Jose, CA","Remote / San Jose, CA"
+Latvia,2,"Riga, Latvia","Riga, Latvia","Riga, Latvia"
+Georgia,1,"Batumi, Georgia","Batumi, Georgia","Batumi, Georgia"
+"France, Luxembourg",1,France / Luxembourg,France / Luxembourg,France / Luxembourg
+Shate-M.By,1,shate-m.by,shate-m.by,shate-m.by
+Lithuania,1,Литва/РБ,Литва/РБ,Литва/РБ
+Lisbon,1,Lisbon,Lisbon,Lisbon
+"Lausanne, Switzerland",1,"Lausanne, Switzerland","Lausanne, Switzerland","Lausanne, Switzerland"
+Kyiv,1,Kyiv / Madrid (remote),Kyiv / Madrid (remote),Kyiv / Madrid (remote)
+"Beijing, China",1,"Beijing, China","Beijing, China","Beijing, China"
+Berlin,1,Berlin,Berlin,Berlin
+"Bishkek, The Kyrgyz Republic",1,"Bishkek, the Kyrgyz Republic","Bishkek, the Kyrgyz Republic","Bishkek, the Kyrgyz Republic"
+"Buenos Aires, Argentina",1,"Buenos Aires, Argentina","Buenos Aires, Argentina","Buenos Aires, Argentina"
+Girteka Logistics Group,1,Girteka logistics group,Girteka logistics group,Girteka logistics group
+"Cascais, Portugal",1,"Cascais, Portugal","Cascais, Portugal","Cascais, Portugal"
+"Cee, Dach, Nordics",1,"CEE, DACH, Nordics","CEE, DACH, Nordics","CEE, DACH, Nordics"
+English --- B2 German --- A2,1,English --- B2 \ \ German --- A2,English --- B2 \ \ German --- A2,English --- B2 \ \ German --- A2
+Eu (Remote),1,EU (remote),EU (remote),EU (remote)
+Slovenia,1,Slovenia,Slovenia,Slovenia
+Canada,1,"Vancouver, Canada","Vancouver, Canada","Vancouver, Canada"
+"San Mateo, Ca",1,"San Mateo, CA","San Mateo, CA","San Mateo, CA"
+"S ~Ao Paulo, Brazil",1,"S\~ao Paulo, Brazil","S\~ao Paulo, Brazil","S\~ao Paulo, Brazil"
+Online Casino Team Backed By A Large Entertainment Holding,1,Online casino team backed by a large entertainment holding,Online casino team backed by a large entertainment holding,Online casino team backed by a large entertainment holding
+Italy,1,Italy,Italy,Italy
+Location,1,"Location \,","Location \,","Location \,"
+"London, Se16",1,"London, SE16","London, SE16","London, SE16"
+Madrid (Hybrid),1,Madrid (Hybrid),Madrid (Hybrid),Madrid (Hybrid)
+"New York, Ny",1,"New York, NY","New York, NY","New York, NY"
+Norway,1,Norway,Norway,Norway
+Novosibirsk,1,Новосибирск,Новосибирск,Новосибирск
+"Perth, Australia",1,"Perth, Australia","Perth, Australia","Perth, Australia"
+"Ryde, Nsw 2112",1,"Ryde, NSW 2112","Ryde, NSW 2112","Ryde, NSW 2112"
+Portugal,1,Portugal,Portugal,Portugal
+Product Company (25 Employees),1,Product Company (25 employees),Product Company (25 employees),Product Company (25 employees)
+Project: Pjsc Vtb Bank,1,Project: PJSC VTB Bank,Project: PJSC VTB Bank,Project: PJSC VTB Bank
+"Puteaux, France",1,"Puteaux, France","Puteaux, France","Puteaux, France"
+R&D Branch,1,R\&D branch,R\&D branch,R\&D branch
+"(Торговля Электрооборудованием, Автоматизация Инженерных Систем, Умныи Дом, Офис, Оборот 4+ Млрд)",1,"(торговля электрооборудованием, автоматизация инженерных систем, умный дом/офис; оборот 4+ млрд)","(торговля электрооборудованием, автоматизация инженерных...","(торговля электрооборудованием, автоматизация инженерных..."
+"Rome, Italy",1,"Rome, Italy","Rome, Italy","Rome, Italy"
+Hq,1,HQ,HQ,HQ
+Владивосток,1,Владивосток,Владивосток,Владивосток
+"Izmir, Turkiye",1,"İzmir, Türkiye","İzmir, Türkiye","İzmir, Türkiye"
+Сириус,1,Сириус,Сириус,Сириус
+Дальнии Восток,1,Дальний Восток,Дальний Восток,Дальний Восток
+Производственно-Инжиниринговая Компания,1,Производственно-инжиниринговая компания,Производственно-инжиниринговая компания,Производственно-инжиниринговая компания
+Екатеринбург,1,Екатеринбург,Екатеринбург,Екатеринбург
+Разработка Собственного По В Области Иб (350 Человек),1,Разработка собственного ПО в области ИБ (350 человек),Разработка собственного ПО в области ИБ (350 человек),Разработка собственного ПО в области ИБ (350 человек)
+"Tuscany, Italy",1,"Tuscany, Italy","Tuscany, Italy","Tuscany, Italy"
+Union --- Ai Saas,1,Union --- AI SaaS,Union --- AI SaaS,Union --- AI SaaS
+Ukraine,1,"Odesa, Ukraine","Odesa, Ukraine","Odesa, Ukraine"
+Стамбул,1,Стамбул,Стамбул,Стамбул
+Г. Тюмень,1,г. Тюмень,г. Тюмень,г. Тюмень
+Телефон,1,Телефон,Телефон,Телефон
+Телефон: Не Указан,1,Телефон: не указан,Телефон: не указан,Телефон: не указан
+"Темиртау, Караганда",1,"Темиртау, Караганда","Темиртау, Караганда","Темиртау, Караганда"
+"Tel Aviv, Hamerkaz",1,"Tel Aviv, Hamerkaz","Tel Aviv, Hamerkaz","Tel Aviv, Hamerkaz"
+"Управление Активами, Фондами И Коммерческои Недвижимостью",1,"Управление активами, фондами и коммерческой недвижимостью","Управление активами, фондами и коммерческой недвижимостью","Управление активами, фондами и коммерческой недвижимостью"
+"Удаленно, Англия",1,"Удаленно, Англия","Удаленно, Англия","Удаленно, Англия"
+Ульяновск,1,Ульяновск,Ульяновск,Ульяновск
+Гродно,1,Гродно,Гродно,Гродно
+Бахреин,1,Бахрейн,Бахрейн,Бахрейн
+Kehl,1,Kehl,Kehl,Kehl
+Покров,1,Покров,Покров,Покров
+Krakow,1,Kraków,Kraków,Kraków
+Ksa,1,KSA,KSA,KSA
+"Kuala Lumpur, Malaysia",1,"Kuala Lumpur, Malaysia","Kuala Lumpur, Malaysia","Kuala Lumpur, Malaysia"
+Fully Remote,1,Fully remote,Fully remote,Fully remote
+Startx.Team,1,startx.team,startx.team,startx.team
+"Remote, International",1,Remote / International,Remote / International,Remote / International
+(Аудит И Управление R&D-Проектами В Стратегических Отраслях),1,(аудит и управление R\&D-проектами в стратегических отраслях),(аудит и управление R\&D-проектами в стратегических отрас...,(аудит и управление R\&D-проектами в стратегических отрас...
+Www.Avbinvest.Com,1,www.avbinvest.com,www.avbinvest.com,www.avbinvest.com
+"Краснодар, Сочи, Удаленно Готовность К Командировкам И Переезду: Да",1,Краснодар / Сочи / удаленно \ готовность к командировкам и переезду: да,Краснодар / Сочи / удаленно \ готовность к командировкам...,Краснодар / Сочи / удаленно \ готовность к командировкам...
+Онлаин,1,Онлайн,Онлайн,Онлайн
+Омск,1,Омск,Омск,Омск
+"Zurich, Switzerland",1,"Zurich, Switzerland","Zurich, Switzerland","Zurich, Switzerland"
+Нижнии Новгород,1,"Нижний Новгород \,","Нижний Новгород \,","Нижний Новгород \,"
+Международная Корпоративная Сеть,1,Международная корпоративная сеть,Международная корпоративная сеть,Международная корпоративная сеть
+Международная Компания По Сертификации Товаров И Услуг,1,международная компания по сертификации товаров и услуг,международная компания по сертификации товаров и услуг,международная компания по сертификации товаров и услуг
+"Лиссабон, Португалия",1,"Лиссабон, Португалия","Лиссабон, Португалия","Лиссабон, Португалия"
+"Холдинг Т1, Гк Иннотех",1,"Холдинг Т1, ГК Иннотех","Холдинг Т1, ГК Иннотех","Холдинг Т1, ГК Иннотех"

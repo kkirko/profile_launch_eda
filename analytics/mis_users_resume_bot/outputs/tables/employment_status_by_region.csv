@@ -1,0 +1,46 @@
+region_norm,region_norm_short,employment_status,count,row_share_%,row_total
+Almaty,Almaty,employed,9,75.0,12
+Almaty,Almaty,not_employed,3,25.0,12
+Almaty,Almaty,unknown,0,0.0,12
+Belarus,Belarus,employed,7,87.5,8
+Belarus,Belarus,not_employed,1,12.5,8
+Belarus,Belarus,unknown,0,0.0,8
+Dubai,Dubai,employed,22,91.7,24
+Dubai,Dubai,not_employed,2,8.3,24
+Dubai,Dubai,unknown,0,0.0,24
+Germany,Germany,employed,10,76.9,13
+Germany,Germany,not_employed,2,15.4,13
+Germany,Germany,unknown,1,7.7,13
+Kazakhstan,Kazakhstan,employed,5,62.5,8
+Kazakhstan,Kazakhstan,not_employed,2,25.0,8
+Kazakhstan,Kazakhstan,unknown,1,12.5,8
+Minsk,Minsk,employed,17,65.4,26
+Minsk,Minsk,not_employed,8,30.8,26
+Minsk,Minsk,unknown,1,3.8,26
+Moscow,Moscow,employed,85,68.5,124
+Moscow,Moscow,not_employed,37,29.8,124
+Moscow,Moscow,unknown,2,1.6,124
+Remote,Remote,employed,9,81.8,11
+Remote,Remote,not_employed,2,18.2,11
+Remote,Remote,unknown,0,0.0,11
+Russia,Russia,employed,18,66.7,27
+Russia,Russia,not_employed,9,33.3,27
+Russia,Russia,unknown,0,0.0,27
+Saint Petersburg,Saint Petersburg,employed,11,47.8,23
+Saint Petersburg,Saint Petersburg,not_employed,12,52.2,23
+Saint Petersburg,Saint Petersburg,unknown,0,0.0,23
+Serbia,Serbia,employed,3,33.3,9
+Serbia,Serbia,not_employed,6,66.7,9
+Serbia,Serbia,unknown,0,0.0,9
+Tashkent,Tashkent,employed,6,66.7,9
+Tashkent,Tashkent,not_employed,3,33.3,9
+Tashkent,Tashkent,unknown,0,0.0,9
+USA,USA,employed,6,75.0,8
+USA,USA,not_employed,1,12.5,8
+USA,USA,unknown,1,12.5,8
+United Kingdom,United Kingdom,employed,4,57.1,7
+United Kingdom,United Kingdom,not_employed,3,42.9,7
+United Kingdom,United Kingdom,unknown,0,0.0,7
+Warsaw,Warsaw,employed,9,75.0,12
+Warsaw,Warsaw,not_employed,3,25.0,12
+Warsaw,Warsaw,unknown,0,0.0,12

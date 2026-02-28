@@ -159,12 +159,12 @@ docker compose,2,Docker Compose
 cursor,2,Cursor
 sap ecc,2,Sap Ecc
 go,2,Go
-управление командой,2,управление командой
+управление командои,2,управление командои
 sap s/4hana,2,Sap S/4Hana
 uat & go-live,2,Uat & Go-Live
 salesforce,2,Salesforce
-sqlite (базовый,2,Sqlite (Базовый
-mysql (базовый,2,Mysql (Базовый
+sqlite (базовыи,2,Sqlite (Базовыи
+mysql (базовыи,2,Mysql (Базовыи
 sqlalchemy,2,Sqlalchemy
 react query,1,React Query
 ai инструменты (gemini,1,Ai Инструменты (Gemini
@@ -187,7 +187,7 @@ vendor performance governance & slas,1,Vendor Performance Governance & Slas
 strategic negotiations,1,Strategic Negotiations
 scala,1,Scala
 product analytics (google analytics,1,Product Analytics (Google Analytics
-figma (базовый,1,Figma (Базовый
+figma (базовыи,1,Figma (Базовыи
 прототипирование (figma,1,Прототипирование (Figma
 scope & backlog governance,1,Scope & Backlog Governance
 logos,1,Logos
@@ -199,11 +199,11 @@ investment governance & phase-gate approvals,1,Investment Governance & Phase-Gat
 advanced excel & powerpoint,1,Advanced Excel & Powerpoint
 co2-лазерные платформы,1,Co2-Лазерные Платформы
 микротоковые аппараты,1,микротоковые аппараты
-аппараты skin для аппаратной чистки,1,Аппараты Skin Для Аппаратной Чистки
+аппараты skin для аппаратнои чистки,1,Аппараты Skin Для Аппаратнои Чистки
 netsuite (oracle,1,Netsuite (Oracle
 kafka administration,1,Kafka Administration
 hydrafacial,1,Hydrafacial
-apache kafka (взаимодействие,1,Apache Kafka (Взаимодействие
+apache kafka (взаимодеиствие,1,Apache Kafka (Взаимодеиствие
 information security & data governance,1,Information Security & Data Governance
 e-staff,1,E-Staff
 secret rf,1,Secret Rf
@@ -260,8 +260,8 @@ docsvision,1,Docsvision
 credinform,1,Credinform
 integrum,1,Integrum
 django rest framework (drf,1,Django Rest Framework (Drf
-mysql (базовый уровень,1,Mysql (Базовый Уровень
-sqlite (базовый уровень,1,Sqlite (Базовый Уровень
+mysql (базовыи уровень,1,Mysql (Базовыи Уровень
+sqlite (базовыи уровень,1,Sqlite (Базовыи Уровень
 basic sql,1,Basic Sql
 git/github,1,Git/Github
 digital products & learning experiences,1,Digital Products & Learning Experiences
@@ -440,7 +440,7 @@ java (6-21,1,Java (6-21
 searchinform,1,Searchinform
 bitrix24 (crm,1,Bitrix24 (Crm
 nps,1,Nps
-клиентский сервис (csi,1,Клиентский Сервис (Csi
+клиентскии сервис (csi,1,Клиентскии Сервис (Csi
 digital sales strategy,1,Digital Sales Strategy
 git bash,1,Git Bash
 mathcad,1,Mathcad
@@ -500,7 +500,7 @@ soapui,1,Soapui
 json,1,Json
 интеграции (rest/json,1,Интеграции (Rest/Json
 soap/xml,1,Soap/Xml
-управление стейкхолдерами,1,управление стейкхолдерами
+управление стеикхолдерами,1,управление стеикхолдерами
 rxjava,1,Rxjava
 people management (acting tl,1,People Management (Acting Tl
 gantpro,1,Gantpro
@@ -522,7 +522,7 @@ sdlc governance,1,Sdlc Governance
 government,1,Government
 стратегия и governance ниокр,1,Стратегия И Governance Ниокр
 аналитика и презентации (excel,1,Аналитика И Презентации (Excel
-проектный менеджмент (pmbok,1,Проектный Менеджмент (Pmbok
+проектныи менеджмент (pmbok,1,Проектныи Менеджмент (Pmbok
 agile/scrum,1,Agile/Scrum
 bim & digital twin,1,Bim & Digital Twin
 dbrain,1,Dbrain
@@ -569,7 +569,7 @@ servicetitan,1,Servicetitan
 housecallpro,1,Housecallpro
 ai tools,1,Ai Tools
 финансовое моделирование,1,финансовое моделирование
-бюджетирование (операционный бюджет,1,бюджетирование (операционный бюджет
+бюджетирование (операционныи бюджет,1,бюджетирование (операционныи бюджет
 бюджет предоткрытия,1,бюджет предоткрытия
 бренд-платформа и позиционирование,1,бренд-платформа и позиционирование
 оптимизация и стандартизация процессов,1,оптимизация и стандартизация процессов
@@ -598,7 +598,7 @@ supplier management & negotiation,1,Supplier Management & Negotiation
 contract renegotiation,1,Contract Renegotiation
 pricing & promotions (category,1,Pricing & Promotions (Category
 автоматизация hr-процессов (bitrix24,1,Автоматизация Hr-Процессов (Bitrix24
-кадровый резерв кадровое делопроизводство и комплаенс автоматизация hr-процессов (bitrix24,1,Кадровый Резерв Кадровое Делопроизводство И Комплаенс Автоматизация Hr-Процессов (Bitrix24
+кадровыи резерв кадровое делопроизводство и комплаенс автоматизация hr-процессов (bitrix24,1,Кадровыи Резерв Кадровое Делопроизводство И Комплаенс Автоматизация Hr-Процессов (Bitrix24
 embedded c/c++,1,Embedded C/C++
 linux (kernel,1,Linux (Kernel
 unreal engine 5,1,Unreal Engine 5
@@ -613,7 +613,7 @@ digital workplace (microsoft 365,1,Digital Workplace (Microsoft 365
 governance & risk alignment,1,Governance & Risk Alignment
 google sites,1,Google Sites
 sdlc,1,Sdlc
-сбор и документирование требований,1,сбор и документирование требований
+сбор и документирование требовании,1,сбор и документирование требовании
 приоритизация бэклога,1,приоритизация бэклога
 uat,1,Uat
 управление проектами,1,управление проектами
@@ -684,7 +684,7 @@ quality practices (ci/cd,1,Quality Practices (Ci/Cd
 governance (raci,1,Governance (Raci
 микросервисная архитектура,1,микросервисная архитектура
 sla,1,Sla
-мониторинг и операционная устойчивость,1,мониторинг и операционная устойчивость
+мониторинг и операционная устоичивость,1,мониторинг и операционная устоичивость
 управление бюджетом и подрядчиками,1,управление бюджетом и подрядчиками
 irr,1,Irr
 kpi и мотивация оптимизация оргструктуры и фот автоматизация процессов (crm,1,Kpi И Мотивация Оптимизация Оргструктуры И Фот Автоматизация Процессов (Crm
@@ -712,7 +712,7 @@ openlens,1,Openlens
 ci/cd & devops practices,1,Ci/Cd & Devops Practices
 algorithms,1,Algorithms
 3d geometry / slicing algorithms,1,3D Geometry / Slicing Algorithms
-power bi (формирование требований,1,Power Bi (Формирование Требований
+power bi (формирование требовании,1,Power Bi (Формирование Требовании
 figma (контроль соответствия,1,Figma (Контроль Соответствия
 декомпозиция и оценка трудозатрат,1,декомпозиция и оценка трудозатрат
 переговоры и контрактная работа,1,переговоры и контрактная работа
@@ -785,7 +785,7 @@ sap bo,1,Sap Bo
 corporate governance (board reporting,1,Corporate Governance (Board Reporting
 defect tracking (jira,1,Defect Tracking (Jira
 automation basics (python,1,Automation Basics (Python
-digital-маркетинг (сайт,1,Digital-Маркетинг (Сайт
+digital-маркетинг (саит,1,Digital-Маркетинг (Саит
 sap erp & 1c integrations,1,Sap Erp & 1C Integrations
 jira & confluence (admin,1,Jira & Confluence (Admin
 yield farming,1,Yield Farming
@@ -800,7 +800,7 @@ payments & card processing,1,Payments & Card Processing
 pci dss,1,Pci Dss
 high-load services,1,High-Load Services
 agile planning,1,Agile Planning
-технологический контекст (понимание): java,1,Технологический Контекст (Понимание): Java
+технологическии контекст (понимание): java,1,Технологическии Контекст (Понимание): Java
 методологии и практики: agile,1,Методологии И Практики: Agile
 roadmap,1,Roadmap
 фасилитация,1,фасилитация

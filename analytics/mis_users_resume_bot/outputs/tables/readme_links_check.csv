@@ -11,5 +11,11 @@ outputs/figures/10_top_tools.png,True
 outputs/figures/11_top_skills.png,True
 outputs/figures/12_heatmap_domain_tools_share.png,True
 outputs/figures/15_strata_top20.png,True
+outputs/figures/16_employment_status_overall.png,True
+outputs/figures/17_employment_status_by_domain.png,True
+outputs/figures/18_months_since_last_end_hist.png,True
+outputs/figures/19_not_employed_top_last_companies.png,True
+outputs/figures/20_not_employed_top_last_titles.png,True
+outputs/figures/21_not_employed_history_top_companies.png,True
 outputs/figures/13_donut_seniority_filled.png,True
 outputs/figures/14_donut_cv_generation_language.png,True

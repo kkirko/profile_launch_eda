@@ -1,22 +1,22 @@
-industry_norm,count,industry_display
-Banking/FinTech,26,FinTech
-IT/Software,26,IT
-Other,24,Other
-E-commerce/Retail,9,E-commerce
-Healthcare,6,Healthcare
-Telecom,4,Telecom
-Real Estate,3,Real Estate
-EdTech,3,EdTech
-Consulting,2,Consulting
-Manufacturing,2,Manufacturing
-Marketing/Sales,1,Marketing/Sales
-Public Sector,1,GovTech
-PropTech,1,PropTech
-AdTech/MarTech,1,AdTech/MarTech
-HRTech,1,HRTech
-Gaming,1,Gaming
-Foodtech,1,Foodtech
-Finance,1,Finance
-Distribution,1,Distribution
-Chemical Industry,1,Chemical Industry
-iGaming,1,iGaming
+industry_norm,count,industry_display_full,industry_display_short,industry_display
+Banking/FinTech,26,FinTech,FinTech,FinTech
+IT/Software,26,IT,IT,IT
+Other,24,Other,Other,Other
+E-commerce/Retail,9,E-commerce,E-commerce,E-commerce
+Healthcare,6,Healthcare,Healthcare,Healthcare
+Telecom,4,Telecom,Telecom,Telecom
+Real Estate,3,Real Estate,Real Estate,Real Estate
+EdTech,3,EdTech,EdTech,EdTech
+Consulting,2,Consulting,Consulting,Consulting
+Manufacturing,2,Manufacturing,Manufacturing,Manufacturing
+Marketing/Sales,1,Marketing/Sales,Marketing/Sales,Marketing/Sales
+Public Sector,1,GovTech,GovTech,GovTech
+PropTech,1,PropTech,PropTech,PropTech
+AdTech/MarTech,1,AdTech/MarTech,AdTech/MarTech,AdTech/MarTech
+HRTech,1,HRTech,HRTech,HRTech
+Gaming,1,Gaming,Gaming,Gaming
+Foodtech,1,Foodtech,Foodtech,Foodtech
+Finance,1,Finance,Finance,Finance
+Distribution,1,Distribution,Distribution,Distribution
+Chemical Industry,1,Chemical Industry,Chemical Industry,Chemical Industry
+iGaming,1,iGaming,iGaming,iGaming

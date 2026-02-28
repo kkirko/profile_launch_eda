@@ -114,7 +114,7 @@ Most frequent title keywords:
 | 07.2024                                       |       4 |       5   |
 | tech recruiter                                |       4 |       5   |
 | senior ux researcher                          |       4 |       5   |
-| исполнительный директор                       |       2 |       2.5 |
+| исполнительныи директор                       |       2 |       2.5 |
 | associate producer                            |       2 |       2.5 |
 | line producer                                 |       2 |       2.5 |
 | volunteer                                     |       2 |       2.5 |
@@ -125,7 +125,7 @@ Most frequent title keywords:
 | лидер розничного кредитования                 |       2 |       2.5 |
 | экосистема недвижимости домклик               |       2 |       2.5 |
 | employed                                      |       2 |       2.5 |
-| региональный менеджер по продажам             |       2 |       2.5 |
+| региональныи менеджер по продажам             |       2 |       2.5 |
 | managing partner and ceo                      |       2 |       2.5 |
 | head of education center                      |       2 |       2.5 |
 | chief technology officer                      |       2 |       2.5 |
@@ -134,7 +134,7 @@ Most frequent title keywords:
 | qa lead                                       |       2 |       2.5 |
 | специалист по обучению и сопровождению        |       2 |       2.5 |
 | психолог                                      |       2 |       2.5 |
-| ведущий инженер                               |       2 |       2.5 |
+| ведущии инженер                               |       2 |       2.5 |
 | рекрутер                                      |       2 |       2.5 |
 | тест                                          |       2 |       2.5 |
 

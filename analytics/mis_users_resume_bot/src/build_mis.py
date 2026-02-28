@@ -20,6 +20,8 @@ from feature_builders import (
     build_jobs_long_talent,
     build_mapping_table,
     canonical_text,
+    company_clean_key,
+    company_key_translit,
     experience_bin,
     guess_country,
     hash_user_id,
@@ -65,6 +67,14 @@ def save_table(df: pd.DataFrame, path: Path) -> None:
 def shorten(value: object, max_len: int = 44) -> str:
     text = str(value)
     return text if len(text) <= max_len else text[: max_len - 3] + "..."
+
+
+def display_short(value: object, max_len: int = 60) -> str:
+    text = str(value) if value is not None else ""
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 3].rstrip() + "..."
 
 
 def wrap_label(value: object, max_len: int = 44, wrap_width: int = 28) -> str:
@@ -140,7 +150,9 @@ def distribution_with_display(df: pd.DataFrame, raw_col: str, norm_col: str, fie
     display_top = display_map.drop_duplicates(subset=[norm_col])[[norm_col, raw_col]]
 
     out = counts.merge(display_top, on=norm_col, how="left")
-    out = out.rename(columns={raw_col: f"{field_name}_display", norm_col: f"{field_name}_norm"})
+    out = out.rename(columns={raw_col: f"{field_name}_display_full", norm_col: f"{field_name}_norm"})
+    out[f"{field_name}_display_short"] = out[f"{field_name}_display_full"].map(lambda x: display_short(x, max_len=60))
+    out[f"{field_name}_display"] = out[f"{field_name}_display_short"]
     return out
 
 
@@ -168,8 +180,8 @@ def plot_barh(
     out_path: Path,
     title: str,
     top_n: int,
-    max_label_len: int = 44,
-    wrap_width: int = 30,
+    max_label_len: int = 36,
+    wrap_width: int = 22,
 ) -> bool:
     if not is_meaningful_barplot(df, label_col, value_col):
         return False
@@ -192,7 +204,7 @@ def plot_barh(
     ax.set_xlabel("Candidates")
     ax.set_ylabel("")
     ax.grid(axis="x", alpha=0.25)
-    fig.subplots_adjust(left=0.38, right=0.97, top=0.92, bottom=0.08)
+    fig.subplots_adjust(left=0.41, right=0.97, top=0.92, bottom=0.08)
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
@@ -466,6 +478,102 @@ def discover_alt_geo_columns(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("non_empty_count", ascending=False)
 
 
+def build_company_mapping_collisions(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return pd.DataFrame(columns=["cluster_key", "total_count", "company_norm_list", "top_raw_examples"])
+
+    work = df.copy()
+    work["company_raw"] = work["company_raw"].fillna("").astype(str).str.strip()
+    work["company_norm"] = work["company_norm"].fillna("Not specified").astype(str)
+    work = work[work["company_raw"].ne("")]
+    work = work[~work["company_norm"].str.lower().isin({"not specified", "other", "unknown"})]
+    work["cluster_key"] = work["company_raw"].map(company_key_translit)
+    work = work[work["cluster_key"].ne("")]
+
+    rows: List[Dict[str, object]] = []
+    for cluster_key, grp in work.groupby("cluster_key"):
+        norm_counts = grp["company_norm"].value_counts()
+        if len(norm_counts) <= 1:
+            continue
+
+        raw_counts = grp["company_raw"].value_counts().head(6)
+        rows.append(
+            {
+                "cluster_key": cluster_key,
+                "total_count": int(len(grp)),
+                "company_norm_list": " | ".join([f"{idx} ({int(cnt)})" for idx, cnt in norm_counts.items()]),
+                "top_raw_examples": " | ".join([f"{idx} ({int(cnt)})" for idx, cnt in raw_counts.items()]),
+            }
+        )
+
+    if not rows:
+        return pd.DataFrame(columns=["cluster_key", "total_count", "company_norm_list", "top_raw_examples"])
+    return pd.DataFrame(rows).sort_values(["total_count", "cluster_key"], ascending=[False, True]).reset_index(drop=True)
+
+
+def months_between(later: pd.Timestamp, earlier: pd.Timestamp) -> float:
+    if pd.isna(later) or pd.isna(earlier):
+        return np.nan
+    months = (later.year - earlier.year) * 12 + (later.month - earlier.month)
+    if later.day < earlier.day:
+        months -= 1
+    return float(max(months, 0))
+
+
+def plot_bar(
+    df: pd.DataFrame,
+    label_col: str,
+    value_col: str,
+    out_path: Path,
+    title: str,
+    max_label_len: int = 28,
+) -> bool:
+    if not is_meaningful_barplot(df, label_col, value_col):
+        return False
+    data = df.copy()
+    labels = [display_short(v, max_len=max_label_len) for v in data[label_col].astype(str)]
+    values = data[value_col].astype(float).values
+
+    fig, ax = plt.subplots(figsize=(8.2, 4.8))
+    colors = sns.color_palette("viridis", n_colors=len(data))
+    ax.bar(labels, values, color=colors)
+    total = float(values.sum())
+    for i, val in enumerate(values):
+        ax.text(i, val + max(values) * 0.02, f"{int(val)} ({pct(int(val), int(total)):.1f}%)", ha="center", va="bottom", fontsize=9)
+    ax.set_title(title)
+    ax.set_ylabel("Candidates")
+    ax.tick_params(axis="x", rotation=20)
+    for tick in ax.get_xticklabels():
+        tick.set_ha("right")
+    ax.grid(axis="y", alpha=0.2)
+    fig.tight_layout()
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+    return True
+
+
+def plot_hist(
+    series: pd.Series,
+    out_path: Path,
+    title: str,
+    xlabel: str,
+    bins: int = 15,
+) -> bool:
+    s = pd.to_numeric(series, errors="coerce").dropna()
+    if s.empty:
+        return False
+    fig, ax = plt.subplots(figsize=(9.2, 4.8))
+    ax.hist(s.values, bins=bins, color="#355C7D", alpha=0.85, edgecolor="white")
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel("Candidates")
+    ax.grid(axis="y", alpha=0.2)
+    fig.tight_layout()
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+    return True
+
+
 def build_notebook(path: Path) -> None:
     notebook_json = {
         "cells": [
@@ -529,6 +637,10 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     region_ns_breakdown = tables["not_specified_deep_dive_region_not_specified_breakdown"]
     company_ns_breakdown = tables["not_specified_deep_dive_company_not_specified_breakdown"]
     region_alt_cols = tables["not_specified_deep_dive_region_alt_columns"]
+    employment_summary = tables.get("employment_status_summary", pd.DataFrame())
+    employment_domain = tables.get("employment_status_by_domain", pd.DataFrame())
+    employment_region = tables.get("employment_status_by_region", pd.DataFrame())
+    employment_seniority = tables.get("employment_status_by_seniority", pd.DataFrame())
 
     p = dict(zip(profile["metric"], profile["value"]))
     v = dict(zip(validation["metric"], validation["value"]))
@@ -554,6 +666,10 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         else 0.0
     )
     alt_geo_used = int(region_alt_cols["selected_in_fallback"].fillna(False).sum()) if "selected_in_fallback" in region_alt_cols.columns else 0
+    emp_share = {}
+    if not employment_summary.empty:
+        for _, row in employment_summary.iterrows():
+            emp_share[str(row["employment_status"])] = float(row.get("share_%", 0.0))
 
     observations = [
         f"База содержит {int(float(p['users_total']))} профилей.",
@@ -568,6 +684,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         f"`region=Not specified` остается у {region_ns_share:.1f}% базы; `company=Not specified` — у {company_ns_share:.1f}%.",
         f"В fallback цепочку региона добавлено альтернативных geo-колонок: {alt_geo_used}.",
         f"Топ tools: {', '.join(top_tools['token_display'].tolist())}.",
+        f"Статус занятости: employed {emp_share.get('employed', 0.0):.1f}%, not_employed {emp_share.get('not_employed', 0.0):.1f}%, unknown {emp_share.get('unknown', 0.0):.1f}%.",
     ]
 
     lines: List[str] = []
@@ -581,13 +698,13 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     lines.append(f"- Coverage `talentCard.specialist_category`: **{float(v['coverage_specialist_category_%']):.1f}%**")
     lines.append("")
     lines.append("Top-3 domains (excluding Other/Not specified):")
-    lines.append(_to_markdown_top(top_domains, ["domain_filled", "count"]))
+    lines.append(_to_markdown_top(top_domains.rename(columns={"domain_display_short": "domain"}), ["domain", "count"]))
     lines.append("")
     lines.append("Top-3 regions (excluding Other/Not specified):")
-    lines.append(_to_markdown_top(top_regions, ["region_display", "count"]))
+    lines.append(_to_markdown_top(top_regions.rename(columns={"region_display_short": "region"}), ["region", "count"]))
     lines.append("")
     lines.append("Top-3 companies (excluding Other/Not specified):")
-    lines.append(_to_markdown_top(top_companies, ["company_display", "count"]))
+    lines.append(_to_markdown_top(top_companies.rename(columns={"company_display_short": "company"}), ["company", "count"]))
     lines.append("")
     lines.append("### Key observations")
     lines.extend([f"- {x}" for x in observations])
@@ -658,7 +775,74 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         ]
     )
     lines.append("")
-    lines.append("## 7) Not specified research")
+    lines.append("## 7) Employment status (working vs not working)")
+    if not employment_summary.empty:
+        lines.append(employment_summary.to_markdown(index=False))
+    emp_notes: List[str] = []
+    if not employment_domain.empty:
+        d_emp = employment_domain[(employment_domain["employment_status"] == "employed") & (employment_domain["row_total"] >= 10)]
+        d_not = employment_domain[(employment_domain["employment_status"] == "not_employed") & (employment_domain["row_total"] >= 10)]
+        if not d_emp.empty:
+            top = d_emp.sort_values("row_share_%", ascending=False).iloc[0]
+            emp_notes.append(
+                f"Домен с максимальной долей employed: `{top['domain_filled_short']}` ({float(top['row_share_%']):.1f}%)."
+            )
+        if not d_not.empty:
+            top = d_not.sort_values("row_share_%", ascending=False).iloc[0]
+            emp_notes.append(
+                f"Домен с максимальной долей not_employed: `{top['domain_filled_short']}` ({float(top['row_share_%']):.1f}%)."
+            )
+    if not employment_region.empty:
+        r_not = employment_region[(employment_region["employment_status"] == "not_employed") & (employment_region["row_total"] >= 8)]
+        if not r_not.empty:
+            top = r_not.sort_values("row_share_%", ascending=False).iloc[0]
+            emp_notes.append(
+                f"Регион с максимальной долей not_employed: `{top['region_norm_short']}` ({float(top['row_share_%']):.1f}%)."
+            )
+    if not employment_seniority.empty:
+        s_not = employment_seniority[
+            (employment_seniority["employment_status"] == "not_employed")
+            & (employment_seniority["row_total"] >= 8)
+            & (~employment_seniority["seniority_filled"].astype(str).str.lower().isin({"not specified", "unknown"}))
+        ]
+        if not s_not.empty:
+            top = s_not.sort_values("row_share_%", ascending=False).iloc[0]
+            emp_notes.append(
+                f"Сеньорность с максимальной долей not_employed: `{top['seniority_filled_short']}` ({float(top['row_share_%']):.1f}%)."
+            )
+    if emp_notes:
+        lines.append("")
+        lines.append("Ключевые наблюдения:")
+        lines.extend([f"- {x}" for x in emp_notes])
+    lines.append("")
+    for rel, title in [
+        ("outputs/figures/16_employment_status_overall.png", "Employment status overall"),
+        ("outputs/figures/17_employment_status_by_domain.png", "Employment status by domain (100% stacked)"),
+        ("outputs/figures/18_months_since_last_end_hist.png", "Months since last end-date (not employed)"),
+        ("outputs/figures/19_not_employed_top_last_companies.png", "Not employed: top last companies"),
+        ("outputs/figures/20_not_employed_top_last_titles.png", "Not employed: top last titles"),
+        ("outputs/figures/21_not_employed_history_top_companies.png", "Not employed: historical top companies"),
+    ]:
+        img = _img_md(base_dir, rel, title)
+        if img:
+            lines.append(img)
+    lines.append("")
+    lines.append("Таблицы employment status:")
+    lines.extend(
+        [
+            "- `outputs/tables/employment_status_summary.csv`",
+            "- `outputs/tables/employment_status_by_domain.csv`",
+            "- `outputs/tables/employment_status_by_region.csv`",
+            "- `outputs/tables/employment_status_by_seniority.csv`",
+            "- `outputs/tables/not_employed_top_last_companies.csv`",
+            "- `outputs/tables/not_employed_top_last_titles.csv`",
+            "- `outputs/tables/not_employed_months_since_last_end.csv`",
+            "- `outputs/tables/not_employed_history_top_companies.csv`",
+            "- `outputs/tables/not_employed_history_top_titles.csv`",
+        ]
+    )
+    lines.append("")
+    lines.append("## 8) Not specified research")
     lines.append(diagnostics.to_markdown(index=False))
     lines.append("")
     lines.append("Пустоты уменьшались по fallback-цепочкам:")
@@ -680,10 +864,10 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         ]
     )
     lines.append("")
-    lines.append("## 8) Domain Other")
+    lines.append("## 9) Domain Other")
     lines.append("Исследование домена `Other` вынесено в отдельный отчёт: `REPORT_OTHERS.md`.")
     lines.append("")
-    lines.append("## 9) Appendix")
+    lines.append("## 10) Appendix")
     lines.append("Артефакты:")
     lines.extend(
         [
@@ -693,6 +877,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
             "- Notebook: `notebooks/mis_users_resume_bot.ipynb`",
             "- Geo mapping audit: `outputs/tables/geo_mapping_audit.csv`",
             "- Geo mapping top-50: `outputs/tables/geo_mapping_top50.csv`",
+            "- Company mapping collisions: `outputs/tables/company_mapping_collisions.csv`",
         ]
     )
     lines.append("")
@@ -1039,6 +1224,9 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     # Distributions.
 
     domain_distribution = users_enriched["domain_filled"].fillna("Not specified").astype(str).value_counts().rename_axis("domain_filled").reset_index(name="count")
+    domain_distribution["domain_display_full"] = domain_distribution["domain_filled"].astype(str)
+    domain_distribution["domain_display_short"] = domain_distribution["domain_display_full"].map(lambda x: display_short(x, max_len=60))
+    domain_distribution["domain_display"] = domain_distribution["domain_display_short"]
     role_family_distribution = users_enriched["role_family"].fillna("Other").astype(str).value_counts().rename_axis("role_family").reset_index(name="count")
 
     seniority_order = ["Junior", "Middle", "Senior", "Lead", "C-level", "Not specified"]
@@ -1063,9 +1251,13 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     industry_distribution = distribution_with_display(users_enriched, "industry_filled", "industry_norm", "industry")
 
     domain_distribution_plot = filter_generic(domain_distribution, "domain_filled")
+    domain_distribution_plot = domain_distribution_plot.sort_values("count", ascending=False).reset_index(drop=True)
     region_distribution_plot = filter_generic(region_distribution, "region_norm")
+    region_distribution_plot = region_distribution_plot.sort_values("count", ascending=False).reset_index(drop=True)
     company_distribution_plot = filter_generic(company_distribution, "company_norm")
+    company_distribution_plot = company_distribution_plot.sort_values("count", ascending=False).reset_index(drop=True)
     seniority_distribution_plot = filter_generic(seniority_distribution, "seniority_filled")
+    seniority_distribution_plot = seniority_distribution_plot.sort_values("count", ascending=False).reset_index(drop=True)
 
     industry_subset = industry_distribution[industry_distribution["industry_norm"] != "Not specified"].copy()
 
@@ -1241,6 +1433,277 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     company_ns_job_titles = top_counts(company_ns["current_job_title_filled"], 20, "current_job_title_filled")
     company_ns_regions = top_counts(company_ns["region_norm"], 20, "region_norm")
 
+    # Company mapping collision audit.
+    company_audit_parts: List[pd.DataFrame] = []
+    company_audit_parts.append(
+        users_enriched[["company_filled", "company_norm"]]
+        .rename(columns={"company_filled": "company_raw"})
+        .assign(source="current_filled")
+    )
+    if not jobs_talent.empty:
+        company_audit_parts.append(
+            jobs_talent[["company"]]
+            .rename(columns={"company": "company_raw"})
+            .assign(company_norm=lambda d: d["company_raw"].map(normalize_company), source="jobs_talentCard")
+        )
+    if not jobs_latex.empty:
+        company_audit_parts.append(
+            jobs_latex[["company"]]
+            .rename(columns={"company": "company_raw"})
+            .assign(company_norm=lambda d: d["company_raw"].map(normalize_company), source="jobs_latex")
+        )
+    company_audit = pd.concat(company_audit_parts, ignore_index=True)
+    company_mapping_collisions = build_company_mapping_collisions(company_audit)
+
+    # Employment status (working vs not working) from combined jobs history.
+    analysis_date_candidates: List[pd.Timestamp] = []
+    if "updatedAt" in users.columns and users["updatedAt"].notna().any():
+        analysis_date_candidates.append(users["updatedAt"].dropna().max())
+    if "createdAt" in users.columns and users["createdAt"].notna().any():
+        analysis_date_candidates.append(users["createdAt"].dropna().max())
+    analysis_date = max(analysis_date_candidates) if analysis_date_candidates else pd.Timestamp.utcnow()
+    if isinstance(analysis_date, pd.Timestamp) and analysis_date.tzinfo is not None:
+        analysis_date = analysis_date.tz_convert(None)
+
+    jobs_all_parts: List[pd.DataFrame] = []
+    if not jobs_talent.empty:
+        jt = jobs_talent.copy()
+        jt["source"] = "talentCard"
+        jt = jt.rename(columns={"employment_period": "period_raw", "period_parse_ok": "parse_ok"})
+        jobs_all_parts.append(
+            jt[
+                [
+                    "user_hash",
+                    "source",
+                    "company",
+                    "region",
+                    "job_title",
+                    "period_raw",
+                    "start_date",
+                    "end_date",
+                    "is_present",
+                    "parse_ok",
+                ]
+            ]
+        )
+    if not jobs_latex.empty:
+        jl = jobs_latex.copy()
+        jl["source"] = jl["source"].fillna("latex")
+        jl = jl.rename(columns={"employment_period": "period_raw", "period_parse_ok": "parse_ok"})
+        jobs_all_parts.append(
+            jl[
+                [
+                    "user_hash",
+                    "source",
+                    "company",
+                    "region",
+                    "job_title",
+                    "period_raw",
+                    "start_date",
+                    "end_date",
+                    "is_present",
+                    "parse_ok",
+                ]
+            ]
+        )
+
+    if jobs_all_parts:
+        jobs_long_all = pd.concat(jobs_all_parts, ignore_index=True)
+        jobs_long_all["company_display_full"] = jobs_long_all["company"].fillna("").astype(str).str.strip()
+        jobs_long_all["company_display_short"] = jobs_long_all["company_display_full"].map(lambda x: display_short(x, max_len=60))
+        jobs_long_all["company_norm"] = jobs_long_all["company_display_full"].map(normalize_company)
+        jobs_long_all["region_display_full"] = jobs_long_all["region"].fillna("").astype(str).str.strip()
+        jobs_long_all["region_display_short"] = jobs_long_all["region_display_full"].map(lambda x: display_short(x, max_len=60))
+        jobs_long_all["region_norm"] = jobs_long_all["region_display_full"].map(normalize_region)
+        jobs_long_all["job_title"] = jobs_long_all["job_title"].fillna("").astype(str).str.strip()
+        jobs_long_all["job_title_short"] = jobs_long_all["job_title"].map(lambda x: display_short(x, max_len=60))
+        jobs_long_all["period_raw"] = jobs_long_all["period_raw"].fillna("").astype(str).str.strip()
+        jobs_long_all["parse_ok"] = jobs_long_all["parse_ok"].fillna(False).astype(bool)
+        jobs_long_all["is_present"] = jobs_long_all["is_present"].fillna(False).astype(bool)
+        jobs_long_all = jobs_long_all[
+            jobs_long_all[["company_display_full", "job_title", "period_raw"]].astype(str).apply(lambda r: any(v.strip() for v in r), axis=1)
+        ].copy()
+    else:
+        jobs_long_all = pd.DataFrame(
+            columns=[
+                "user_hash",
+                "source",
+                "company_display_full",
+                "company_display_short",
+                "company_norm",
+                "region_display_full",
+                "region_display_short",
+                "region_norm",
+                "job_title",
+                "job_title_short",
+                "period_raw",
+                "start_date",
+                "end_date",
+                "is_present",
+                "parse_ok",
+            ]
+        )
+
+    status_rows: List[Dict[str, object]] = []
+    if not jobs_long_all.empty:
+        for user_hash, grp in jobs_long_all.groupby("user_hash"):
+            g = grp.copy()
+            employed = bool(g["is_present"].fillna(False).any())
+            valid_closed = g[g["parse_ok"] & g["end_date"].notna()].copy()
+
+            status = "unknown"
+            last_end = pd.NaT
+            months_since_last_end = np.nan
+            last_company_norm = "Not specified"
+            last_company_display_full = "Not specified"
+            last_job_title = "Not specified"
+
+            if employed:
+                status = "employed"
+            elif not valid_closed.empty:
+                last_end = valid_closed["end_date"].max()
+                if pd.notna(last_end) and last_end < analysis_date:
+                    status = "not_employed"
+                    months_since_last_end = months_between(analysis_date, last_end)
+                else:
+                    status = "unknown"
+
+                last_row = valid_closed.sort_values(["end_date", "start_date"], ascending=[False, False]).iloc[0]
+                last_company_norm = clean_text(last_row.get("company_norm", "")) or "Not specified"
+                last_company_display_full = clean_text(last_row.get("company_display_full", "")) or "Not specified"
+                last_job_title = clean_text(last_row.get("job_title", "")) or "Not specified"
+
+            status_rows.append(
+                {
+                    "user_hash": user_hash,
+                    "employment_status": status,
+                    "last_end_date": last_end,
+                    "months_since_last_end": months_since_last_end,
+                    "last_company_norm": last_company_norm,
+                    "last_company_display_full": last_company_display_full,
+                    "last_company_display_short": display_short(last_company_display_full, max_len=60),
+                    "last_job_title": last_job_title,
+                    "last_job_title_short": display_short(last_job_title, max_len=60),
+                }
+            )
+
+    employment_user = users_enriched[["user_hash", "domain_filled", "region_norm", "seniority_filled"]].merge(
+        pd.DataFrame(status_rows), on="user_hash", how="left"
+    )
+    employment_user["employment_status"] = employment_user["employment_status"].fillna("unknown")
+    employment_user["months_since_last_end"] = pd.to_numeric(employment_user["months_since_last_end"], errors="coerce")
+    employment_user["last_company_norm"] = employment_user["last_company_norm"].fillna("Not specified")
+    employment_user["last_company_display_full"] = employment_user["last_company_display_full"].fillna("Not specified")
+    employment_user["last_company_display_short"] = employment_user["last_company_display_short"].fillna("Not specified")
+    employment_user["last_job_title"] = employment_user["last_job_title"].fillna("Not specified")
+    employment_user["last_job_title_short"] = employment_user["last_job_title_short"].fillna("Not specified")
+
+    status_order = ["employed", "not_employed", "unknown"]
+    employment_status_summary = (
+        employment_user["employment_status"]
+        .value_counts()
+        .reindex(status_order, fill_value=0)
+        .rename_axis("employment_status")
+        .reset_index(name="count")
+    )
+    employment_status_summary["share_%"] = (employment_status_summary["count"] / max(len(employment_user), 1) * 100).round(1)
+
+    def cross_status(segment: pd.Series, segment_name: str, top_n: int | None = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        seg = segment.fillna("Not specified").astype(str)
+        if top_n is not None:
+            seg_top = seg[~seg.str.lower().isin(GENERIC_EXCLUDE)].value_counts().head(top_n).index.tolist()
+            seg = seg.where(seg.isin(seg_top), np.nan)
+        base = pd.DataFrame({"segment": seg, "employment_status": employment_user["employment_status"]}).dropna(subset=["segment"]).copy()
+        counts = pd.crosstab(base["segment"], base["employment_status"])
+        for st in status_order:
+            if st not in counts.columns:
+                counts[st] = 0
+        counts = counts[status_order]
+        shares = row_normalize_percent(counts)
+        rows: List[Dict[str, object]] = []
+        for idx in counts.index:
+            row_total = int(counts.loc[idx].sum())
+            for st in status_order:
+                rows.append(
+                    {
+                        segment_name: idx,
+                        f"{segment_name}_short": display_short(idx, max_len=60),
+                        "employment_status": st,
+                        "count": int(counts.loc[idx, st]),
+                        "row_share_%": round(float(shares.loc[idx, st]), 1),
+                        "row_total": row_total,
+                    }
+                )
+        return pd.DataFrame(rows), counts
+
+    employment_status_by_domain, domain_status_counts = cross_status(employment_user["domain_filled"], "domain_filled", top_n=10)
+    employment_status_by_region, region_status_counts = cross_status(employment_user["region_norm"], "region_norm", top_n=15)
+    employment_status_by_seniority, seniority_status_counts = cross_status(employment_user["seniority_filled"], "seniority_filled", top_n=None)
+
+    not_employed_users = employment_user[employment_user["employment_status"] == "not_employed"].copy()
+    not_employed_months_since_last_end = not_employed_users[
+        ["user_hash", "last_end_date", "months_since_last_end", "last_company_norm", "last_job_title"]
+    ].copy()
+
+    not_employed_last_companies = (
+        not_employed_users[~not_employed_users["last_company_norm"].astype(str).str.lower().isin(GENERIC_EXCLUDE)]
+        .groupby("last_company_norm")
+        .agg(
+            count=("user_hash", "count"),
+            company_display_full=("last_company_display_full", lambda x: x.value_counts().index[0] if len(x) else ""),
+        )
+        .reset_index()
+        .rename(columns={"last_company_norm": "company_norm"})
+        .sort_values("count", ascending=False)
+        .head(30)
+    )
+    if not not_employed_last_companies.empty:
+        not_employed_last_companies["share_%"] = (not_employed_last_companies["count"] / not_employed_last_companies["count"].sum() * 100).round(1)
+        not_employed_last_companies["company_display_short"] = not_employed_last_companies["company_display_full"].map(lambda x: display_short(x, max_len=60))
+    else:
+        not_employed_last_companies = pd.DataFrame(columns=["company_norm", "count", "company_display_full", "company_display_short", "share_%"])
+
+    not_employed_last_titles = (
+        not_employed_users[not_employed_users["last_job_title"].astype(str).str.strip().ne("")]
+        .groupby("last_job_title")
+        .size()
+        .rename("count")
+        .reset_index()
+        .sort_values("count", ascending=False)
+        .head(30)
+    )
+    if not not_employed_last_titles.empty:
+        not_employed_last_titles["share_%"] = (not_employed_last_titles["count"] / not_employed_last_titles["count"].sum() * 100).round(1)
+        not_employed_last_titles["job_title_short"] = not_employed_last_titles["last_job_title"].map(lambda x: display_short(x, max_len=60))
+    else:
+        not_employed_last_titles = pd.DataFrame(columns=["last_job_title", "count", "share_%", "job_title_short"])
+
+    not_employed_history_jobs = jobs_long_all[jobs_long_all["user_hash"].isin(set(not_employed_users["user_hash"]))].copy()
+    not_employed_history_companies = (
+        not_employed_history_jobs[~not_employed_history_jobs["company_norm"].astype(str).str.lower().isin(GENERIC_EXCLUDE)]
+        .groupby("company_norm")
+        .agg(
+            count=("user_hash", "count"),
+            company_display_full=("company_display_full", lambda x: x.value_counts().index[0] if len(x) else ""),
+        )
+        .reset_index()
+        .sort_values("count", ascending=False)
+        .head(30)
+    )
+    if not not_employed_history_companies.empty:
+        not_employed_history_companies["share_%"] = (
+            not_employed_history_companies["count"] / not_employed_history_companies["count"].sum() * 100
+        ).round(1)
+        not_employed_history_companies["company_display_short"] = not_employed_history_companies["company_display_full"].map(
+            lambda x: display_short(x, max_len=60)
+        )
+    else:
+        not_employed_history_companies = pd.DataFrame(columns=["company_norm", "count", "company_display_full", "company_display_short", "share_%"])
+
+    not_employed_history_titles = top_counts(not_employed_history_jobs["job_title"], 30, "job_title")
+    if not not_employed_history_titles.empty:
+        not_employed_history_titles["job_title_short"] = not_employed_history_titles["job_title"].map(lambda x: display_short(x, max_len=60))
+
     geo_mapping_audit = (
         users_enriched.groupby(["region_filled", "region_norm"]).size().reset_index(name="count").rename(columns={"region_filled": "raw_region"}).sort_values("count", ascending=False)
     )
@@ -1250,9 +1713,9 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     company_mappings = build_mapping_table(users_enriched["company_filled"], users_enriched["company_norm"], "company")
     industry_mappings = build_mapping_table(users_enriched["industry_filled"], users_enriched["industry_norm"], "industry")
 
-    top_domains_full = domain_distribution_plot[["domain_filled", "count"]].head(10).copy()
-    top_regions_full = region_distribution_plot[["region_display", "region_norm", "count"]].head(15).copy()
-    top_companies_full = company_distribution_plot[["company_display", "company_norm", "count"]].head(15).copy()
+    top_domains_full = domain_distribution_plot[["domain_display_full", "count"]].head(10).copy()
+    top_regions_full = region_distribution_plot[["region_display_full", "count"]].head(15).copy()
+    top_companies_full = company_distribution_plot[["company_display_full", "count"]].head(15).copy()
     top_seniority_full = seniority_distribution_plot[["seniority_filled", "count"]].head(10).copy()
 
     dataset_profile = pd.DataFrame(
@@ -1320,9 +1783,20 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "domain_tools_heatmap": domain_tools_matrix.reset_index().rename(columns={"index": "domain_filled"}),
         "region_mappings": region_mappings,
         "company_mappings": company_mappings,
+        "company_mapping_collisions": company_mapping_collisions,
         "industry_mappings": industry_mappings,
         "geo_mapping_audit": geo_mapping_audit,
         "geo_mapping_top50": geo_mapping_top50,
+        "jobs_long_all": jobs_long_all,
+        "employment_status_summary": employment_status_summary,
+        "employment_status_by_domain": employment_status_by_domain,
+        "employment_status_by_region": employment_status_by_region,
+        "employment_status_by_seniority": employment_status_by_seniority,
+        "not_employed_months_since_last_end": not_employed_months_since_last_end,
+        "not_employed_top_last_companies": not_employed_last_companies,
+        "not_employed_top_last_titles": not_employed_last_titles,
+        "not_employed_history_top_companies": not_employed_history_companies,
+        "not_employed_history_top_titles": not_employed_history_titles,
         "strata_top20": strata_top20,
         "not_specified_deep_dive_summary": not_specified_deep_dive_summary,
         "not_specified_deep_dive_region_not_specified_breakdown": region_ns_breakdown,
@@ -1340,33 +1814,33 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     # Figures.
     plot_barh(
         domain_distribution_plot,
-        "domain_filled",
+        "domain_display_short",
         "count",
         figures_dir / "02_top_domains.png",
         "Top domains (excluding Other/Not specified)",
         top_n=10,
-        max_label_len=42,
-        wrap_width=27,
+        max_label_len=34,
+        wrap_width=22,
     )
     plot_barh(
-        region_distribution_plot.rename(columns={"region_display": "region"}),
+        region_distribution_plot.rename(columns={"region_display_short": "region"}),
         "region",
         "count",
         figures_dir / "03_top_regions.png",
         "Top regions (excluding Other/Not specified)",
         top_n=15,
-        max_label_len=44,
-        wrap_width=28,
+        max_label_len=34,
+        wrap_width=22,
     )
     plot_barh(
-        company_distribution_plot.rename(columns={"company_display": "company"}),
+        company_distribution_plot.rename(columns={"company_display_short": "company"}),
         "company",
         "count",
         figures_dir / "04_top_companies.png",
         "Top companies (excluding Other/Not specified)",
         top_n=15,
-        max_label_len=44,
-        wrap_width=28,
+        max_label_len=34,
+        wrap_width=22,
     )
     if not industry_subset.empty:
         plot_barh(
@@ -1376,8 +1850,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             figures_dir / "05_top_industries_subset.png",
             "Top industries (subset with non-empty industry)",
             top_n=15,
-            max_label_len=44,
-            wrap_width=28,
+            max_label_len=34,
+            wrap_width=22,
         )
 
     if not domain_region_share.empty:
@@ -1420,8 +1894,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         figures_dir / "10_top_tools.png",
         "Top tools / stack",
         top_n=20,
-        max_label_len=40,
-        wrap_width=26,
+        max_label_len=34,
+        wrap_width=22,
     )
     plot_barh(
         skills_top.rename(columns={"token_display": "skill"}),
@@ -1430,8 +1904,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         figures_dir / "11_top_skills.png",
         "Top skills",
         top_n=20,
-        max_label_len=40,
-        wrap_width=26,
+        max_label_len=34,
+        wrap_width=22,
     )
 
     if not domain_tools_matrix.empty:
@@ -1458,9 +1932,69 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             figures_dir / "15_strata_top20.png",
             "Top-20 strata: domain x seniority x region",
             top_n=20,
-            max_label_len=58,
-            wrap_width=35,
+            max_label_len=36,
+            wrap_width=24,
         )
+
+    plot_bar(
+        employment_status_summary,
+        "employment_status",
+        "count",
+        figures_dir / "16_employment_status_overall.png",
+        "Employment status overall",
+        max_label_len=20,
+    )
+
+    if not domain_status_counts.empty:
+        plot_stacked_100(
+            domain_status_counts,
+            figures_dir / "17_employment_status_by_domain.png",
+            "Employment status by domain (100% stacked)",
+            "Domain",
+        )
+
+    plot_hist(
+        not_employed_months_since_last_end["months_since_last_end"]
+        if "months_since_last_end" in not_employed_months_since_last_end.columns
+        else pd.Series(dtype=float),
+        figures_dir / "18_months_since_last_end_hist.png",
+        "Months since last closed job (not employed)",
+        "Months",
+        bins=16,
+    )
+
+    plot_barh(
+        not_employed_last_companies.rename(columns={"company_display_short": "company"}),
+        "company",
+        "count",
+        figures_dir / "19_not_employed_top_last_companies.png",
+        "Not employed: top last companies",
+        top_n=20,
+        max_label_len=34,
+        wrap_width=22,
+    )
+
+    plot_barh(
+        not_employed_last_titles.rename(columns={"job_title_short": "title"}),
+        "title",
+        "count",
+        figures_dir / "20_not_employed_top_last_titles.png",
+        "Not employed: top last titles",
+        top_n=20,
+        max_label_len=34,
+        wrap_width=22,
+    )
+
+    plot_barh(
+        not_employed_history_companies.rename(columns={"company_display_short": "company"}),
+        "company",
+        "count",
+        figures_dir / "21_not_employed_history_top_companies.png",
+        "Not employed history: top companies",
+        top_n=20,
+        max_label_len=34,
+        wrap_width=22,
+    )
 
     # Separate report for domain=Other.
     other_subset = users_enriched[users_enriched["domain_filled"].astype(str).eq("Other")].copy()
@@ -1559,8 +2093,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         others_figures_dir / "01_other_titles_history_top30.png",
         "Other domain: top titles across all jobs history",
         top_n=30,
-        max_label_len=46,
-        wrap_width=30,
+        max_label_len=34,
+        wrap_width=22,
     )
     plot_barh(
         other_companies_all,
@@ -1569,8 +2103,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         others_figures_dir / "02_other_companies_history_top30.png",
         "Other domain: top companies across all jobs history",
         top_n=30,
-        max_label_len=46,
-        wrap_width=30,
+        max_label_len=34,
+        wrap_width=22,
     )
     plot_barh(
         other_tools_top,
@@ -1579,8 +2113,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         others_figures_dir / "03_other_tools_top30.png",
         "Other domain: top tools",
         top_n=30,
-        max_label_len=40,
-        wrap_width=28,
+        max_label_len=34,
+        wrap_width=22,
     )
     plot_barh(
         other_bucket_dist,
@@ -1589,8 +2123,8 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         others_figures_dir / "04_other_bucket_distribution.png",
         "Other domain: rule-based bucket distribution",
         top_n=20,
-        max_label_len=40,
-        wrap_width=28,
+        max_label_len=34,
+        wrap_width=22,
     )
 
     build_others_report(

@@ -1,0 +1,5 @@
+group,total_users,with_cvAnalysisResult_nonnull,with_positions3,with_selected_mapped,share_mapped_%
+all,521,521,521,521,100.0
+employed,356,356,356,356,100.0
+not_employed,155,155,155,155,100.0
+exclude_known_companies,497,497,497,497,100.0

@@ -109,7 +109,34 @@ CV language: `ru/en`.
 - `outputs/tables/cv_language_coverage.csv`
 - `outputs/tables/language_audit.csv`
 
-## 7) Employment status (working vs not working)
+## 7) Position choice (rank 1/2/3)
+`rank` — номер выбранной пользователем позиции в `cvAnalysisResult.positioning` (1/2/3), сопоставленный с `selectedPosition`.
+
+| group                   |   total_users |   with_cvAnalysisResult_nonnull |   with_positions3 |   with_selected_mapped |   share_mapped_% |
+|:------------------------|--------------:|--------------------------------:|------------------:|-----------------------:|-----------------:|
+| all                     |           521 |                             521 |               521 |                    521 |              100 |
+| employed                |           356 |                             356 |               356 |                    356 |              100 |
+| not_employed            |           155 |                             155 |               155 |                    155 |              100 |
+| exclude_known_companies |           497 |                             497 |               497 |                    497 |              100 |
+
+Группа `exclude_known_companies`: `employed + not_employed`, исключены компании:
+- AVO, EPAM, avo в банке, avo интегратор, Сбер
+
+![Position choice rank - all](outputs/figures/position_choice_rank_all.png)
+![Position choice rank - employed](outputs/figures/position_choice_rank_employed.png)
+![Position choice rank - not_employed](outputs/figures/position_choice_rank_not_employed.png)
+![Position choice rank - exclude_known_companies](outputs/figures/position_choice_rank_exclude_known_companies.png)
+
+Таблицы position choice:
+- `outputs/tables/position_choice_coverage.csv`
+- `outputs/tables/position_choice_plot_status.csv`
+- `outputs/tables/position_choice_excluded_companies.csv`
+- `outputs/tables/position_choice_rank_distribution_all.csv`
+- `outputs/tables/position_choice_rank_distribution_employed.csv`
+- `outputs/tables/position_choice_rank_distribution_not_employed.csv`
+- `outputs/tables/position_choice_rank_distribution_exclude_known_companies.csv`
+
+## 8) Employment status (working vs not working)
 | employment_status   |   count |   share_% |
 |:--------------------|--------:|----------:|
 | employed            |     356 |      68.3 |
@@ -156,7 +183,7 @@ Links:
 - `outputs/tables/employment_unknown_before_after.csv`
 - `outputs/tables/employment_unknown_reason_shift.csv`
 
-## 8) Not specified research
+## 9) Not specified research
 | field     |   total_missing_count |   share_missing_% |   share_filled_by_fallback | source_breakdown                                                                            |
 |:----------|----------------------:|------------------:|---------------------------:|:--------------------------------------------------------------------------------------------|
 | domain    |                     0 |               0   |                       97.9 | inferred:97.9%; talentCard:2.1%                                                             |
@@ -180,10 +207,10 @@ Links:
 - `outputs/tables/not_specified_deep_dive_company_not_specified_job_titles.csv`
 - `outputs/tables/not_specified_deep_dive_company_not_specified_region.csv`
 
-## 9) Domain Other
+## 10) Domain Other
 Исследование домена `Other` вынесено в отдельный отчёт: `REPORT_OTHERS.md`.
 
-## 10) Appendix
+## 11) Appendix
 Артефакты:
 - Figures: `outputs/figures/*.png`
 - Tables: `outputs/tables/*.csv`

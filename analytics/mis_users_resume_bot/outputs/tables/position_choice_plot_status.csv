@@ -1,0 +1,5 @@
+group,sample_n,mapped_n,unique_ranks,figure_generated,note,figure
+all,521,521,3,True,,outputs/figures/position_choice_rank_all.png
+employed,356,356,3,True,,outputs/figures/position_choice_rank_employed.png
+not_employed,155,155,3,True,,outputs/figures/position_choice_rank_not_employed.png
+exclude_known_companies,497,497,3,True,,outputs/figures/position_choice_rank_exclude_known_companies.png

@@ -113,6 +113,88 @@ def infer_lang_from_text(value: object) -> str:
     return "en"
 
 
+def detect_cv_analysis_col(columns: List[str]) -> str | None:
+    if "cvAnalysisResult" in columns:
+        return "cvAnalysisResult"
+    for col in columns:
+        if col.lower() == "cvanalysisresult":
+            return col
+    for col in columns:
+        if "cvanalysisresult" in col.lower():
+            return col
+    return None
+
+
+def parse_cv_analysis_result_positions(cv_analysis_result_str: object) -> List[str]:
+    raw = clean_text(cv_analysis_result_str)
+    if not raw:
+        return []
+    try:
+        payload = json.loads(raw)
+    except Exception:
+        return []
+    if not isinstance(payload, dict):
+        return []
+    positioning = payload.get("positioning")
+    if not isinstance(positioning, list):
+        return []
+
+    out: List[str] = []
+    for item in positioning[:3]:
+        if not isinstance(item, dict):
+            continue
+        pos = clean_text(item.get("position", ""))
+        pos = re.sub(r"\s+", " ", pos).strip()
+        if pos:
+            out.append(pos)
+    if len(out) != 3:
+        return []
+    return out
+
+
+def normalize_position_label(value: object) -> str:
+    s = clean_text(value).lower()
+    if not s:
+        return ""
+    s = s.replace("ё", "е")
+    s = re.sub(r"\([^)]*\)", " ", s)
+    s = s.replace("—", "-").replace("–", "-")
+    s = re.sub(r"\s*-\s*", " - ", s)
+    s = re.sub(r"\s*/\s*", " / ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"[.,;:!?]+$", "", s).strip()
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def map_selected_to_rank(selected_position: object, positions_list: List[str]) -> Tuple[int | None, str]:
+    if not isinstance(positions_list, list) or len(positions_list) != 3:
+        return None, "positions_invalid"
+
+    key_map: Dict[str, int] = {}
+    for idx, pos in enumerate(positions_list, start=1):
+        key = normalize_position_label(pos)
+        if key:
+            key_map[key] = idx
+    if len(key_map) == 0:
+        return None, "positions_empty"
+
+    selected_key = normalize_position_label(selected_position)
+    if not selected_key:
+        return None, "selected_empty"
+    if selected_key in key_map:
+        return key_map[selected_key], "exact"
+
+    candidates: List[int] = []
+    for key, rank in key_map.items():
+        if selected_key in key or key in selected_key:
+            candidates.append(rank)
+    candidates = sorted(set(candidates))
+    if len(candidates) == 1:
+        return candidates[0], "substring_unique"
+    return None, "no_match"
+
+
 def limit_categories(series: pd.Series, max_n: int, other_label: str = "Other") -> pd.Series:
     values = series.fillna("Not specified").astype(str)
     top = values.value_counts().head(max_n - 1 if values.nunique() > max_n else max_n).index
@@ -1041,6 +1123,46 @@ def plot_bar(
     return True
 
 
+def plot_rank_distribution(
+    df_rank: pd.DataFrame,
+    out_path: Path,
+    title: str,
+    min_n: int = 5,
+) -> bool:
+    if df_rank.empty:
+        return False
+    data = df_rank.copy()
+    data["rank"] = pd.to_numeric(data["rank"], errors="coerce")
+    data = data[data["rank"].isin([1, 2, 3])].sort_values("rank")
+    total = int(data["count"].sum())
+    non_zero_ranks = int((data["count"] > 0).sum())
+    if total < min_n or non_zero_ranks < 2:
+        return False
+
+    labels = data["rank"].astype(int).astype(str).tolist()
+    values = data["count"].astype(int).tolist()
+    fig, ax = plt.subplots(figsize=(7.8, 4.6))
+    colors = sns.color_palette("viridis", n_colors=3)
+    bars = ax.bar(labels, values, color=colors[: len(labels)], width=0.62)
+    for bar, val in zip(bars, values):
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + max(values) * 0.02,
+            f"{val}",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+        )
+    ax.set_title(title)
+    ax.set_xlabel("Selected rank in positioning (1/2/3)")
+    ax.set_ylabel("Users")
+    ax.grid(axis="y", alpha=0.2)
+    fig.tight_layout()
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+    return True
+
+
 def plot_hist(
     series: pd.Series,
     out_path: Path,
@@ -1136,6 +1258,9 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     unknown_crosstab = tables.get("employment_unknown_crosstab_sources", pd.DataFrame())
     unknown_before_after = tables.get("employment_unknown_before_after", pd.DataFrame())
     period_reparse_stats = tables.get("period_reparse_stats", pd.DataFrame())
+    position_choice_coverage = tables.get("position_choice_coverage", pd.DataFrame())
+    position_choice_plot_status = tables.get("position_choice_plot_status", pd.DataFrame())
+    position_choice_excluded = tables.get("position_choice_excluded_companies", pd.DataFrame())
     cv_language_coverage = tables.get("cv_language_coverage", pd.DataFrame())
     cv_language_dist = tables.get("cv_generation_language_distribution", pd.DataFrame())
 
@@ -1315,7 +1440,38 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         ]
     )
     lines.append("")
-    lines.append("## 7) Employment status (working vs not working)")
+    lines.append("## 7) Position choice (rank 1/2/3)")
+    lines.append("`rank` — номер выбранной пользователем позиции в `cvAnalysisResult.positioning` (1/2/3), сопоставленный с `selectedPosition`.")
+    if not position_choice_coverage.empty:
+        lines.append("")
+        lines.append(position_choice_coverage.to_markdown(index=False))
+    excluded_list = position_choice_excluded.get("excluded_company_norm", pd.Series(dtype=object)).astype(str).tolist()
+    lines.append("")
+    lines.append("Группа `exclude_known_companies`: `employed + not_employed`, исключены компании:")
+    lines.append(f"- {', '.join(excluded_list) if excluded_list else '(none)'}")
+    lines.append("")
+    for group_name in ["all", "employed", "not_employed", "exclude_known_companies"]:
+        rel = f"outputs/figures/position_choice_rank_{group_name}.png"
+        img = _img_md(base_dir, rel, f"Position choice rank - {group_name}")
+        if img:
+            lines.append(img)
+        else:
+            lines.append(f"- `{group_name}`: insufficient variation")
+    lines.append("")
+    lines.append("Таблицы position choice:")
+    lines.extend(
+        [
+            "- `outputs/tables/position_choice_coverage.csv`",
+            "- `outputs/tables/position_choice_plot_status.csv`",
+            "- `outputs/tables/position_choice_excluded_companies.csv`",
+            "- `outputs/tables/position_choice_rank_distribution_all.csv`",
+            "- `outputs/tables/position_choice_rank_distribution_employed.csv`",
+            "- `outputs/tables/position_choice_rank_distribution_not_employed.csv`",
+            "- `outputs/tables/position_choice_rank_distribution_exclude_known_companies.csv`",
+        ]
+    )
+    lines.append("")
+    lines.append("## 8) Employment status (working vs not working)")
     if not employment_summary.empty:
         lines.append(employment_summary.to_markdown(index=False))
     emp_notes: List[str] = []
@@ -1401,7 +1557,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     lines.append("- `outputs/tables/employment_unknown_before_after.csv`")
     lines.append("- `outputs/tables/employment_unknown_reason_shift.csv`")
     lines.append("")
-    lines.append("## 8) Not specified research")
+    lines.append("## 9) Not specified research")
     lines.append(diagnostics.to_markdown(index=False))
     lines.append("")
     lines.append("Пустоты уменьшались по fallback-цепочкам:")
@@ -1423,10 +1579,10 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
         ]
     )
     lines.append("")
-    lines.append("## 9) Domain Other")
+    lines.append("## 10) Domain Other")
     lines.append("Исследование домена `Other` вынесено в отдельный отчёт: `REPORT_OTHERS.md`.")
     lines.append("")
-    lines.append("## 10) Appendix")
+    lines.append("## 11) Appendix")
     lines.append("Артефакты:")
     lines.extend(
         [
@@ -1804,6 +1960,22 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     users_enriched["tools_list"] = merged_skills.map(lambda x: x[1])
     users_enriched["skills_count"] = users_enriched["skills_list"].map(len)
     users_enriched["tools_count"] = users_enriched["tools_list"].map(len)
+
+    cv_analysis_col = detect_cv_analysis_col(list(users_enriched.columns))
+    if cv_analysis_col is None:
+        users_enriched["_cv_analysis_raw"] = ""
+    else:
+        users_enriched["_cv_analysis_raw"] = users_enriched[cv_analysis_col]
+    users_enriched["cv_analysis_positions"] = users_enriched["_cv_analysis_raw"].map(parse_cv_analysis_result_positions)
+    users_enriched["cv_analysis_positions_ok"] = users_enriched["cv_analysis_positions"].map(lambda x: isinstance(x, list) and len(x) == 3)
+    users_enriched["_selected_rank_tuple"] = users_enriched.apply(
+        lambda r: map_selected_to_rank(r.get("selectedPosition", ""), r.get("cv_analysis_positions", [])),
+        axis=1,
+    )
+    users_enriched["selected_rank"] = users_enriched["_selected_rank_tuple"].map(lambda x: x[0] if isinstance(x, tuple) else None)
+    users_enriched["selected_rank_match_method"] = users_enriched["_selected_rank_tuple"].map(lambda x: x[1] if isinstance(x, tuple) else "no_match")
+    users_enriched["selected_rank_ok"] = users_enriched["selected_rank"].isin([1, 2, 3])
+    users_enriched["cvAnalysisResult_nonnull"] = users_enriched["_cv_analysis_raw"].map(non_empty)
 
     # Core coverage and validation.
     total_users = len(users_enriched)
@@ -2299,6 +2471,127 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         }
     )
 
+    # Position choice rank from cvAnalysisResult.positioning vs selectedPosition.
+    excluded_companies_raw = [
+        "Сбер",
+        "Сбербанк",
+        "Sberbank",
+        "EPAM",
+        "EPAM Systems",
+        "AVO",
+        "AVO (в банке)",
+        "AVO (интегратор)",
+    ]
+    excluded_companies_norm = sorted(
+        {
+            normalize_company(x)
+            for x in excluded_companies_raw
+            if normalize_company(x) not in {"Not specified", "Other", ""}
+        }
+    )
+    position_base = users_enriched[
+        [
+            "user_hash",
+            "company_norm",
+            "cvAnalysisResult_nonnull",
+            "cv_analysis_positions_ok",
+            "selected_rank",
+            "selected_rank_ok",
+        ]
+    ].copy()
+    position_base = position_base.merge(
+        employment_user[["user_hash", "employment_status"]],
+        on="user_hash",
+        how="left",
+    )
+    position_base["employment_status"] = position_base["employment_status"].fillna("unknown")
+    position_base["company_norm"] = position_base["company_norm"].fillna("Not specified").astype(str)
+    position_base["cvAnalysisResult_nonnull"] = position_base["cvAnalysisResult_nonnull"].fillna(False).astype(bool)
+    position_base["cv_analysis_positions_ok"] = position_base["cv_analysis_positions_ok"].fillna(False).astype(bool)
+    position_base["selected_rank_ok"] = position_base["selected_rank_ok"].fillna(False).astype(bool)
+    position_base["selected_rank"] = pd.to_numeric(position_base["selected_rank"], errors="coerce")
+
+    group_all = position_base.copy()
+    group_employed = position_base[position_base["employment_status"] == "employed"].copy()
+    group_not_employed = position_base[position_base["employment_status"] == "not_employed"].copy()
+    group_work = position_base[position_base["employment_status"].isin(["employed", "not_employed"])].copy()
+    group_excl = group_work[
+        ~group_work["company_norm"].isin(excluded_companies_norm)
+        & ~group_work["company_norm"].str.lower().isin({"not specified", "other", "unknown"})
+    ].copy()
+
+    coverage_rows: List[Dict[str, object]] = []
+
+    def add_coverage_row(name: str, frame: pd.DataFrame) -> None:
+        total = int(len(frame))
+        mapped = int(frame["selected_rank_ok"].sum()) if total else 0
+        coverage_rows.append(
+            {
+                "group": name,
+                "total_users": total,
+                "with_cvAnalysisResult_nonnull": int(frame["cvAnalysisResult_nonnull"].sum()) if total else 0,
+                "with_positions3": int(frame["cv_analysis_positions_ok"].sum()) if total else 0,
+                "with_selected_mapped": mapped,
+                "share_mapped_%": round(mapped / total * 100, 1) if total else 0.0,
+            }
+        )
+
+    add_coverage_row("all", group_all)
+    add_coverage_row("employed", group_employed)
+    add_coverage_row("not_employed", group_not_employed)
+    add_coverage_row("exclude_known_companies", group_excl)
+    position_choice_coverage = pd.DataFrame(coverage_rows)
+
+    dist_groups = {
+        "all": group_all,
+        "employed": group_employed,
+        "not_employed": group_not_employed,
+        "exclude_known_companies": group_excl,
+    }
+    position_distributions: Dict[str, pd.DataFrame] = {}
+    plot_status_rows: List[Dict[str, object]] = []
+    for name, frame in dist_groups.items():
+        mapped = frame[frame["selected_rank_ok"]].copy()
+        rank_table = (
+            mapped["selected_rank"]
+            .value_counts()
+            .reindex([1, 2, 3], fill_value=0)
+            .rename_axis("rank")
+            .reset_index(name="count")
+        )
+        rank_table["rank"] = rank_table["rank"].astype(int)
+        rank_table["share_%"] = (
+            rank_table["count"] / max(int(rank_table["count"].sum()), 1) * 100
+        ).round(1)
+        rank_table["sample_n"] = int(len(frame))
+        rank_table["mapped_n"] = int(len(mapped))
+        position_distributions[name] = rank_table
+
+        out_path = figures_dir / f"position_choice_rank_{name}.png"
+        generated = plot_rank_distribution(
+            rank_table[["rank", "count", "share_%"]],
+            out_path,
+            f"Selected recommended position rank (1/2/3) - {name} (N={len(frame)}, mapped={len(mapped)})",
+            min_n=5,
+        )
+        unique_ranks = int((rank_table["count"] > 0).sum())
+        note = "" if generated else "insufficient variation"
+        plot_status_rows.append(
+            {
+                "group": name,
+                "sample_n": int(len(frame)),
+                "mapped_n": int(len(mapped)),
+                "unique_ranks": unique_ranks,
+                "figure_generated": bool(generated),
+                "note": note,
+                "figure": f"outputs/figures/position_choice_rank_{name}.png",
+            }
+        )
+    position_choice_plot_status = pd.DataFrame(plot_status_rows)
+    position_choice_excluded_companies = pd.DataFrame(
+        {"excluded_company_norm": excluded_companies_norm}
+    )
+
     geo_mapping_audit = (
         users_enriched.groupby(["region_filled", "region_norm"]).size().reset_index(name="count").rename(columns={"region_filled": "raw_region"}).sort_values("count", ascending=False)
     )
@@ -2409,6 +2702,13 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "employment_unknown_before_after": employment_unknown_before_after,
         "employment_unknown_reason_shift": employment_unknown_reason_shift,
         "period_reparse_stats": period_reparse_stats,
+        "position_choice_coverage": position_choice_coverage,
+        "position_choice_plot_status": position_choice_plot_status,
+        "position_choice_excluded_companies": position_choice_excluded_companies,
+        "position_choice_rank_distribution_all": position_distributions["all"],
+        "position_choice_rank_distribution_employed": position_distributions["employed"],
+        "position_choice_rank_distribution_not_employed": position_distributions["not_employed"],
+        "position_choice_rank_distribution_exclude_known_companies": position_distributions["exclude_known_companies"],
         "strata_top20": strata_top20,
         "not_specified_deep_dive_summary": not_specified_deep_dive_summary,
         "not_specified_deep_dive_region_not_specified_breakdown": region_ns_breakdown,

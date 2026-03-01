@@ -1,6 +1,17 @@
-excluded_company_norm
-AVO
-EPAM
-avo в банке
-avo интегратор
-Сбер
+company_norm,count,share_%,top_raw_examples
+Сбер,7,23.3,Сбер | Sberbank | СБЕР
+EPAM,4,13.3,EPAM Systems | EPAM
+Яндекс,3,10.0,Yandex | Яндекс
+Avito,2,6.7,Авито | Avito
+PWC,2,6.7,PwC
+Газпромбанк,2,6.7,"Газпромбанк, ОАО"
+VK,1,3.3,VK
+ernst and young,1,3.3,Ernst \& Young
+luxoft,1,3.3,Luxoft
+sbertech,1,3.3,JSC SberTech
+wildberries,1,3.3,Wildberries
+БАНК,1,3.3,Банк
+ВТБ,1,3.3,Банк ВТБ (ПАО)
+Газпром,1,3.3,ПАО «Газпром»
+Лаборатория Касперского,1,3.3,Лаборатория Касперского
+Т1,1,3.3,Т1

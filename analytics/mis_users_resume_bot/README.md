@@ -117,10 +117,11 @@ CV language: `ru/en`.
 | all                     |           521 |                             521 |               521 |                    521 |              100 |
 | employed                |           356 |                             356 |               356 |                    356 |              100 |
 | not_employed            |           155 |                             155 |               155 |                    155 |              100 |
-| exclude_known_companies |           497 |                             497 |               497 |                    497 |              100 |
+| exclude_known_companies |           478 |                             478 |               478 |                    478 |              100 |
 
-Группа `exclude_known_companies`: `employed + not_employed`, исключены компании:
-- AVO, EPAM, avo в банке, avo интегратор, Сбер
+Excluded known companies list: `src/known_companies.py`
+Top excluded (by count):
+- Сбер (7), EPAM (4), Яндекс (3), Avito (2), PWC (2), Газпромбанк (2), VK (1), ernst and young (1), luxoft (1), sbertech (1), wildberries (1), БАНК (1), ВТБ (1), Газпром (1), Лаборатория Касперского (1)
 
 ![Position choice rank - all](outputs/figures/position_choice_rank_all.png)
 ![Position choice rank - employed](outputs/figures/position_choice_rank_employed.png)
@@ -131,6 +132,7 @@ CV language: `ru/en`.
 - `outputs/tables/position_choice_coverage.csv`
 - `outputs/tables/position_choice_plot_status.csv`
 - `outputs/tables/position_choice_excluded_companies.csv`
+- `outputs/tables/position_choice_excluded_known_list.csv`
 - `outputs/tables/position_choice_rank_distribution_all.csv`
 - `outputs/tables/position_choice_rank_distribution_employed.csv`
 - `outputs/tables/position_choice_rank_distribution_not_employed.csv`

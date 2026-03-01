@@ -452,6 +452,13 @@ COMPANY_SYNONYMS: Dict[str, set[str]] = {
         "it one",
         "it_one",
     },
+    "AVO": {
+        "avo",
+        "avo в банке",
+        "avo интегратор",
+        "avo bank",
+        "avo integrator",
+    },
     "Metro Cash&Carry": {
         "metro cash and carry",
         "метро cash and carry",

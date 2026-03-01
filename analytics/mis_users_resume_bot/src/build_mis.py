@@ -39,6 +39,11 @@ from feature_builders import (
     summarize_user_jobs,
 )
 from latex_parser import clean_text, has_latex_cv, parse_cv_latex, parse_period
+from known_companies import (
+    KNOWN_COMPANIES_CANONICAL,
+    KNOWN_COMPANY_ALIASES,
+    build_known_companies_norm,
+)
 
 
 sns.set_theme(style="whitegrid", context="talk")
@@ -1261,6 +1266,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     position_choice_coverage = tables.get("position_choice_coverage", pd.DataFrame())
     position_choice_plot_status = tables.get("position_choice_plot_status", pd.DataFrame())
     position_choice_excluded = tables.get("position_choice_excluded_companies", pd.DataFrame())
+    position_choice_excluded_known = tables.get("position_choice_excluded_known_list", pd.DataFrame())
     cv_language_coverage = tables.get("cv_language_coverage", pd.DataFrame())
     cv_language_dist = tables.get("cv_generation_language_distribution", pd.DataFrame())
 
@@ -1445,10 +1451,16 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
     if not position_choice_coverage.empty:
         lines.append("")
         lines.append(position_choice_coverage.to_markdown(index=False))
-    excluded_list = position_choice_excluded.get("excluded_company_norm", pd.Series(dtype=object)).astype(str).tolist()
     lines.append("")
-    lines.append("Группа `exclude_known_companies`: `employed + not_employed`, исключены компании:")
-    lines.append(f"- {', '.join(excluded_list) if excluded_list else '(none)'}")
+    lines.append("Excluded known companies list: `src/known_companies.py`")
+    if not position_choice_excluded.empty:
+        top_excl = position_choice_excluded.head(15).copy()
+        top_list = [f"{row['company_norm']} ({int(row['count'])})" for _, row in top_excl.iterrows()]
+        lines.append("Top excluded (by count):")
+        lines.append(f"- {', '.join(top_list)}")
+    else:
+        lines.append("Top excluded (by count):")
+        lines.append("- (none)")
     lines.append("")
     for group_name in ["all", "employed", "not_employed", "exclude_known_companies"]:
         rel = f"outputs/figures/position_choice_rank_{group_name}.png"
@@ -1464,6 +1476,7 @@ def build_readme(base_dir: Path, tables: Dict[str, pd.DataFrame]) -> None:
             "- `outputs/tables/position_choice_coverage.csv`",
             "- `outputs/tables/position_choice_plot_status.csv`",
             "- `outputs/tables/position_choice_excluded_companies.csv`",
+            "- `outputs/tables/position_choice_excluded_known_list.csv`",
             "- `outputs/tables/position_choice_rank_distribution_all.csv`",
             "- `outputs/tables/position_choice_rank_distribution_employed.csv`",
             "- `outputs/tables/position_choice_rank_distribution_not_employed.csv`",
@@ -2472,27 +2485,36 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     )
 
     # Position choice rank from cvAnalysisResult.positioning vs selectedPosition.
-    excluded_companies_raw = [
-        "Сбер",
-        "Сбербанк",
-        "Sberbank",
-        "EPAM",
-        "EPAM Systems",
-        "AVO",
-        "AVO (в банке)",
-        "AVO (интегратор)",
-    ]
-    excluded_companies_norm = sorted(
-        {
-            normalize_company(x)
-            for x in excluded_companies_raw
-            if normalize_company(x) not in {"Not specified", "Other", ""}
-        }
-    )
+    excluded_companies_norm = sorted(build_known_companies_norm(normalize_company))
+    if normalize_company("PwC") not in excluded_companies_norm:
+        raise ValueError("Known companies assert failed: PwC is not in excluded_norm")
+    if normalize_company("Сбербанк") not in excluded_companies_norm:
+        raise ValueError("Known companies assert failed: Сбер/Сбербанк is not in excluded_norm")
+
+    excluded_known_rows: List[Dict[str, object]] = []
+    for canonical in KNOWN_COMPANIES_CANONICAL:
+        variants = [canonical] + KNOWN_COMPANY_ALIASES.get(canonical, [])
+        norms = sorted(
+            {
+                normalize_company(v)
+                for v in variants
+                if normalize_company(v) not in {"Not specified", "Other", ""}
+            }
+        )
+        excluded_known_rows.append(
+            {
+                "canonical": canonical,
+                "variants_count": len(variants),
+                "пример_norm": normalize_company(canonical) if normalize_company(canonical) not in {"Not specified", "Other", ""} else (norms[0] if norms else ""),
+            }
+        )
+    position_choice_excluded_known_list = pd.DataFrame(excluded_known_rows)
+
     position_base = users_enriched[
         [
             "user_hash",
             "company_norm",
+            "company_filled",
             "cvAnalysisResult_nonnull",
             "cv_analysis_positions_ok",
             "selected_rank",
@@ -2500,12 +2522,32 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         ]
     ].copy()
     position_base = position_base.merge(
-        employment_user[["user_hash", "employment_status"]],
+        employment_user[
+            [
+                "user_hash",
+                "employment_status",
+                "last_company_norm",
+                "last_company_display_full",
+            ]
+        ],
         on="user_hash",
         how="left",
     )
     position_base["employment_status"] = position_base["employment_status"].fillna("unknown")
     position_base["company_norm"] = position_base["company_norm"].fillna("Not specified").astype(str)
+    position_base["company_filled"] = position_base["company_filled"].fillna("Not specified").astype(str)
+    position_base["last_company_norm"] = position_base["last_company_norm"].fillna("Not specified").astype(str)
+    position_base["last_company_display_full"] = position_base["last_company_display_full"].fillna("Not specified").astype(str)
+    position_base["company_norm_effective"] = np.where(
+        position_base["employment_status"].eq("not_employed"),
+        position_base["last_company_norm"],
+        position_base["company_norm"],
+    )
+    position_base["company_raw_effective"] = np.where(
+        position_base["employment_status"].eq("not_employed"),
+        position_base["last_company_display_full"],
+        position_base["company_filled"],
+    )
     position_base["cvAnalysisResult_nonnull"] = position_base["cvAnalysisResult_nonnull"].fillna(False).astype(bool)
     position_base["cv_analysis_positions_ok"] = position_base["cv_analysis_positions_ok"].fillna(False).astype(bool)
     position_base["selected_rank_ok"] = position_base["selected_rank_ok"].fillna(False).astype(bool)
@@ -2516,9 +2558,35 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
     group_not_employed = position_base[position_base["employment_status"] == "not_employed"].copy()
     group_work = position_base[position_base["employment_status"].isin(["employed", "not_employed"])].copy()
     group_excl = group_work[
-        ~group_work["company_norm"].isin(excluded_companies_norm)
-        & ~group_work["company_norm"].str.lower().isin({"not specified", "other", "unknown"})
+        ~group_work["company_norm_effective"].isin(excluded_companies_norm)
+        & ~group_work["company_norm_effective"].fillna("").astype(str).str.lower().isin({"not specified", "other", "unknown", ""})
     ].copy()
+
+    excluded_hits = group_work[group_work["company_norm_effective"].isin(excluded_companies_norm)].copy()
+    if not excluded_hits.empty:
+        excluded_counts = (
+            excluded_hits.groupby("company_norm_effective")
+            .agg(
+                count=("user_hash", "count"),
+                top_raw_examples=(
+                    "company_raw_effective",
+                    lambda x: " | ".join(
+                        [
+                            display_short(v, max_len=48)
+                            for v in pd.Series(x).fillna("").astype(str).str.strip().replace("", np.nan).dropna().value_counts().head(3).index.tolist()
+                        ]
+                    ),
+                ),
+            )
+            .reset_index()
+            .rename(columns={"company_norm_effective": "company_norm"})
+            .sort_values("count", ascending=False)
+        )
+        total_excl = max(int(excluded_counts["count"].sum()), 1)
+        excluded_counts["share_%"] = (excluded_counts["count"] / total_excl * 100).round(1)
+        position_choice_excluded_companies = excluded_counts[["company_norm", "count", "share_%", "top_raw_examples"]]
+    else:
+        position_choice_excluded_companies = pd.DataFrame(columns=["company_norm", "count", "share_%", "top_raw_examples"])
 
     coverage_rows: List[Dict[str, object]] = []
 
@@ -2588,9 +2656,6 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
             }
         )
     position_choice_plot_status = pd.DataFrame(plot_status_rows)
-    position_choice_excluded_companies = pd.DataFrame(
-        {"excluded_company_norm": excluded_companies_norm}
-    )
 
     geo_mapping_audit = (
         users_enriched.groupby(["region_filled", "region_norm"]).size().reset_index(name="count").rename(columns={"region_filled": "raw_region"}).sort_values("count", ascending=False)
@@ -2705,6 +2770,7 @@ def run(input_path: str, base_dir: str) -> Dict[str, pd.DataFrame]:
         "position_choice_coverage": position_choice_coverage,
         "position_choice_plot_status": position_choice_plot_status,
         "position_choice_excluded_companies": position_choice_excluded_companies,
+        "position_choice_excluded_known_list": position_choice_excluded_known_list,
         "position_choice_rank_distribution_all": position_distributions["all"],
         "position_choice_rank_distribution_employed": position_distributions["employed"],
         "position_choice_rank_distribution_not_employed": position_distributions["not_employed"],
